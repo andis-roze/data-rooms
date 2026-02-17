@@ -1,0 +1,23 @@
+{
+  "aboutBody": "Diese Vorlage setzt auf praxisnahe Standards: Routing-Struktur, Lokalisierung und wiederverwendbare UI-Bausteine mit Theme.",
+  "aboutTitle": "Uber dieses Starterprojekt",
+  "autoFormattingTitle": "Automatische Lokalisierung",
+  "brand": "Polyglot UI",
+  "cartItems": "{count, plural, =0 {Dein Warenkorb ist leer.} one {Du hast # Artikel im Warenkorb.} other {Du hast # Artikel im Warenkorb.}}",
+  "featureOneBody": "Vite, React und striktes TypeScript fur schnelle Iteration.",
+  "featureOneTitle": "Moderner Stack",
+  "featureThreeBody": "Eigene Typografie, abgerundete Komponenten und atmospharische Verlaufe von Anfang an.",
+  "featureThreeTitle": "Bewusstes visuelles Design",
+  "featureTwoBody": "i18next mit Spracherkennung und Laufzeit-Umschaltung der Sprache.",
+  "featureTwoTitle": "Internationalisierung inklusive",
+  "language": "Sprache",
+  "monthlyRevenue": "Monatsumsatz: {value, number}",
+  "navAbout": "Info",
+  "navHome": "Start",
+  "navigationLabel": "Hauptnavigation",
+  "primaryAction": "Jetzt starten",
+  "secondaryAction": "Dokumentation ansehen",
+  "sectionTitle": "Was dieses Starterprojekt enthalt",
+  "subtitle": "Ein minimales React + TypeScript Starterprojekt mit i18next und einem hochwertigen Material UI Theme.",
+  "title": "Baue Produkte, die jede Sprache sprechen"
+}

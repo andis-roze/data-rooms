@@ -1,0 +1,81 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: gettext-converter\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2026-02-17T15:10:55.558Z\n"
+"PO-Revision-Date: 2026-02-17T15:10:55.559Z\n"
+"Language: en\n"
+
+msgid "aboutBody"
+msgstr ""
+"This template focuses on practical defaults: route-driven structure, "
+"localization, and reusable themed UI primitives."
+
+msgid "aboutTitle"
+msgstr "About this starter"
+
+msgid "autoFormattingTitle"
+msgstr "Automatic locale formatting"
+
+msgid "brand"
+msgstr "Polyglot UI"
+
+msgid "cartItems"
+msgstr ""
+"{count, plural, =0 {Your cart is empty.} one {You have # item in your "
+"cart.} other {You have # items in your cart.}}"
+
+msgid "featureOneBody"
+msgstr "Vite, React, and strict TypeScript configured for fast iteration."
+
+msgid "featureOneTitle"
+msgstr "Modern stack"
+
+msgid "featureThreeBody"
+msgstr ""
+"Custom typography, rounded components, and atmospheric gradients out of the "
+"box."
+
+msgid "featureThreeTitle"
+msgstr "Intentional visual design"
+
+msgid "featureTwoBody"
+msgstr "i18next with language detection and runtime language switching."
+
+msgid "featureTwoTitle"
+msgstr "Internationalization ready"
+
+msgid "language"
+msgstr "Language"
+
+msgid "monthlyRevenue"
+msgstr "Monthly revenue: {value, number}"
+
+msgid "navAbout"
+msgstr "About"
+
+msgid "navHome"
+msgstr "Home"
+
+msgid "navigationLabel"
+msgstr "Main navigation"
+
+msgid "primaryAction"
+msgstr "Get Started"
+
+msgid "secondaryAction"
+msgstr "View Documentation"
+
+msgid "sectionTitle"
+msgstr "What this starter includes"
+
+msgid "subtitle"
+msgstr ""
+"A minimal React + TypeScript starter with i18next and a polished Material "
+"UI theme."
+
+msgid "title"
+msgstr "Build products that speak every language"

@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Local:\\s+http://localhost:5173/"
+        }
+      },
+      "label": "npm: dev"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "label": "npm: build"
+    },
+    {
+      "type": "npm",
+      "script": "lint",
+      "group": "test",
+      "label": "npm: lint"
+    },
+    {
+      "type": "npm",
+      "script": "test:run",
+      "group": "test",
+      "label": "npm: test:run"
+    },
+    {
+      "type": "npm",
+      "script": "test",
+      "group": "test",
+      "isBackground": true,
+      "label": "npm: test"
+    },
+    {
+      "type": "npm",
+      "script": "preview",
+      "label": "npm: preview"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:extract:keys",
+      "label": "npm: i18n:extract:keys"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:extract",
+      "label": "npm: i18n:extract"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:gettext:compile",
+      "label": "npm: i18n:gettext:compile"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:sync",
+      "label": "npm: i18n:sync"
+    }
+  ]
+}

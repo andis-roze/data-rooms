@@ -1,0 +1,23 @@
+{
+  "aboutBody": "This template focuses on practical defaults: route-driven structure, localization, and reusable themed UI primitives.",
+  "aboutTitle": "About this starter",
+  "autoFormattingTitle": "Automatic locale formatting",
+  "brand": "Polyglot UI",
+  "cartItems": "{count, plural, =0 {Your cart is empty.} one {You have # item in your cart.} other {You have # items in your cart.}}",
+  "featureOneBody": "Vite, React, and strict TypeScript configured for fast iteration.",
+  "featureOneTitle": "Modern stack",
+  "featureThreeBody": "Custom typography, rounded components, and atmospheric gradients out of the box.",
+  "featureThreeTitle": "Intentional visual design",
+  "featureTwoBody": "i18next with language detection and runtime language switching.",
+  "featureTwoTitle": "Internationalization ready",
+  "language": "Language",
+  "monthlyRevenue": "Monthly revenue: {value, number}",
+  "navAbout": "About",
+  "navHome": "Home",
+  "navigationLabel": "Main navigation",
+  "primaryAction": "Get Started",
+  "secondaryAction": "View Documentation",
+  "sectionTitle": "What this starter includes",
+  "subtitle": "A minimal React + TypeScript starter with i18next and a polished Material UI theme.",
+  "title": "Build products that speak every language"
+}
