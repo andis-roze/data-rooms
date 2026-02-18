@@ -7,14 +7,9 @@ import {
   type NodeId,
 } from '../dataroom/model'
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
-import type { FeedbackState, FolderContentItem, SortState } from './types'
-import {
-  buildFolderPath,
-  getFileChildren,
-  getFolderChildren,
-  isDefined,
-  loadSortModePreference,
-} from './utils'
+import { selectActiveDataRoom, selectActiveFolder, selectBreadcrumbs, selectDataRooms, selectRootFolder, selectVisibleContentItems } from './selectors/homeSelectors'
+import { loadSortModePreference } from './services/sortPreference'
+import type { FeedbackState, SortState } from './types'
 import { useHomePageHandlers } from './useHomePageHandlers'
 
 export function useHomePageController() {
@@ -80,78 +75,17 @@ export function useHomePageController() {
     })
   }
 
-  const dataRooms = entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
-  const activeDataRoom =
-    (selectedDataRoomId ? entities.dataRoomsById[selectedDataRoomId] : undefined) ?? dataRooms[0]
-  const rootFolder = activeDataRoom ? entities.foldersById[activeDataRoom.rootFolderId] : null
+  const dataRooms = selectDataRooms(entities)
+  const activeDataRoom = selectActiveDataRoom(entities, selectedDataRoomId, dataRooms)
+  const rootFolder = selectRootFolder(entities, activeDataRoom)
   const canDeleteActiveDataRoom = Boolean(activeDataRoom)
   const dataRoomDeleteSummary = activeDataRoom
     ? getDataRoomDeleteSummary(entities, activeDataRoom.id)
     : { folderCount: 0, fileCount: 0 }
 
-  const activeFolder =
-    rootFolder ? ((selectedFolderId ? entities.foldersById[selectedFolderId] : undefined) ?? rootFolder) : null
-  const breadcrumbs = activeFolder ? buildFolderPath(entities, activeFolder.id) : []
-  const childFolders = activeFolder ? getFolderChildren(entities, activeFolder) : []
-  const childFiles = activeFolder ? getFileChildren(entities, activeFolder) : []
-  const parentFolder =
-    activeFolder?.parentFolderId ? entities.foldersById[activeFolder.parentFolderId] : undefined
-
-  const parentNavigationItem: FolderContentItem[] = parentFolder
-    ? [
-        {
-          kind: 'folder',
-          id: `parent-${parentFolder.id}`,
-          name: resolveDisplayName(parentFolder.name),
-          displayName: '..',
-          updatedAt: parentFolder.updatedAt,
-          folder: parentFolder,
-          isParentNavigation: true,
-        },
-      ]
-    : []
-
-  const contentItems: FolderContentItem[] = [
-    ...childFolders.map((folder) => ({
-      kind: 'folder' as const,
-      id: folder.id,
-      name: folder.name,
-      updatedAt: folder.updatedAt,
-      folder,
-    })),
-    ...childFiles.map((file) => ({
-      kind: 'file' as const,
-      id: file.id,
-      name: file.name,
-      updatedAt: file.updatedAt,
-      file,
-    })),
-  ]
-
-  const sortedContentItems = [...contentItems].sort((a, b) => {
-    const compareName = () => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-    const directionMultiplier = sortState.direction === 'asc' ? 1 : -1
-
-    if (sortState.field === 'type') {
-      if (a.kind !== b.kind) {
-        return (a.kind === 'folder' ? -1 : 1) * directionMultiplier
-      }
-
-      return compareName() * directionMultiplier
-    }
-
-    if (sortState.field === 'name') {
-      return compareName() * directionMultiplier
-    }
-
-    if (a.updatedAt === b.updatedAt) {
-      return compareName() * directionMultiplier
-    }
-
-    return (a.updatedAt - b.updatedAt) * directionMultiplier
-  })
-
-  const visibleContentItems = [...parentNavigationItem, ...sortedContentItems]
+  const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
+  const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
+  const visibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
   const locale = i18n.resolvedLanguage ?? i18n.language
 
   const targetFolder = targetFolderId ? entities.foldersById[targetFolderId] : null
