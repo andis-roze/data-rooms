@@ -23,12 +23,15 @@ describe('App routing and localization', () => {
     await i18n.changeLanguage('en')
   })
 
-  it('renders home route with localized navigation', () => {
+  it('renders home route with data room shell and localized navigation', () => {
     renderRoute('/')
 
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Build products that speak every language' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Folder tree' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Folder breadcrumbs')).toBeInTheDocument()
+    expect(screen.getByText('This folder is empty')).toBeInTheDocument()
   })
 
   it('renders about route', () => {
@@ -44,6 +47,6 @@ describe('App routing and localization', () => {
     await user.click(screen.getByRole('button', { name: 'DE' }))
 
     expect(screen.getByRole('link', { name: 'Start' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Baue Produkte, die jede Sprache sprechen' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
   })
 })
