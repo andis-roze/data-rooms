@@ -3,9 +3,9 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
+import { NamePromptDialog } from './NamePromptDialog'
 
 interface FileDialogsProps {
   renameFileDialogOpen: boolean
@@ -36,35 +36,18 @@ export function FileDialogs({
 
   return (
     <>
-      <Dialog open={renameFileDialogOpen} onClose={onCloseRenameFileDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogRenameFileTitle')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            fullWidth
-            label={t('dataroomFieldFileName')}
-            value={fileNameDraft}
-            onChange={(event) => {
-              onFileNameChange(event.target.value)
-            }}
-            error={Boolean(fileNameError)}
-            helperText={fileNameError ?? ' '}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                onRenameFile()
-              }
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseRenameFileDialog}>{t('dataroomActionCancel')}</Button>
-          <Button onClick={onRenameFile} variant="contained">
-            {t('dataroomActionRename')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <NamePromptDialog
+        open={renameFileDialogOpen}
+        title={t('dataroomDialogRenameFileTitle')}
+        label={t('dataroomFieldFileName')}
+        value={fileNameDraft}
+        errorText={fileNameError}
+        cancelLabel={t('dataroomActionCancel')}
+        submitLabel={t('dataroomActionRename')}
+        onClose={onCloseRenameFileDialog}
+        onValueChange={onFileNameChange}
+        onSubmit={onRenameFile}
+      />
 
       <Dialog open={deleteFileDialogOpen} onClose={onCloseDeleteFileDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogDeleteFileTitle')}</DialogTitle>

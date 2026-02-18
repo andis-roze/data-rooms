@@ -42,6 +42,8 @@ export function FolderContentTable({
   onOpenDeleteFile,
 }: FolderContentTableProps) {
   const { t } = useTranslation()
+  const sortIndicator = (field: SortField) =>
+    sortState.field === field ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'
 
   return (
     <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
@@ -63,7 +65,7 @@ export function FolderContentTable({
           onClick={() => onToggleSort('name')}
           aria-label={t('dataroomSortByNameAria')}
         >
-          {t('dataroomColumnName')} {sortState.field === 'name' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+          {t('dataroomColumnName')} {sortIndicator('name')}
         </Button>
         <Button
           size="small"
@@ -72,7 +74,7 @@ export function FolderContentTable({
           onClick={() => onToggleSort('type')}
           aria-label={t('dataroomSortByTypeAria')}
         >
-          {t('dataroomColumnType')} {sortState.field === 'type' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+          {t('dataroomColumnType')} {sortIndicator('type')}
         </Button>
         <Button
           size="small"
@@ -81,7 +83,7 @@ export function FolderContentTable({
           onClick={() => onToggleSort('updated')}
           aria-label={t('dataroomSortByUpdatedAria')}
         >
-          {t('dataroomColumnUpdated')} {sortState.field === 'updated' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+          {t('dataroomColumnUpdated')} {sortIndicator('updated')}
         </Button>
         <Typography variant="caption" color="text.secondary" sx={{ justifySelf: 'end' }}>
           {t('dataroomColumnActions')}
@@ -99,10 +101,10 @@ export function FolderContentTable({
                 isParentNavigation={item.isParentNavigation}
                 locale={locale}
                 resolveDisplayName={resolveDisplayName}
-              onSelectFolder={onSelectFolder}
-              onOpenRenameFolder={onOpenRenameFolder}
-              onOpenDeleteFolder={onOpenDeleteFolder}
-            />
+                onSelectFolder={onSelectFolder}
+                onOpenRenameFolder={onOpenRenameFolder}
+                onOpenDeleteFolder={onOpenDeleteFolder}
+              />
             )
           }
 

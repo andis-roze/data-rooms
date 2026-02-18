@@ -4,8 +4,8 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AppProviders } from '../../app/providers/AppProviders'
 import { appRoutes } from '../../app/router'
-import i18n from '../../i18n/config'
 import { clearDataRoomState } from '../../features/dataroom/model'
+import i18n from '../../i18n/config'
 
 function renderRoute(path: string) {
   const router = createMemoryRouter(appRoutes, {
@@ -17,6 +17,58 @@ function renderRoute(path: string) {
       <RouterProvider router={router} />
     </AppProviders>,
   )
+}
+
+async function createFolder(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByRole('button', { name: 'Create folder' }))
+  await user.type(screen.getByRole('textbox', { name: 'Folder name' }), name)
+  await user.click(screen.getByRole('button', { name: 'Create' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create folder' }))
+}
+
+async function renameFolder(user: ReturnType<typeof userEvent.setup>, currentName: string, nextName: string) {
+  await user.click(screen.getByRole('button', { name: 'Data Room' }))
+  await user.click(screen.getByRole('button', { name: `Rename folder ${currentName}` }))
+  const renameInput = screen.getByRole('textbox', { name: 'Folder name' })
+  await user.clear(renameInput)
+  await user.type(renameInput, nextName)
+  await user.click(screen.getByRole('button', { name: 'Rename' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename folder' }))
+}
+
+async function deleteFolder(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByRole('button', { name: `Delete folder ${name}` }))
+  await user.click(screen.getByRole('button', { name: 'Delete' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete folder' }))
+}
+
+async function createDataRoom(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByRole('button', { name: 'Create data room' }))
+  await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), name)
+  await user.click(screen.getByRole('button', { name: 'Create' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create data room' }))
+}
+
+async function renameDataRoom(user: ReturnType<typeof userEvent.setup>, nextName: string) {
+  await user.click(screen.getByRole('button', { name: 'Rename data room' }))
+  const renameDataRoomInput = screen.getByRole('textbox', { name: 'Data Room name' })
+  await user.clear(renameDataRoomInput)
+  await user.type(renameDataRoomInput, nextName)
+  await user.click(screen.getByRole('button', { name: 'Rename' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename data room' }))
+}
+
+async function deleteCurrentDataRoom(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'Delete data room' }))
+  const deleteDataRoomDialog = screen.getByRole('dialog', { name: 'Delete data room' })
+  await user.click(within(deleteDataRoomDialog).getByRole('button', { name: 'Delete' }))
+  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete data room' }))
+}
+
+async function uploadPdf(user: ReturnType<typeof userEvent.setup>, name: string): Promise<void> {
+  const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+  const file = new File(['%PDF-1.4 test'], name, { type: 'application/pdf' })
+  await user.upload(uploadInput, file)
 }
 
 describe('App routing and localization', () => {
@@ -44,26 +96,13 @@ describe('App routing and localization', () => {
     const user = userEvent.setup()
     renderRoute('/')
 
-    await user.click(screen.getByRole('button', { name: 'Create folder' }))
-    await user.type(screen.getByRole('textbox', { name: 'Folder name' }), 'Finance')
-    await user.click(screen.getByRole('button', { name: 'Create' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create folder' }))
-
+    await createFolder(user, 'Finance')
     expect(screen.getAllByText('Finance').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: 'Data Room' }))
-    await user.click(screen.getByRole('button', { name: 'Rename folder Finance' }))
-    const renameInput = screen.getByRole('textbox', { name: 'Folder name' })
-    await user.clear(renameInput)
-    await user.type(renameInput, 'Legal')
-    await user.click(screen.getByRole('button', { name: 'Rename' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename folder' }))
-
+    await renameFolder(user, 'Finance', 'Legal')
     expect(screen.getAllByText('Legal').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: 'Delete folder Legal' }))
-    await user.click(screen.getByRole('button', { name: 'Delete' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete folder' }))
+    await deleteFolder(user, 'Legal')
 
     expect(screen.queryByText('Legal')).not.toBeInTheDocument()
     expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
@@ -73,27 +112,13 @@ describe('App routing and localization', () => {
     const user = userEvent.setup()
     renderRoute('/')
 
-    await user.click(screen.getByRole('button', { name: 'Create data room' }))
-    await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), 'Project Zephyr')
-    await user.click(screen.getByRole('button', { name: 'Create' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create data room' }))
-
+    await createDataRoom(user, 'Project Zephyr')
     expect(screen.getByRole('heading', { name: 'Project Zephyr' })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Rename data room' }))
-    const renameDataRoomInput = screen.getByRole('textbox', { name: 'Data Room name' })
-    await user.clear(renameDataRoomInput)
-    await user.type(renameDataRoomInput, 'Project Apollo')
-    await user.click(screen.getByRole('button', { name: 'Rename' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename data room' }))
-
+    await renameDataRoom(user, 'Project Apollo')
     expect(screen.getByRole('heading', { name: 'Project Apollo' })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Delete data room' }))
-    const deleteDataRoomDialog = screen.getByRole('dialog', { name: 'Delete data room' })
-    await user.click(within(deleteDataRoomDialog).getByRole('button', { name: 'Delete' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete data room' }))
-
+    await deleteCurrentDataRoom(user)
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
   }, 15000)
 
@@ -113,13 +138,10 @@ describe('App routing and localization', () => {
     const user = userEvent.setup()
     renderRoute('/')
 
-    const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
-    const file = new File(['%PDF-1.4 test'], 'contract.pdf', { type: 'application/pdf' })
-
-    await user.upload(uploadInput, file)
+    await uploadPdf(user, 'contract.pdf')
     expect(screen.getByText('contract.pdf')).toBeInTheDocument()
 
-    await user.upload(uploadInput, file)
+    await uploadPdf(user, 'contract.pdf')
     expect(screen.getByText('File with this name already exists in this location.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Rename file contract.pdf' }))
@@ -142,10 +164,9 @@ describe('App routing and localization', () => {
   it('applies header sort and persists it across remounts', async () => {
     const user = userEvent.setup()
     const firstRender = renderRoute('/')
-    const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
 
-    await user.upload(uploadInput, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
-    await user.upload(uploadInput, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
+    await uploadPdf(user, 'zeta.pdf')
+    await uploadPdf(user, 'alpha.pdf')
 
     const defaultOrder = screen.getAllByRole('button', { name: /View file / })
     expect(defaultOrder[0]).toHaveAccessibleName('View file alpha.pdf')
@@ -164,9 +185,8 @@ describe('App routing and localization', () => {
     firstRender.unmount()
     renderRoute('/')
 
-    const uploadInputAfterRemount = screen.getByTestId('upload-pdf-input') as HTMLInputElement
-    await user.upload(uploadInputAfterRemount, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
-    await user.upload(uploadInputAfterRemount, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
+    await uploadPdf(user, 'zeta.pdf')
+    await uploadPdf(user, 'alpha.pdf')
 
     const persistedOrder = screen.getAllByRole('button', { name: /View file / })
     expect(persistedOrder[0]).toHaveAccessibleName('View file zeta.pdf')

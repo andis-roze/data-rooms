@@ -1,13 +1,12 @@
 import Container from '@mui/material/Container'
 import Paper from '@mui/material/Paper'
-import { HomeDialogs } from '../HomeDialogs'
-import { EmptyDataRoomState } from '../components/EmptyDataRoomState'
 import { HomeContentSection } from '../components/HomeContentSection'
 import { HomeSidebar } from '../components/HomeSidebar'
 import { IncompleteStructureState } from '../components/IncompleteStructureState'
-import { CreateDataRoomDialog } from '../dialogs/CreateDataRoomDialog'
 import { FeedbackStack } from '../dialogs/FeedbackStack'
 import { useHomePageController } from '../useHomePageController'
+import { HomePageDialogsContainer } from './HomePageDialogsContainer'
+import { HomePageEmptyState } from './HomePageEmptyState'
 
 export function HomePageContainer() {
   const controller = useHomePageController()
@@ -35,21 +34,18 @@ export function HomePageContainer() {
 
   if (dataRooms.length === 0) {
     return (
-      <EmptyDataRoomState
+      <HomePageEmptyState
         title={t('dataroomNoDataRoomTitle')}
         body={t('dataroomNoDataRoomBody')}
         actionLabel={t('dataroomActionCreateDataRoom')}
-        onCreateDataRoom={handlers.openCreateDataRoomDialog}
-      >
-        <CreateDataRoomDialog
-          open={dialogs.isCreateDataRoomDialogOpen}
-          dataRoomNameDraft={forms.dataRoomNameDraft}
-          dataRoomNameError={forms.dataRoomNameError}
-          onClose={handlers.closeCreateDataRoomDialog}
-          onDataRoomNameDraftChange={handlers.handleDataRoomNameDraftChange}
-          onSubmit={handlers.handleCreateDataRoom}
-        />
-      </EmptyDataRoomState>
+        isCreateDataRoomDialogOpen={dialogs.isCreateDataRoomDialogOpen}
+        dataRoomNameDraft={forms.dataRoomNameDraft}
+        dataRoomNameError={forms.dataRoomNameError}
+        onOpenCreateDataRoomDialog={handlers.openCreateDataRoomDialog}
+        onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
+        onDataRoomNameDraftChange={handlers.handleDataRoomNameDraftChange}
+        onCreateDataRoom={handlers.handleCreateDataRoom}
+      />
     )
   }
 
@@ -106,49 +102,17 @@ export function HomePageContainer() {
         />
       </Paper>
 
-      <HomeDialogs
-        createDataRoomDialogOpen={dialogs.isCreateDataRoomDialogOpen}
-        renameDataRoomDialogOpen={dialogs.isRenameDataRoomDialogOpen}
-        deleteDataRoomDialogOpen={dialogs.isDeleteDataRoomDialogOpen}
-        createFolderDialogOpen={dialogs.isCreateFolderDialogOpen}
-        renameFolderDialogOpen={dialogs.isRenameFolderDialogOpen}
-        deleteFolderDialogOpen={dialogs.isDeleteFolderDialogOpen}
-        renameFileDialogOpen={dialogs.isRenameFileDialogOpen}
-        deleteFileDialogOpen={dialogs.isDeleteFileDialogOpen}
-        viewFileDialogOpen={dialogs.isViewFileDialogOpen}
-        dataRoomNameDraft={forms.dataRoomNameDraft}
-        dataRoomNameError={forms.dataRoomNameError}
-        folderNameDraft={forms.folderNameDraft}
-        folderNameError={forms.folderNameError}
-        fileNameDraft={forms.fileNameDraft}
-        fileNameError={forms.fileNameError}
+      <HomePageDialogsContainer
+        dialogs={dialogs}
+        forms={forms}
         activeDataRoomName={resolveDisplayName(activeDataRoom.name)}
         activeFolderName={resolveDisplayName(activeFolder.name)}
-        targetFolderName={targetFolder ? resolveDisplayName(targetFolder.name) : null}
-        activeFileName={activeFile?.name ?? null}
-        activeFileId={activeFile?.id ?? null}
+        targetFolder={targetFolder}
+        activeFile={activeFile}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
         folderDeleteSummary={folderDeleteSummary}
-        onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
-        onOpenDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
-        onCreateDataRoom={handlers.handleCreateDataRoom}
-        onCloseRenameDataRoomDialog={handlers.closeRenameDataRoomDialog}
-        onRenameDataRoom={handlers.handleRenameDataRoom}
-        onCloseDeleteDataRoomDialog={handlers.closeDeleteDataRoomDialog}
-        onDeleteDataRoom={handlers.handleDeleteDataRoom}
-        onCloseCreateFolderDialog={handlers.closeCreateFolderDialog}
-        onFolderNameChange={handlers.handleFolderNameDraftChange}
-        onCreateFolder={handlers.handleCreateFolder}
-        onCloseRenameFolderDialog={handlers.closeRenameFolderDialog}
-        onRenameFolder={handlers.handleRenameFolder}
-        onCloseDeleteFolderDialog={handlers.closeDeleteFolderDialog}
-        onDeleteFolder={handlers.handleDeleteFolder}
-        onCloseRenameFileDialog={handlers.closeRenameFileDialog}
-        onFileNameChange={handlers.handleFileNameDraftChange}
-        onRenameFile={handlers.handleRenameFile}
-        onCloseDeleteFileDialog={handlers.closeDeleteFileDialog}
-        onDeleteFile={handlers.handleDeleteFile}
-        onCloseViewFileDialog={handlers.closeViewFileDialog}
+        resolveDisplayName={resolveDisplayName}
+        handlers={handlers}
       />
 
       <FeedbackStack

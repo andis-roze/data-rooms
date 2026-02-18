@@ -15,12 +15,13 @@ import {
   selectRootFolder,
   selectVisibleContentItems,
 } from './selectors/homeSelectors'
+import type { HomePageViewModel } from './model/homePageViewModel'
 import { loadFeedbackTimeoutMs } from './services/feedback'
 import { loadSortModePreference } from './services/sortPreference'
 import type { FeedbackState, SortState } from './types'
 import { useHomePageHandlers } from './useHomePageHandlers'
 
-export function useHomePageController() {
+export function useHomePageController(): HomePageViewModel {
   const { t, i18n } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()

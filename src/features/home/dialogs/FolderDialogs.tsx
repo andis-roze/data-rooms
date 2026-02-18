@@ -3,9 +3,9 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
+import { NamePromptDialog } from './NamePromptDialog'
 
 interface FolderDialogsProps {
   createFolderDialogOpen: boolean
@@ -46,65 +46,31 @@ export function FolderDialogs({
 
   return (
     <>
-      <Dialog open={createFolderDialogOpen} onClose={onCloseCreateFolderDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogCreateFolderTitle')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            fullWidth
-            label={t('dataroomFieldFolderName')}
-            value={folderNameDraft}
-            onChange={(event) => {
-              onFolderNameChange(event.target.value)
-            }}
-            error={Boolean(folderNameError)}
-            helperText={folderNameError ?? ' '}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                onCreateFolder()
-              }
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseCreateFolderDialog}>{t('dataroomActionCancel')}</Button>
-          <Button onClick={onCreateFolder} variant="contained">
-            {t('dataroomActionCreate')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <NamePromptDialog
+        open={createFolderDialogOpen}
+        title={t('dataroomDialogCreateFolderTitle')}
+        label={t('dataroomFieldFolderName')}
+        value={folderNameDraft}
+        errorText={folderNameError}
+        cancelLabel={t('dataroomActionCancel')}
+        submitLabel={t('dataroomActionCreate')}
+        onClose={onCloseCreateFolderDialog}
+        onValueChange={onFolderNameChange}
+        onSubmit={onCreateFolder}
+      />
 
-      <Dialog open={renameFolderDialogOpen} onClose={onCloseRenameFolderDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogRenameFolderTitle')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            fullWidth
-            label={t('dataroomFieldFolderName')}
-            value={folderNameDraft}
-            onChange={(event) => {
-              onFolderNameChange(event.target.value)
-            }}
-            error={Boolean(folderNameError)}
-            helperText={folderNameError ?? ' '}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                onRenameFolder()
-              }
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseRenameFolderDialog}>{t('dataroomActionCancel')}</Button>
-          <Button onClick={onRenameFolder} variant="contained">
-            {t('dataroomActionRename')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <NamePromptDialog
+        open={renameFolderDialogOpen}
+        title={t('dataroomDialogRenameFolderTitle')}
+        label={t('dataroomFieldFolderName')}
+        value={folderNameDraft}
+        errorText={folderNameError}
+        cancelLabel={t('dataroomActionCancel')}
+        submitLabel={t('dataroomActionRename')}
+        onClose={onCloseRenameFolderDialog}
+        onValueChange={onFolderNameChange}
+        onSubmit={onRenameFolder}
+      />
 
       <Dialog open={deleteFolderDialogOpen} onClose={onCloseDeleteFolderDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogDeleteFolderTitle')}</DialogTitle>

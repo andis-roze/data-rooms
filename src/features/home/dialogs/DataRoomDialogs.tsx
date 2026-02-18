@@ -3,10 +3,10 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { CreateDataRoomDialog } from './CreateDataRoomDialog'
+import { NamePromptDialog } from './NamePromptDialog'
 
 interface DataRoomDialogsProps {
   createDataRoomDialogOpen: boolean
@@ -54,35 +54,18 @@ export function DataRoomDialogs({
         onSubmit={onCreateDataRoom}
       />
 
-      <Dialog open={renameDataRoomDialogOpen} onClose={onCloseRenameDataRoomDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogRenameDataRoomTitle')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            fullWidth
-            label={t('dataroomFieldDataRoomName')}
-            value={dataRoomNameDraft}
-            onChange={(event) => {
-              onOpenDataRoomNameChange(event.target.value)
-            }}
-            error={Boolean(dataRoomNameError)}
-            helperText={dataRoomNameError ?? ' '}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                onRenameDataRoom()
-              }
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseRenameDataRoomDialog}>{t('dataroomActionCancel')}</Button>
-          <Button onClick={onRenameDataRoom} variant="contained">
-            {t('dataroomActionRename')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <NamePromptDialog
+        open={renameDataRoomDialogOpen}
+        title={t('dataroomDialogRenameDataRoomTitle')}
+        label={t('dataroomFieldDataRoomName')}
+        value={dataRoomNameDraft}
+        errorText={dataRoomNameError}
+        cancelLabel={t('dataroomActionCancel')}
+        submitLabel={t('dataroomActionRename')}
+        onClose={onCloseRenameDataRoomDialog}
+        onValueChange={onOpenDataRoomNameChange}
+        onSubmit={onRenameDataRoom}
+      />
 
       <Dialog open={deleteDataRoomDialogOpen} onClose={onCloseDeleteDataRoomDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogDeleteDataRoomTitle')}</DialogTitle>
