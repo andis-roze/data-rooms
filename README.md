@@ -19,6 +19,13 @@ npm install
 npm run dev
 ```
 
+Hot reloading is enabled by default via Vite HMR.
+
+If you run the app inside Docker/VM/remote environments and browser reload does not trigger, copy `.env.example` to `.env` and set:
+- `VITE_HMR_HOST` (the hostname your browser uses)
+- `VITE_HMR_PORT` and `VITE_HMR_CLIENT_PORT` (usually `5173`)
+- `VITE_HMR_POLLING=true` when filesystem events are not forwarded
+
 ## Quality checks
 
 ```bash

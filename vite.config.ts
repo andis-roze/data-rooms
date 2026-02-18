@@ -1,12 +1,45 @@
+import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    setupFiles: './src/test/setupTests.ts',
-    globals: true,
-    css: true,
-  },
+function asNumber(value: string | undefined, fallback: number): number {
+  if (!value) {
+    return fallback
+  }
+
+  const parsed = Number.parseInt(value, 10)
+  return Number.isNaN(parsed) ? fallback : parsed
+}
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const devPort = asNumber(env.VITE_DEV_PORT, 5173)
+  const hmrPort = asNumber(env.VITE_HMR_PORT, devPort)
+  const hmrClientPort = asNumber(env.VITE_HMR_CLIENT_PORT, hmrPort)
+  const usePolling = env.VITE_HMR_POLLING === 'true'
+  const pollInterval = asNumber(env.VITE_HMR_POLL_INTERVAL, 250)
+
+  return {
+    plugins: [react()],
+    server: {
+      host: env.VITE_DEV_HOST || '0.0.0.0',
+      port: devPort,
+      strictPort: true,
+      hmr: env.VITE_HMR_HOST
+        ? {
+            host: env.VITE_HMR_HOST,
+            port: hmrPort,
+            clientPort: hmrClientPort,
+            protocol: 'ws',
+          }
+        : undefined,
+      watch: usePolling ? { usePolling: true, interval: pollInterval } : undefined,
+    },
+    test: {
+      environment: 'jsdom',
+      setupFiles: './src/test/setupTests.ts',
+      globals: true,
+      css: true,
+    },
+  }
 })
