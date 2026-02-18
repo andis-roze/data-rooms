@@ -1,7 +1,13 @@
+import { useState } from 'react'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import List from '@mui/material/List'
@@ -10,9 +16,19 @@ import ListItemText from '@mui/material/ListItemText'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Select from '@mui/material/Select'
+import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import type { Folder, DataRoomState, FileNode, NodeId } from '../dataroom/model'
+import {
+  getFolderDeleteSummary,
+  getFolderNameValidationError,
+  hasDuplicateFolderName,
+  type DataRoomState,
+  type FileNode,
+  type Folder,
+  type NodeId,
+} from '../dataroom/model'
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
 
 function isDefined<T>(value: T | undefined): value is T {
@@ -68,6 +84,14 @@ function formatFileSize(bytes: number): string {
 
   const mb = kb / 1024
   return `${mb.toFixed(1)} MB`
+}
+
+function generateFolderId(): NodeId {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `folder-${crypto.randomUUID()}`
+  }
+
+  return `folder-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 interface FolderTreeNodeProps {
@@ -129,6 +153,13 @@ export function HomePage() {
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
 
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [folderNameDraft, setFolderNameDraft] = useState('')
+  const [folderNameError, setFolderNameError] = useState<string | null>(null)
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
+
   const dataRooms = entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
 
   if (dataRooms.length === 0) {
@@ -167,6 +198,85 @@ export function HomePage() {
   const breadcrumbs = buildFolderPath(entities, activeFolder.id)
   const childFolders = getFolderChildren(entities, activeFolder)
   const childFiles = getFileChildren(entities, activeFolder)
+
+  const canDeleteActiveFolder = activeFolder.id !== rootFolder.id
+  const deleteSummary = getFolderDeleteSummary(entities, activeFolder.id)
+
+  const openCreateDialog = () => {
+    setFolderNameDraft('')
+    setFolderNameError(null)
+    setCreateDialogOpen(true)
+  }
+
+  const openRenameDialog = () => {
+    setFolderNameDraft(activeFolder.name)
+    setFolderNameError(null)
+    setRenameDialogOpen(true)
+  }
+
+  const handleCreateFolder = () => {
+    const validationError = getFolderNameValidationError(folderNameDraft)
+
+    if (validationError) {
+      setFolderNameError(validationError)
+      return
+    }
+
+    if (hasDuplicateFolderName(entities, activeFolder.id, folderNameDraft)) {
+      setFolderNameError('Folder with this name already exists in this location.')
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/createFolder',
+      payload: {
+        dataRoomId: activeDataRoom.id,
+        parentFolderId: activeFolder.id,
+        folderId: generateFolderId(),
+        folderName: folderNameDraft,
+      },
+    })
+
+    setCreateDialogOpen(false)
+    setFeedbackMessage('Folder created.')
+  }
+
+  const handleRenameFolder = () => {
+    const validationError = getFolderNameValidationError(folderNameDraft)
+
+    if (validationError) {
+      setFolderNameError(validationError)
+      return
+    }
+
+    if (hasDuplicateFolderName(entities, activeFolder.parentFolderId, folderNameDraft, activeFolder.id)) {
+      setFolderNameError('Folder with this name already exists in this location.')
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/renameFolder',
+      payload: {
+        folderId: activeFolder.id,
+        folderName: folderNameDraft,
+      },
+    })
+
+    setRenameDialogOpen(false)
+    setFeedbackMessage('Folder renamed.')
+  }
+
+  const handleDeleteFolder = () => {
+    dispatch({
+      type: 'dataroom/deleteFolder',
+      payload: {
+        folderId: activeFolder.id,
+      },
+    })
+
+    setDeleteDialogOpen(false)
+    setFeedbackMessage('Folder deleted.')
+  }
 
   return (
     <Container component="main" maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
@@ -248,10 +358,16 @@ export function HomePage() {
             </Stack>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Button variant="contained" disabled>
+              <Button variant="contained" onClick={openCreateDialog}>
                 Create folder
               </Button>
-              <Button variant="outlined" disabled>
+              <Button variant="outlined" onClick={openRenameDialog}>
+                Rename folder
+              </Button>
+              <Button variant="outlined" color="error" disabled={!canDeleteActiveFolder} onClick={() => setDeleteDialogOpen(true)}>
+                Delete folder
+              </Button>
+              <Button variant="text" disabled>
                 Upload PDF
               </Button>
               <Button variant="text" disabled>
@@ -274,10 +390,7 @@ export function HomePage() {
 
                 {childFiles.map((file) => (
                   <ListItemButton key={file.id}>
-                    <ListItemText
-                      primary={file.name}
-                      secondary={`PDF - ${formatFileSize(file.size)}`}
-                    />
+                    <ListItemText primary={file.name} secondary={`PDF - ${formatFileSize(file.size)}`} />
                   </ListItemButton>
                 ))}
 
@@ -296,6 +409,97 @@ export function HomePage() {
           </Stack>
         </Box>
       </Paper>
+
+      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Create folder</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            label="Folder name"
+            value={folderNameDraft}
+            onChange={(event) => {
+              setFolderNameDraft(event.target.value)
+              setFolderNameError(null)
+            }}
+            error={Boolean(folderNameError)}
+            helperText={folderNameError ?? ' '}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleCreateFolder()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleCreateFolder} variant="contained">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Rename folder</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            label="Folder name"
+            value={folderNameDraft}
+            onChange={(event) => {
+              setFolderNameDraft(event.target.value)
+              setFolderNameError(null)
+            }}
+            error={Boolean(folderNameError)}
+            helperText={folderNameError ?? ' '}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleRenameFolder()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRenameFolder} variant="contained">
+            Rename
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Delete folder</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Delete "{activeFolder.name}" and all nested content?
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            This will remove {deleteSummary.folderCount} folder(s) and {deleteSummary.fileCount} file(s).
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteFolder}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={Boolean(feedbackMessage)}
+        autoHideDuration={2500}
+        onClose={() => setFeedbackMessage(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert severity="success" variant="filled" onClose={() => setFeedbackMessage(null)}>
+          {feedbackMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   )
 }

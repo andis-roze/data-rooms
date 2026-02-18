@@ -29,3 +29,25 @@ export type DataRoomAction =
         folderId: NodeId
       }
     }
+  | {
+      type: 'dataroom/createFolder'
+      payload: {
+        dataRoomId: NodeId
+        parentFolderId: NodeId
+        folderId: NodeId
+        folderName: string
+      }
+    }
+  | {
+      type: 'dataroom/renameFolder'
+      payload: {
+        folderId: NodeId
+        folderName: string
+      }
+    }
+  | {
+      type: 'dataroom/deleteFolder'
+      payload: {
+        folderId: NodeId
+      }
+    }

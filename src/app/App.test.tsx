@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AppProviders } from './providers/AppProviders'
 import { appRoutes } from './router'
 import i18n from '../i18n/config'
+import { clearDataRoomState } from '../features/dataroom/model'
 
 function renderRoute(path: string) {
   const router = createMemoryRouter(appRoutes, {
@@ -20,6 +21,7 @@ function renderRoute(path: string) {
 
 describe('App routing and localization', () => {
   beforeEach(async () => {
+    clearDataRoomState()
     await i18n.changeLanguage('en')
   })
 
@@ -34,10 +36,32 @@ describe('App routing and localization', () => {
     expect(screen.getByText('This folder is empty')).toBeInTheDocument()
   })
 
-  it('renders about route', () => {
-    renderRoute('/about')
+  it('creates, renames, and deletes a folder from the toolbar flow', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
 
-    expect(screen.getByRole('heading', { name: 'About this starter' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Create folder' }))
+    await user.type(screen.getByRole('textbox', { name: 'Folder name' }), 'Finance')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create folder' }))
+
+    expect(screen.getAllByText('Finance').length).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: 'Rename folder' }))
+    const renameInput = screen.getByRole('textbox', { name: 'Folder name' })
+    await user.clear(renameInput)
+    await user.type(renameInput, 'Legal')
+    await user.click(screen.getByRole('button', { name: 'Rename' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename folder' }))
+
+    expect(screen.getAllByText('Legal').length).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: 'Delete folder' }))
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete folder' }))
+
+    expect(screen.queryByText('Legal')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
   })
 
   it('switches language to German from header controls', async () => {

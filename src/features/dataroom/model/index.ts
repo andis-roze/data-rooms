@@ -1,4 +1,5 @@
 export * from './types'
 export * from './seed'
+export * from './nameValidation'
 export * from './treeOps'
 export * from './storage'

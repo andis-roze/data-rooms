@@ -1,8 +1,11 @@
 import {
+  createFolder,
   createSeedDataRoomState,
+  deleteFolderCascade,
   getDefaultSelection,
   hasDataRoom,
   hasFolder,
+  renameFolder,
   resolveSelection,
   type DataRoomState,
 } from '../model'
@@ -67,6 +70,64 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
 
       return {
         ...state,
+        selectedDataRoomId: selection.selectedDataRoomId,
+        selectedFolderId: selection.selectedFolderId,
+      }
+    }
+
+    case 'dataroom/createFolder': {
+      const entities = createFolder(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (entities === state.entities) {
+        return state
+      }
+
+      return {
+        ...state,
+        entities,
+        selectedDataRoomId: action.payload.dataRoomId,
+        selectedFolderId: action.payload.folderId,
+      }
+    }
+
+    case 'dataroom/renameFolder': {
+      const entities = renameFolder(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (entities === state.entities) {
+        return state
+      }
+
+      return {
+        ...state,
+        entities,
+      }
+    }
+
+    case 'dataroom/deleteFolder': {
+      const result = deleteFolderCascade(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (!result.deleted) {
+        return state
+      }
+
+      const selection = resolveSelection(
+        result.nextState,
+        state.selectedDataRoomId,
+        result.fallbackFolderId ?? state.selectedFolderId,
+      )
+
+      return {
+        ...state,
+        entities: result.nextState,
         selectedDataRoomId: selection.selectedDataRoomId,
         selectedFolderId: selection.selectedFolderId,
       }
