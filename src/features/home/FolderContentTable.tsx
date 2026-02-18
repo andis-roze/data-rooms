@@ -25,12 +25,12 @@ interface FolderContentTableProps {
 
 const rowGridTemplate = {
   xs: 'minmax(0,1fr) auto',
-  md: 'minmax(0,1fr) 120px 130px 270px',
+  md: 'minmax(0,1fr) 120px 130px 190px',
 }
 
 const actionGridTemplate = {
-  xs: 'repeat(3, max-content)',
-  md: 'repeat(3, minmax(84px, 1fr))',
+  xs: 'repeat(2, max-content)',
+  md: 'repeat(2, minmax(84px, 1fr))',
 }
 
 export function FolderContentTable({
@@ -106,7 +106,15 @@ export function FolderContentTable({
                     alignItems: 'center',
                   }}
                 >
-                  <Typography noWrap>{item.displayName ?? resolveDisplayName(item.folder.name)}</Typography>
+                  <Button
+                    size="small"
+                    color="inherit"
+                    sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
+                    aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(item.folder.name) })}
+                    onClick={() => onSelectFolder(item.folder.id)}
+                  >
+                    <Typography noWrap>{item.displayName ?? resolveDisplayName(item.folder.name)}</Typography>
+                  </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
                     {t('dataroomFolderItemType')}
                   </Typography>
@@ -123,14 +131,6 @@ export function FolderContentTable({
                       width: { xs: 'auto', md: '100%' },
                     }}
                   >
-                    <Button
-                      size="small"
-                      sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(item.folder.name) })}
-                      onClick={() => onSelectFolder(item.folder.id)}
-                    >
-                      {t('dataroomActionOpenFolder')}
-                    </Button>
                     {item.isParentNavigation ? (
                       <>
                         <Box />
@@ -175,7 +175,15 @@ export function FolderContentTable({
                     alignItems: 'center',
                   }}
                 >
-                  <Typography noWrap>{item.file.name}</Typography>
+                  <Button
+                    size="small"
+                    color="inherit"
+                    sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
+                    aria-label={t('dataroomAriaViewFile', { name: item.file.name })}
+                    onClick={() => onOpenViewFile(item.file)}
+                  >
+                    <Typography noWrap>{item.file.name}</Typography>
+                  </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
                     {`${t('dataroomFileItemType')} - ${formatFileSize(item.file.size)}`}
                   </Typography>
@@ -192,14 +200,6 @@ export function FolderContentTable({
                       width: { xs: 'auto', md: '100%' },
                     }}
                   >
-                    <Button
-                      size="small"
-                      sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaViewFile', { name: item.file.name })}
-                      onClick={() => onOpenViewFile(item.file)}
-                    >
-                      {t('dataroomActionViewFile')}
-                    </Button>
                     <Button
                       size="small"
                       sx={{ minWidth: 84 }}
