@@ -138,7 +138,7 @@ describe('App routing and localization', () => {
     expect(screen.queryByText('nda.pdf')).not.toBeInTheDocument()
   })
 
-  it('applies selected sort mode and persists it across remounts', async () => {
+  it('applies header sort and persists it across remounts', async () => {
     const user = userEvent.setup()
     const firstRender = renderRoute('/')
     const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
@@ -146,20 +146,29 @@ describe('App routing and localization', () => {
     await user.upload(uploadInput, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
     await user.upload(uploadInput, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
 
-    const sortSelect = screen.getAllByRole('combobox')[0]
-    await user.click(sortSelect)
-    await user.click(screen.getByRole('option', { name: 'Name (Z-A)' }))
+    const defaultOrder = screen.getAllByRole('button', { name: /View file / })
+    expect(defaultOrder[0]).toHaveAccessibleName('View file alpha.pdf')
+
+    await user.click(screen.getByRole('button', { name: 'Sort by name' }))
+
+    const descOrder = screen.getAllByRole('button', { name: /View file / })
+    expect(descOrder[0]).toHaveAccessibleName('View file zeta.pdf')
 
     const storage = window.localStorage as Partial<Storage>
     if (typeof storage.getItem === 'function') {
-      expect(storage.getItem('dataroom/view-preferences')).toContain('name-desc')
+      expect(storage.getItem('dataroom/view-preferences')).toContain('"sortField":"name"')
+      expect(storage.getItem('dataroom/view-preferences')).toContain('"sortDirection":"desc"')
     }
-    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('Name (Z-A)')
 
     firstRender.unmount()
     renderRoute('/')
 
-    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('Name (Z-A)')
+    const uploadInputAfterRemount = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+    await user.upload(uploadInputAfterRemount, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
+    await user.upload(uploadInputAfterRemount, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
+
+    const persistedOrder = screen.getAllByRole('button', { name: /View file / })
+    expect(persistedOrder[0]).toHaveAccessibleName('View file zeta.pdf')
   })
 
   it('switches language to German from header controls', async () => {

@@ -9,14 +9,11 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
-import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
-import Select from '@mui/material/Select'
 import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
@@ -47,7 +44,12 @@ interface FeedbackState {
   severity: 'success' | 'error'
 }
 
-type SortMode = 'name-asc' | 'name-desc' | 'updated-desc' | 'updated-asc' | 'type'
+type SortField = 'name' | 'type' | 'updated'
+type SortDirection = 'asc' | 'desc'
+interface SortState {
+  field: SortField
+  direction: SortDirection
+}
 
 interface FolderContentItem {
   kind: 'folder' | 'file'
@@ -59,7 +61,7 @@ interface FolderContentItem {
 }
 
 const SORT_PREFERENCE_STORAGE_KEY = 'dataroom/view-preferences'
-let inMemorySortPreference: SortMode = 'name-asc'
+let inMemorySortPreference: SortState = { field: 'name', direction: 'asc' }
 
 function fallbackUuidV4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
@@ -93,7 +95,7 @@ function getFileChildren(state: DataRoomState, folder: Folder): FileNode[] {
   return folder.fileIds.map((id) => state.filesById[id]).filter(isDefined).sort(byNameAsc)
 }
 
-function loadSortModePreference(): SortMode {
+function loadSortModePreference(): SortState {
   if (typeof window === 'undefined') {
     return inMemorySortPreference
   }
@@ -105,16 +107,30 @@ function loadSortModePreference(): SortMode {
       return inMemorySortPreference
     }
 
-    const parsed = JSON.parse(raw) as { sortMode?: string }
+    const parsed = JSON.parse(raw) as { sortField?: string; sortDirection?: string; sortMode?: string }
 
     if (
-      parsed.sortMode === 'name-asc' ||
-      parsed.sortMode === 'name-desc' ||
-      parsed.sortMode === 'updated-desc' ||
-      parsed.sortMode === 'updated-asc' ||
-      parsed.sortMode === 'type'
+      (parsed.sortField === 'name' || parsed.sortField === 'type' || parsed.sortField === 'updated') &&
+      (parsed.sortDirection === 'asc' || parsed.sortDirection === 'desc')
     ) {
-      return parsed.sortMode
+      return { field: parsed.sortField, direction: parsed.sortDirection }
+    }
+
+    // Backward compatibility with previous select-based sort mode.
+    if (parsed.sortMode === 'name-asc') {
+      return { field: 'name', direction: 'asc' }
+    }
+    if (parsed.sortMode === 'name-desc') {
+      return { field: 'name', direction: 'desc' }
+    }
+    if (parsed.sortMode === 'updated-desc') {
+      return { field: 'updated', direction: 'desc' }
+    }
+    if (parsed.sortMode === 'updated-asc') {
+      return { field: 'updated', direction: 'asc' }
+    }
+    if (parsed.sortMode === 'type') {
+      return { field: 'type', direction: 'asc' }
     }
   } catch {
     return inMemorySortPreference
@@ -123,15 +139,18 @@ function loadSortModePreference(): SortMode {
   return inMemorySortPreference
 }
 
-function saveSortModePreference(sortMode: SortMode): void {
-  inMemorySortPreference = sortMode
+function saveSortModePreference(sortState: SortState): void {
+  inMemorySortPreference = sortState
 
   if (typeof window === 'undefined') {
     return
   }
 
   try {
-    window.localStorage.setItem(SORT_PREFERENCE_STORAGE_KEY, JSON.stringify({ sortMode }))
+    window.localStorage.setItem(
+      SORT_PREFERENCE_STORAGE_KEY,
+      JSON.stringify({ sortField: sortState.field, sortDirection: sortState.direction }),
+    )
   } catch {
     // Ignore persistence failures and keep in-memory preference.
   }
@@ -174,6 +193,14 @@ function formatFileSize(bytes: number): string {
 
   const mb = kb / 1024
   return `${mb.toFixed(1)} MB`
+}
+
+function formatUpdatedAt(value: number, language: string): string {
+  return new Intl.DateTimeFormat(language, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(new Date(value))
 }
 
 interface FolderTreeNodeProps {
@@ -285,7 +312,7 @@ function DataRoomTreeNode({
 }
 
 export function HomePage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
@@ -311,7 +338,7 @@ export function HomePage() {
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
 
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
-  const [sortMode, setSortMode] = useState<SortMode>(() => loadSortModePreference())
+  const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
   const resolveDisplayName = (value: string) =>
     value.startsWith('i18n:') ? t(value.slice(5)) : value
   const hasDuplicateDataRoomDisplayName = (candidateName: string, excludeDataRoomId?: NodeId) => {
@@ -521,37 +548,31 @@ export function HomePage() {
   ]
   const sortedContentItems = [...contentItems].sort((a, b) => {
     const compareName = () => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    const directionMultiplier = sortState.direction === 'asc' ? 1 : -1
 
-    if (sortMode === 'type') {
+    if (sortState.field === 'type') {
       if (a.kind !== b.kind) {
-        return a.kind === 'folder' ? -1 : 1
+        return (a.kind === 'folder' ? -1 : 1) * directionMultiplier
       }
 
-      return compareName()
+      return compareName() * directionMultiplier
     }
 
-    if (sortMode === 'name-asc') {
-      return compareName()
-    }
-
-    if (sortMode === 'name-desc') {
-      return compareName() * -1
-    }
-
-    if (sortMode === 'updated-asc') {
-      if (a.updatedAt === b.updatedAt) {
-        return compareName()
-      }
-
-      return a.updatedAt - b.updatedAt
+    if (sortState.field === 'name') {
+      return compareName() * directionMultiplier
     }
 
     if (a.updatedAt === b.updatedAt) {
-      return compareName()
+      return compareName() * directionMultiplier
     }
 
-    return b.updatedAt - a.updatedAt
+    return (a.updatedAt - b.updatedAt) * directionMultiplier
   })
+  const locale = i18n.resolvedLanguage ?? i18n.language
+  const rowGridTemplate = {
+    xs: 'minmax(0,1fr) auto',
+    md: 'minmax(0,1fr) 130px 140px 240px',
+  }
 
   const canDeleteActiveFolder = activeFolder.id !== rootFolder.id
   const deleteSummary = getFolderDeleteSummary(entities, activeFolder.id)
@@ -753,6 +774,16 @@ export function HomePage() {
     setFeedback({ message: t('dataroomFeedbackFileDeleted'), severity: 'success' })
   }
 
+  const toggleSort = (field: SortField) => {
+    const nextState: SortState =
+      sortState.field === field
+        ? { field, direction: sortState.direction === 'asc' ? 'desc' : 'asc' }
+        : { field, direction: 'asc' }
+
+    setSortState(nextState)
+    saveSortModePreference(nextState)
+  }
+
   return (
     <Container component="main" maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
       <Paper
@@ -853,23 +884,6 @@ export function HomePage() {
               <Button variant="text" onClick={() => uploadInputRef.current?.click()}>
                 {t('dataroomActionUploadPdf')}
               </Button>
-              <FormControl size="small" sx={{ minWidth: 190 }}>
-                <Select
-                  value={sortMode}
-                  aria-label={t('dataroomSortLabel')}
-                  onChange={(event) => {
-                    const value = event.target.value as SortMode
-                    setSortMode(value)
-                    saveSortModePreference(value)
-                  }}
-                >
-                  <MenuItem value="name-asc">{t('dataroomSortNameAsc')}</MenuItem>
-                  <MenuItem value="name-desc">{t('dataroomSortNameDesc')}</MenuItem>
-                  <MenuItem value="updated-desc">{t('dataroomSortUpdatedDesc')}</MenuItem>
-                  <MenuItem value="updated-asc">{t('dataroomSortUpdatedAsc')}</MenuItem>
-                  <MenuItem value="type">{t('dataroomSortType')}</MenuItem>
-                </Select>
-              </FormControl>
             </Stack>
 
             <input
@@ -882,27 +896,101 @@ export function HomePage() {
             />
 
             <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: rowGridTemplate,
+                  gap: 1,
+                  px: 2,
+                  py: 1,
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Button
+                  size="small"
+                  color="inherit"
+                  sx={{ justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
+                  onClick={() => toggleSort('name')}
+                  aria-label={t('dataroomSortByNameAria')}
+                >
+                  {t('dataroomColumnName')} {sortState.field === 'name' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+                </Button>
+                <Button
+                  size="small"
+                  color="inherit"
+                  sx={{ display: { xs: 'none', md: 'inline-flex' }, justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
+                  onClick={() => toggleSort('type')}
+                  aria-label={t('dataroomSortByTypeAria')}
+                >
+                  {t('dataroomColumnType')} {sortState.field === 'type' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+                </Button>
+                <Button
+                  size="small"
+                  color="inherit"
+                  sx={{ display: { xs: 'none', md: 'inline-flex' }, justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
+                  onClick={() => toggleSort('updated')}
+                  aria-label={t('dataroomSortByUpdatedAria')}
+                >
+                  {t('dataroomColumnUpdated')} {sortState.field === 'updated' ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'}
+                </Button>
+                <Typography variant="caption" color="text.secondary" sx={{ justifySelf: 'end' }}>
+                  {t('dataroomColumnActions')}
+                </Typography>
+              </Box>
               <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
                 {sortedContentItems.map((item) => {
                   if (item.kind === 'folder' && item.folder) {
                     return (
-                      <ListItemButton
-                        key={item.id}
-                        onClick={() => {
-                          dispatch({ type: 'dataroom/selectFolder', payload: { folderId: item.folder.id } })
-                        }}
-                      >
-                        <ListItemText primary={resolveDisplayName(item.folder.name)} secondary={t('dataroomFolderItemType')} />
-                      </ListItemButton>
+                      <ListItem key={item.id} disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            dispatch({ type: 'dataroom/selectFolder', payload: { folderId: item.folder.id } })
+                          }}
+                          sx={{
+                            px: 2,
+                            py: 1,
+                            display: 'grid',
+                            gridTemplateColumns: rowGridTemplate,
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Typography noWrap>{resolveDisplayName(item.folder.name)}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+                            {t('dataroomFolderItemType')}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+                            {formatUpdatedAt(item.folder.updatedAt, locale)}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ justifySelf: 'end' }}>
+                            -
+                          </Typography>
+                        </ListItemButton>
+                      </ListItem>
                     )
                   }
 
                   if (item.kind === 'file' && item.file) {
                     return (
-                      <ListItem
-                        key={item.id}
-                        secondaryAction={
-                          <Stack direction="row" spacing={0.5}>
+                      <ListItem key={item.id} disablePadding sx={{ px: 2, py: 1 }}>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            display: 'grid',
+                            gridTemplateColumns: rowGridTemplate,
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Typography noWrap>{item.file.name}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+                            {`${t('dataroomFileItemType')} - ${formatFileSize(item.file.size)}`}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+                            {formatUpdatedAt(item.file.updatedAt, locale)}
+                          </Typography>
+                          <Stack direction="row" spacing={0.5} justifySelf="end" sx={{ whiteSpace: 'nowrap' }}>
                             <Button
                               size="small"
                               aria-label={t('dataroomAriaViewFile', { name: item.file.name })}
@@ -926,9 +1014,7 @@ export function HomePage() {
                               {t('dataroomActionDeleteFile')}
                             </Button>
                           </Stack>
-                        }
-                      >
-                        <ListItemText primary={item.file.name} secondary={`PDF - ${formatFileSize(item.file.size)}`} />
+                        </Box>
                       </ListItem>
                     )
                   }

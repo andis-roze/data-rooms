@@ -24,6 +24,10 @@
   "dataroomAriaViewFile": "View file {name}",
   "dataroomBreadcrumbsLabel": "Folder breadcrumbs",
   "dataroomCurrentFolderContentsLabel": "Current folder contents",
+  "dataroomColumnName": "Name",
+  "dataroomColumnType": "Type",
+  "dataroomColumnUpdated": "Updated",
+  "dataroomColumnActions": "Actions",
   "dataroomDeleteDataRoomImpact": "This will remove {folderCount} folder(s) and {fileCount} file(s).",
   "dataroomDeleteDataRoomQuestion": "Delete Data Room \"{name}\" and all its content?",
   "dataroomDeleteFileQuestion": "Delete \"{name}\"?",
@@ -64,6 +68,7 @@
   "dataroomFilePreviewTitle": "File preview",
   "dataroomFilePreviewUnavailable": "File preview is unavailable in this environment.",
   "dataroomFolderItemType": "Folder",
+  "dataroomFileItemType": "PDF",
   "dataroomFolderTreeTitle": "Folder tree",
   "dataroomNoDataRoomBody": "A Data Room will appear here once it is created.",
   "dataroomNoDataRoomTitle": "No Data Room available",
@@ -93,5 +98,8 @@
   "secondaryAction": "View Documentation",
   "sectionTitle": "What this starter includes",
   "subtitle": "A minimal React + TypeScript starter with i18next and a polished Material UI theme.",
-  "title": "Build products that speak every language"
+  "title": "Build products that speak every language",
+  "dataroomSortByNameAria": "Sort by name",
+  "dataroomSortByTypeAria": "Sort by type",
+  "dataroomSortByUpdatedAria": "Sort by updated date"
 }

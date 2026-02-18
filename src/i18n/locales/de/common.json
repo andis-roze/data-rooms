@@ -30,6 +30,10 @@
   "dataroomFolderTreeTitle": "Ordnerbaum",
   "dataroomBreadcrumbsLabel": "Ordner-Pfad",
   "dataroomCurrentFolderContentsLabel": "Inhalt des aktuellen Ordners",
+  "dataroomColumnName": "Name",
+  "dataroomColumnType": "Typ",
+  "dataroomColumnUpdated": "Geandert",
+  "dataroomColumnActions": "Aktionen",
   "dataroomActionCreateFolder": "Ordner erstellen",
   "dataroomActionCreateDataRoom": "Datenraum erstellen",
   "dataroomActionRenameFolder": "Ordner umbenennen",
@@ -52,6 +56,7 @@
   "dataroomSortUpdatedAsc": "Geandert (alteste)",
   "dataroomSortType": "Typ (Ordner zuerst)",
   "dataroomFolderItemType": "Ordner",
+  "dataroomFileItemType": "PDF",
   "dataroomEmptyFolderTitle": "Dieser Ordner ist leer",
   "dataroomEmptyFolderBody": "Erstelle einen Ordner oder lade eine PDF hoch, um den Datenraum zu organisieren.",
   "dataroomDialogCreateFolderTitle": "Ordner erstellen",
@@ -93,5 +98,8 @@
   "dataroomFeedbackFolderDeleted": "Ordner geloscht.",
   "dataroomFeedbackFileUploaded": "PDF hochgeladen.",
   "dataroomFeedbackFileRenamed": "Datei umbenannt.",
-  "dataroomFeedbackFileDeleted": "Datei geloscht."
+  "dataroomFeedbackFileDeleted": "Datei geloscht.",
+  "dataroomSortByNameAria": "Nach Name sortieren",
+  "dataroomSortByTypeAria": "Nach Typ sortieren",
+  "dataroomSortByUpdatedAria": "Nach Anderungsdatum sortieren"
 }
