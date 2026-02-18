@@ -14,7 +14,6 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Paper from '@mui/material/Paper'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -40,6 +39,7 @@ import {
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
 
 interface FeedbackState {
+  id: number
   message: string
   severity: 'success' | 'error'
 }
@@ -318,6 +318,7 @@ export function HomePage() {
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
+  const feedbackIdRef = useRef(0)
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
@@ -340,10 +341,16 @@ export function HomePage() {
   const [fileNameError, setFileNameError] = useState<string | null>(null)
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
 
-  const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [feedbackQueue, setFeedbackQueue] = useState<FeedbackState[]>([])
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
   const resolveDisplayName = (value: string) =>
     value.startsWith('i18n:') ? t(value.slice(5)) : value
+  const enqueueFeedback = (message: string, severity: FeedbackState['severity']) => {
+    setFeedbackQueue((previous) => [...previous, { id: feedbackIdRef.current++, message, severity }])
+  }
+  const dismissFeedback = (id: number) => {
+    setFeedbackQueue((previous) => previous.filter((item) => item.id !== id))
+  }
   const hasDuplicateDataRoomDisplayName = (candidateName: string, excludeDataRoomId?: NodeId) => {
     const normalizedCandidate = normalizeNodeName(candidateName)
 
@@ -414,7 +421,7 @@ export function HomePage() {
     })
 
     setCreateDataRoomDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackDataRoomCreated'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackDataRoomCreated'), 'success')
   }
 
   const handleRenameDataRoom = () => {
@@ -448,7 +455,7 @@ export function HomePage() {
     })
 
     setRenameDataRoomDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackDataRoomRenamed'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackDataRoomRenamed'), 'success')
   }
 
   const handleDeleteDataRoom = () => {
@@ -464,7 +471,7 @@ export function HomePage() {
     })
 
     setDeleteDataRoomDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackDataRoomDeleted'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackDataRoomDeleted'), 'success')
   }
 
   if (dataRooms.length === 0) {
@@ -673,7 +680,7 @@ export function HomePage() {
     })
 
     setCreateDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackFolderCreated'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFolderCreated'), 'success')
   }
 
   const handleRenameFolder = () => {
@@ -705,7 +712,7 @@ export function HomePage() {
 
     setRenameDialogOpen(false)
     setTargetFolderId(null)
-    setFeedback({ message: t('dataroomFeedbackFolderRenamed'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFolderRenamed'), 'success')
   }
 
   const handleDeleteFolder = () => {
@@ -722,7 +729,7 @@ export function HomePage() {
 
     setDeleteDialogOpen(false)
     setTargetFolderId(null)
-    setFeedback({ message: t('dataroomFeedbackFolderDeleted'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
   }
 
   const handleUploadInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -735,10 +742,7 @@ export function HomePage() {
     const uploadError = getPdfUploadValidationError(selectedFile)
 
     if (uploadError) {
-      setFeedback({
-        message: uploadError === 'invalidPdf' ? t('dataroomErrorPdfOnly') : t('dataroomErrorPdfOnly'),
-        severity: 'error',
-      })
+      enqueueFeedback(uploadError === 'invalidPdf' ? t('dataroomErrorPdfOnly') : t('dataroomErrorPdfOnly'), 'error')
       event.target.value = ''
       return
     }
@@ -747,16 +751,13 @@ export function HomePage() {
     const nameError = getFileNameValidationError(preparedUpload.fileName)
 
     if (nameError) {
-      setFeedback({
-        message: nameError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'),
-        severity: 'error',
-      })
+      enqueueFeedback(nameError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'), 'error')
       event.target.value = ''
       return
     }
 
     if (hasDuplicateFileName(entities, activeFolder.id, preparedUpload.fileName)) {
-      setFeedback({ message: t('dataroomErrorFileNameDuplicate'), severity: 'error' })
+      enqueueFeedback(t('dataroomErrorFileNameDuplicate'), 'error')
       event.target.value = ''
       return
     }
@@ -773,7 +774,7 @@ export function HomePage() {
       },
     })
 
-    setFeedback({ message: t('dataroomFeedbackFileUploaded'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
     event.target.value = ''
   }
 
@@ -805,7 +806,7 @@ export function HomePage() {
     })
 
     setRenameFileDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackFileRenamed'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFileRenamed'), 'success')
   }
 
   const handleDeleteFile = () => {
@@ -821,7 +822,7 @@ export function HomePage() {
     })
 
     setDeleteFileDialogOpen(false)
-    setFeedback({ message: t('dataroomFeedbackFileDeleted'), severity: 'success' })
+    enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
   }
 
   const toggleSort = (field: SortField) => {
@@ -1363,16 +1364,28 @@ export function HomePage() {
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={Boolean(feedback)}
-        autoHideDuration={2500}
-        onClose={() => setFeedback(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      <Stack
+        spacing={1}
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: (theme) => theme.zIndex.snackbar,
+          width: { xs: 'calc(100vw - 32px)', sm: 420 },
+          maxWidth: '100%',
+        }}
       >
-        <Alert severity={feedback?.severity ?? 'success'} variant="filled" onClose={() => setFeedback(null)}>
-          {feedback?.message}
-        </Alert>
-      </Snackbar>
+        {feedbackQueue.map((feedback) => (
+          <Alert
+            key={feedback.id}
+            severity={feedback.severity}
+            variant="filled"
+            onClose={() => dismissFeedback(feedback.id)}
+          >
+            {feedback.message}
+          </Alert>
+        ))}
+      </Stack>
     </Container>
   )
 }
