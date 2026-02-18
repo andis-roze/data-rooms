@@ -1,13 +1,13 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { FileNode, Folder, NodeId } from '../dataroom/model'
+import { FileRow } from './components/FileRow'
+import { FolderRow } from './components/FolderRow'
 import type { FolderContentItem, SortField, SortState } from './types'
-import { formatFileSize, formatUpdatedAt } from './utils'
 
 interface FolderContentTableProps {
   items: FolderContentItem[]
@@ -26,11 +26,6 @@ interface FolderContentTableProps {
 const rowGridTemplate = {
   xs: 'minmax(0,1fr) auto',
   md: 'minmax(0,1fr) 120px 130px 190px',
-}
-
-const actionGridTemplate = {
-  xs: 'repeat(2, max-content)',
-  md: 'repeat(2, minmax(84px, 1fr))',
 }
 
 export function FolderContentTable({
@@ -94,140 +89,34 @@ export function FolderContentTable({
       </Box>
       <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
         {items.map((item) => {
-          if (item.kind === 'folder' && item.folder) {
-            const folder = item.folder
-
+          if (item.kind === 'folder') {
             return (
-              <ListItem key={item.id} disablePadding sx={{ px: 2, py: 1 }}>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: rowGridTemplate,
-                    gap: 1,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Button
-                    size="small"
-                    color="inherit"
-                    sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
-                    aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(folder.name) })}
-                    onClick={() => onSelectFolder(folder.id)}
-                  >
-                    <Typography noWrap>{item.displayName ?? resolveDisplayName(folder.name)}</Typography>
-                  </Button>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {t('dataroomFolderItemType')}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {formatUpdatedAt(folder.updatedAt, locale)}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: actionGridTemplate,
-                      gap: 0.5,
-                      justifySelf: 'end',
-                      justifyItems: { xs: 'end', md: 'stretch' },
-                      width: { xs: 'auto', md: '100%' },
-                    }}
-                  >
-                    {item.isParentNavigation ? (
-                      <>
-                        <Box />
-                        <Box />
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="small"
-                          sx={{ minWidth: 84 }}
-                          aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
-                          onClick={() => onOpenRenameFolder(folder)}
-                        >
-                          {t('dataroomActionRename')}
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          sx={{ minWidth: 84 }}
-                          aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
-                          onClick={() => onOpenDeleteFolder(folder)}
-                        >
-                          {t('dataroomActionDelete')}
-                        </Button>
-                      </>
-                    )}
-                  </Box>
-                </Box>
-              </ListItem>
+              <FolderRow
+                key={item.id}
+                itemId={item.id}
+                folder={item.folder}
+                displayName={item.displayName}
+                isParentNavigation={item.isParentNavigation}
+                locale={locale}
+                resolveDisplayName={resolveDisplayName}
+              onSelectFolder={onSelectFolder}
+              onOpenRenameFolder={onOpenRenameFolder}
+              onOpenDeleteFolder={onOpenDeleteFolder}
+            />
             )
           }
 
-          if (item.kind === 'file' && item.file) {
-            const file = item.file
-
-            return (
-              <ListItem key={item.id} disablePadding sx={{ px: 2, py: 1 }}>
-                <Box
-                  sx={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: rowGridTemplate,
-                    gap: 1,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Button
-                    size="small"
-                    color="inherit"
-                    sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
-                    aria-label={t('dataroomAriaViewFile', { name: file.name })}
-                    onClick={() => onOpenViewFile(file)}
-                  >
-                    <Typography noWrap>{file.name}</Typography>
-                  </Button>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {`${t('dataroomFileItemType')} - ${formatFileSize(file.size)}`}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {formatUpdatedAt(file.updatedAt, locale)}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: actionGridTemplate,
-                      gap: 0.5,
-                      justifySelf: 'end',
-                      justifyItems: { xs: 'end', md: 'stretch' },
-                      width: { xs: 'auto', md: '100%' },
-                    }}
-                  >
-                    <Button
-                      size="small"
-                      sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaRenameFile', { name: file.name })}
-                      onClick={() => onOpenRenameFile(file)}
-                    >
-                      {t('dataroomActionRenameFile')}
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaDeleteFile', { name: file.name })}
-                      onClick={() => onOpenDeleteFile(file)}
-                    >
-                      {t('dataroomActionDeleteFile')}
-                    </Button>
-                  </Box>
-                </Box>
-              </ListItem>
-            )
-          }
-
-          return null
+          return (
+            <FileRow
+              key={item.id}
+              itemId={item.id}
+              file={item.file}
+              locale={locale}
+              onOpenViewFile={onOpenViewFile}
+              onOpenRenameFile={onOpenRenameFile}
+              onOpenDeleteFile={onOpenDeleteFile}
+            />
+          )
         })}
 
         {items.length === 0 ? (
