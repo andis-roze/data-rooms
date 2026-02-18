@@ -3,7 +3,7 @@ import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useEffect, type ChangeEvent, type RefObject } from 'react'
+import type { ChangeEvent, RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Folder, NodeId } from '../../dataroom/model'
 import { FolderContentTable } from '../FolderContentTable'
@@ -52,35 +52,6 @@ export function HomeContentSection({
 }: HomeContentSectionProps) {
   const { t } = useTranslation()
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      const isTypingContext =
-        target?.tagName === 'INPUT' ||
-        target?.tagName === 'TEXTAREA' ||
-        target?.isContentEditable === true
-
-      if (isTypingContext) {
-        return
-      }
-
-      if (event.ctrlKey && event.shiftKey && event.key.toLocaleLowerCase() === 'n') {
-        event.preventDefault()
-        onCreateFolder()
-      }
-
-      if (event.ctrlKey && event.shiftKey && event.key.toLocaleLowerCase() === 'u') {
-        event.preventDefault()
-        onUploadPdf()
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [onCreateFolder, onUploadPdf])
-
   return (
     <Box component="section" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
       <Stack spacing={2.5}>
@@ -110,9 +81,6 @@ export function HomeContentSection({
             {t('dataroomActionUploadPdf')}
           </Button>
         </Stack>
-        <Typography variant="caption" color="text.secondary">
-          {t('dataroomKeyboardShortcutsHint')}
-        </Typography>
 
         <input
           ref={uploadInputRef}

@@ -107,6 +107,5 @@
   "dataroomSortByNameAria": "Nach Name sortieren",
   "dataroomSortByTypeAria": "Nach Typ sortieren",
   "dataroomSortByUpdatedAria": "Nach Anderungsdatum sortieren",
-  "dataroomKeyboardShortcutsHint": "Kurzbefehle: Ctrl+Shift+N erstellt einen Ordner, Ctrl+Shift+U startet den Upload.",
   "dataroomErrorFileStorageFailed": "Datei konnte nicht im Browser-Speicher abgelegt werden."
 }

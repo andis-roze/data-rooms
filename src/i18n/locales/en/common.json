@@ -53,6 +53,7 @@
   "dataroomErrorFileNameDuplicate": "File with this name already exists in this location.",
   "dataroomErrorFileNameEmpty": "File name cannot be empty.",
   "dataroomErrorFileNameReserved": "File name is not allowed.",
+  "dataroomErrorFileStorageFailed": "Unable to store file in browser storage.",
   "dataroomErrorFolderNameDuplicate": "Folder with this name already exists in this location.",
   "dataroomErrorFolderNameEmpty": "Folder name cannot be empty.",
   "dataroomErrorFolderNameReserved": "Folder name is not allowed.",
@@ -70,8 +71,8 @@
   "dataroomFieldFileName": "File name",
   "dataroomFieldFolderName": "Folder name",
   "dataroomFileItemType": "PDF",
-  "dataroomFilePreviewTitle": "File preview",
   "dataroomFilePreviewLoading": "Loading file preview...",
+  "dataroomFilePreviewTitle": "File preview",
   "dataroomFilePreviewUnavailable": "File preview is unavailable in this environment.",
   "dataroomFolderItemType": "Folder",
   "dataroomFolderTreeTitle": "Folder tree",
@@ -90,7 +91,6 @@
   "dataroomSortType": "Type (folders first)",
   "dataroomSortUpdatedAsc": "Modified (oldest)",
   "dataroomSortUpdatedDesc": "Modified (newest)",
-  "dataroomKeyboardShortcutsHint": "Shortcuts: Ctrl+Shift+N creates a folder, Ctrl+Shift+U opens upload.",
   "dataroomStructureIncomplete": "Data Room structure is incomplete",
   "featureOneBody": "Vite, React, and strict TypeScript configured for fast iteration.",
   "featureOneTitle": "Modern stack",
@@ -107,6 +107,5 @@
   "secondaryAction": "View Documentation",
   "sectionTitle": "What this starter includes",
   "subtitle": "A minimal React + TypeScript starter with i18next and a polished Material UI theme.",
-  "title": "Build products that speak every language",
-  "dataroomErrorFileStorageFailed": "Unable to store file in browser storage."
+  "title": "Build products that speak every language"
 }
