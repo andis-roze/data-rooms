@@ -37,11 +37,17 @@ msgstr "Close"
 msgid "dataroomActionCreate"
 msgstr "Create"
 
+msgid "dataroomActionCreateDataRoom"
+msgstr "Create data room"
+
 msgid "dataroomActionCreateFolder"
 msgstr "Create folder"
 
 msgid "dataroomActionDelete"
 msgstr "Delete"
+
+msgid "dataroomActionDeleteDataRoom"
+msgstr "Delete data room"
 
 msgid "dataroomActionDeleteFile"
 msgstr "Delete"
@@ -51,6 +57,9 @@ msgstr "Delete folder"
 
 msgid "dataroomActionRename"
 msgstr "Rename"
+
+msgid "dataroomActionRenameDataRoom"
+msgstr "Rename data room"
 
 msgid "dataroomActionRenameFile"
 msgstr "Rename"
@@ -79,6 +88,12 @@ msgstr "Folder breadcrumbs"
 msgid "dataroomCurrentFolderContentsLabel"
 msgstr "Current folder contents"
 
+msgid "dataroomDeleteDataRoomImpact"
+msgstr "This will remove {folderCount} folder(s) and {fileCount} file(s)."
+
+msgid "dataroomDeleteDataRoomQuestion"
+msgstr "Delete Data Room \"{name}\" and all its content?"
+
 msgid "dataroomDeleteFileQuestion"
 msgstr "Delete \"{name}\"?"
 
@@ -88,14 +103,23 @@ msgstr "This will remove {folderCount} folder(s) and {fileCount} file(s)."
 msgid "dataroomDeleteFolderQuestion"
 msgstr "Delete \"{name}\" and all nested content?"
 
+msgid "dataroomDialogCreateDataRoomTitle"
+msgstr "Create data room"
+
 msgid "dataroomDialogCreateFolderTitle"
 msgstr "Create folder"
+
+msgid "dataroomDialogDeleteDataRoomTitle"
+msgstr "Delete data room"
 
 msgid "dataroomDialogDeleteFileTitle"
 msgstr "Delete file"
 
 msgid "dataroomDialogDeleteFolderTitle"
 msgstr "Delete folder"
+
+msgid "dataroomDialogRenameDataRoomTitle"
+msgstr "Rename data room"
 
 msgid "dataroomDialogRenameFileTitle"
 msgstr "Rename file"
@@ -108,6 +132,15 @@ msgstr "Create a folder or upload a PDF to start organizing your Data Room."
 
 msgid "dataroomEmptyFolderTitle"
 msgstr "This folder is empty"
+
+msgid "dataroomErrorDataRoomNameDuplicate"
+msgstr "A Data Room with this name already exists."
+
+msgid "dataroomErrorDataRoomNameEmpty"
+msgstr "Data Room name cannot be empty."
+
+msgid "dataroomErrorDataRoomNameReserved"
+msgstr "Data Room name is not allowed."
 
 msgid "dataroomErrorFileNameDuplicate"
 msgstr "File with this name already exists in this location."
@@ -130,6 +163,15 @@ msgstr "Folder name is not allowed."
 msgid "dataroomErrorPdfOnly"
 msgstr "Only PDF files are allowed."
 
+msgid "dataroomFeedbackDataRoomCreated"
+msgstr "Data Room created."
+
+msgid "dataroomFeedbackDataRoomDeleted"
+msgstr "Data Room deleted."
+
+msgid "dataroomFeedbackDataRoomRenamed"
+msgstr "Data Room renamed."
+
 msgid "dataroomFeedbackFileDeleted"
 msgstr "File deleted."
 
@@ -147,6 +189,9 @@ msgstr "Folder deleted."
 
 msgid "dataroomFeedbackFolderRenamed"
 msgstr "Folder renamed."
+
+msgid "dataroomFieldDataRoomName"
+msgstr "Data Room name"
 
 msgid "dataroomFieldFileName"
 msgstr "File name"
@@ -171,6 +216,12 @@ msgstr "A Data Room will appear here once it is created."
 
 msgid "dataroomNoDataRoomTitle"
 msgstr "No Data Room available"
+
+msgid "dataroomSeedDefaultDataRoomName"
+msgstr "Acme Due Diligence Room"
+
+msgid "dataroomSeedDefaultRootFolderName"
+msgstr "Data Room"
 
 msgid "dataroomSelectLabel"
 msgstr "Select Data Room"

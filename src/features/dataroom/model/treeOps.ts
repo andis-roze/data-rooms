@@ -1,6 +1,8 @@
 import {
+  getDataRoomNameValidationError,
   getFileNameValidationError,
   getFolderNameValidationError,
+  hasDuplicateDataRoomName,
   hasDuplicateFileName,
   hasDuplicateFolderName,
   normalizeNodeName,
@@ -10,6 +12,30 @@ import type { DataRoomState, FileNode, Folder, NodeId, UnixMs } from './types'
 export interface DataRoomSelection {
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
+}
+
+export interface CreateDataRoomInput {
+  dataRoomId: NodeId
+  rootFolderId: NodeId
+  dataRoomName: string
+  rootFolderName: string
+  now: UnixMs
+}
+
+export interface RenameDataRoomInput {
+  dataRoomId: NodeId
+  dataRoomName: string
+  now: UnixMs
+}
+
+export interface DeleteDataRoomInput {
+  dataRoomId: NodeId
+}
+
+export interface DeleteDataRoomResult {
+  nextState: DataRoomState
+  deleted: boolean
+  fallbackDataRoomId: NodeId | null
 }
 
 export interface CreateFolderInput {
@@ -61,6 +87,11 @@ export interface DeleteFileInput {
 }
 
 export interface FolderDeleteSummary {
+  folderCount: number
+  fileCount: number
+}
+
+export interface DataRoomDeleteSummary {
   folderCount: number
   fileCount: number
 }
@@ -128,6 +159,84 @@ export function resolveSelection(
   return {
     selectedDataRoomId,
     selectedFolderId,
+  }
+}
+
+export function createDataRoom(state: DataRoomState, input: CreateDataRoomInput): DataRoomState {
+  const { dataRoomId, rootFolderId, dataRoomName, rootFolderName, now } = input
+  const dataRoomNameError = getDataRoomNameValidationError(dataRoomName)
+  const rootFolderNameError = getFolderNameValidationError(rootFolderName)
+
+  if (dataRoomNameError || rootFolderNameError) {
+    return state
+  }
+
+  if (hasDuplicateDataRoomName(state, dataRoomName)) {
+    return state
+  }
+
+  if (state.dataRoomsById[dataRoomId] || state.foldersById[rootFolderId]) {
+    return state
+  }
+
+  return {
+    ...state,
+    dataRoomOrder: [...state.dataRoomOrder, dataRoomId],
+    dataRoomsById: {
+      ...state.dataRoomsById,
+      [dataRoomId]: {
+        id: dataRoomId,
+        name: dataRoomName.trim(),
+        rootFolderId,
+        createdAt: now,
+        updatedAt: now,
+      },
+    },
+    foldersById: {
+      ...state.foldersById,
+      [rootFolderId]: {
+        id: rootFolderId,
+        dataRoomId,
+        parentFolderId: null,
+        name: rootFolderName.trim(),
+        childFolderIds: [],
+        fileIds: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    },
+  }
+}
+
+export function renameDataRoom(state: DataRoomState, input: RenameDataRoomInput): DataRoomState {
+  const { dataRoomId, dataRoomName, now } = input
+  const dataRoom = state.dataRoomsById[dataRoomId]
+
+  if (!dataRoom) {
+    return state
+  }
+
+  const dataRoomNameError = getDataRoomNameValidationError(dataRoomName)
+  const nextName = dataRoomName.trim()
+
+  if (dataRoomNameError || normalizeNodeName(nextName) === normalizeNodeName(dataRoom.name)) {
+    return state
+  }
+
+  if (hasDuplicateDataRoomName(state, nextName, dataRoomId)) {
+    return state
+  }
+
+  return {
+    ...state,
+    dataRoomsById: {
+      ...state.dataRoomsById,
+      [dataRoomId]: {
+        ...dataRoom,
+        name: nextName,
+        updatedAt: now,
+      },
+    },
   }
 }
 
@@ -417,6 +526,21 @@ export function getFolderDeleteSummary(state: DataRoomState, folderId: NodeId): 
   }
 }
 
+export function getDataRoomDeleteSummary(state: DataRoomState, dataRoomId: NodeId): DataRoomDeleteSummary {
+  const dataRoom = state.dataRoomsById[dataRoomId]
+
+  if (!dataRoom) {
+    return { folderCount: 0, fileCount: 0 }
+  }
+
+  const result = collectFolderAndFileIds(state, dataRoom.rootFolderId)
+
+  return {
+    folderCount: result.folderCount,
+    fileCount: result.fileCount,
+  }
+}
+
 export function deleteFolderCascade(
   state: DataRoomState,
   input: DeleteFolderCascadeInput,
@@ -493,5 +617,47 @@ export function deleteFolderCascade(
     fallbackFolderId: parentFolder.id,
     deletedFolderCount: collectResult.folderCount,
     deletedFileCount: collectResult.fileCount,
+  }
+}
+
+export function deleteDataRoom(state: DataRoomState, input: DeleteDataRoomInput): DeleteDataRoomResult {
+  const { dataRoomId } = input
+  const dataRoom = state.dataRoomsById[dataRoomId]
+
+  if (!dataRoom) {
+    return {
+      nextState: state,
+      deleted: false,
+      fallbackDataRoomId: null,
+    }
+  }
+
+  const collectResult = collectFolderAndFileIds(state, dataRoom.rootFolderId)
+  const nextDataRoomsById = { ...state.dataRoomsById }
+  const nextFoldersById = { ...state.foldersById }
+  const nextFilesById = { ...state.filesById }
+
+  delete nextDataRoomsById[dataRoomId]
+
+  collectResult.folderIds.forEach((id) => {
+    delete nextFoldersById[id]
+  })
+
+  collectResult.fileIds.forEach((id) => {
+    delete nextFilesById[id]
+  })
+
+  const nextDataRoomOrder = state.dataRoomOrder.filter((id) => id !== dataRoomId)
+
+  return {
+    nextState: {
+      ...state,
+      dataRoomOrder: nextDataRoomOrder,
+      dataRoomsById: nextDataRoomsById,
+      foldersById: nextFoldersById,
+      filesById: nextFilesById,
+    },
+    deleted: true,
+    fallbackDataRoomId: nextDataRoomOrder[0] ?? null,
   }
 }

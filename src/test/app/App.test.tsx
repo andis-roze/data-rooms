@@ -66,6 +66,46 @@ describe('App routing and localization', () => {
 
     expect(screen.queryByText('Legal')).not.toBeInTheDocument()
     expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
+  }, 15000)
+
+  it('creates, renames, and deletes a data room from sidebar controls', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await user.click(screen.getByRole('button', { name: 'Create data room' }))
+    await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), 'Project Zephyr')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create data room' }))
+
+    expect(screen.getByRole('heading', { name: 'Project Zephyr' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Rename data room' }))
+    const renameDataRoomInput = screen.getByRole('textbox', { name: 'Data Room name' })
+    await user.clear(renameDataRoomInput)
+    await user.type(renameDataRoomInput, 'Project Apollo')
+    await user.click(screen.getByRole('button', { name: 'Rename' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename data room' }))
+
+    expect(screen.getByRole('heading', { name: 'Project Apollo' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Delete data room' }))
+    const deleteDataRoomDialog = screen.getByRole('dialog', { name: 'Delete data room' })
+    await user.click(within(deleteDataRoomDialog).getByRole('button', { name: 'Delete' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete data room' }))
+
+    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+  }, 15000)
+
+  it('blocks creating a data room with duplicate name', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await user.click(screen.getByRole('button', { name: 'Create data room' }))
+    await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), 'Acme Due Diligence Room')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+
+    expect(screen.getByText('A Data Room with this name already exists.')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Create data room' })).toBeInTheDocument()
   })
 
   it('uploads, renames, and deletes a pdf file with duplicate validation', async () => {
@@ -106,7 +146,7 @@ describe('App routing and localization', () => {
     await user.upload(uploadInput, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
     await user.upload(uploadInput, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
 
-    const sortSelect = screen.getAllByRole('combobox')[1]
+    const sortSelect = screen.getAllByRole('combobox')[0]
     await user.click(sortSelect)
     await user.click(screen.getByRole('option', { name: 'Name (Z-A)' }))
 
@@ -114,12 +154,12 @@ describe('App routing and localization', () => {
     if (typeof storage.getItem === 'function') {
       expect(storage.getItem('dataroom/view-preferences')).toContain('name-desc')
     }
-    expect(screen.getAllByRole('combobox')[1]).toHaveTextContent('Name (Z-A)')
+    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('Name (Z-A)')
 
     firstRender.unmount()
     renderRoute('/')
 
-    expect(screen.getAllByRole('combobox')[1]).toHaveTextContent('Name (Z-A)')
+    expect(screen.getAllByRole('combobox')[0]).toHaveTextContent('Name (Z-A)')
   })
 
   it('switches language to German from header controls', async () => {

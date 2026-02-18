@@ -37,11 +37,17 @@ msgstr "Schliessen"
 msgid "dataroomActionCreate"
 msgstr "Erstellen"
 
+msgid "dataroomActionCreateDataRoom"
+msgstr "Datenraum erstellen"
+
 msgid "dataroomActionCreateFolder"
 msgstr "Ordner erstellen"
 
 msgid "dataroomActionDelete"
 msgstr "Loschen"
+
+msgid "dataroomActionDeleteDataRoom"
+msgstr "Datenraum loschen"
 
 msgid "dataroomActionDeleteFile"
 msgstr "Loschen"
@@ -51,6 +57,9 @@ msgstr "Ordner loschen"
 
 msgid "dataroomActionRename"
 msgstr "Umbenennen"
+
+msgid "dataroomActionRenameDataRoom"
+msgstr "Datenraum umbenennen"
 
 msgid "dataroomActionRenameFile"
 msgstr "Umbenennen"
@@ -79,6 +88,12 @@ msgstr "Ordner-Pfad"
 msgid "dataroomCurrentFolderContentsLabel"
 msgstr "Inhalt des aktuellen Ordners"
 
+msgid "dataroomDeleteDataRoomImpact"
+msgstr "Dabei werden {folderCount} Ordner und {fileCount} Dateien entfernt."
+
+msgid "dataroomDeleteDataRoomQuestion"
+msgstr "Datenraum \"{name}\" und alle Inhalte loschen?"
+
 msgid "dataroomDeleteFileQuestion"
 msgstr "\"{name}\" loschen?"
 
@@ -88,14 +103,23 @@ msgstr "Dabei werden {folderCount} Ordner und {fileCount} Dateien entfernt."
 msgid "dataroomDeleteFolderQuestion"
 msgstr "\"{name}\" und alle untergeordneten Inhalte loschen?"
 
+msgid "dataroomDialogCreateDataRoomTitle"
+msgstr "Datenraum erstellen"
+
 msgid "dataroomDialogCreateFolderTitle"
 msgstr "Ordner erstellen"
+
+msgid "dataroomDialogDeleteDataRoomTitle"
+msgstr "Datenraum loschen"
 
 msgid "dataroomDialogDeleteFileTitle"
 msgstr "Datei loschen"
 
 msgid "dataroomDialogDeleteFolderTitle"
 msgstr "Ordner loschen"
+
+msgid "dataroomDialogRenameDataRoomTitle"
+msgstr "Datenraum umbenennen"
 
 msgid "dataroomDialogRenameFileTitle"
 msgstr "Datei umbenennen"
@@ -110,6 +134,15 @@ msgstr ""
 
 msgid "dataroomEmptyFolderTitle"
 msgstr "Dieser Ordner ist leer"
+
+msgid "dataroomErrorDataRoomNameDuplicate"
+msgstr "Ein Datenraum mit diesem Namen existiert bereits."
+
+msgid "dataroomErrorDataRoomNameEmpty"
+msgstr "Datenraumname darf nicht leer sein."
+
+msgid "dataroomErrorDataRoomNameReserved"
+msgstr "Datenraumname ist nicht erlaubt."
 
 msgid "dataroomErrorFileNameDuplicate"
 msgstr "Eine Datei mit diesem Namen existiert hier bereits."
@@ -132,6 +165,15 @@ msgstr "Ordnername ist nicht erlaubt."
 msgid "dataroomErrorPdfOnly"
 msgstr "Nur PDF-Dateien sind erlaubt."
 
+msgid "dataroomFeedbackDataRoomCreated"
+msgstr "Datenraum erstellt."
+
+msgid "dataroomFeedbackDataRoomDeleted"
+msgstr "Datenraum geloscht."
+
+msgid "dataroomFeedbackDataRoomRenamed"
+msgstr "Datenraum umbenannt."
+
 msgid "dataroomFeedbackFileDeleted"
 msgstr "Datei geloscht."
 
@@ -149,6 +191,9 @@ msgstr "Ordner geloscht."
 
 msgid "dataroomFeedbackFolderRenamed"
 msgstr "Ordner umbenannt."
+
+msgid "dataroomFieldDataRoomName"
+msgstr "Datenraumname"
 
 msgid "dataroomFieldFileName"
 msgstr "Dateiname"
@@ -173,6 +218,12 @@ msgstr "Ein Datenraum wird hier angezeigt, sobald er erstellt wurde."
 
 msgid "dataroomNoDataRoomTitle"
 msgstr "Kein Datenraum verfugbar"
+
+msgid "dataroomSeedDefaultDataRoomName"
+msgstr "Acme Due Diligence Raum"
+
+msgid "dataroomSeedDefaultRootFolderName"
+msgstr "Datenraum"
 
 msgid "dataroomSelectLabel"
 msgstr "Datenraum auswahlen"

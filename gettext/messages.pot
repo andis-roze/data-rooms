@@ -33,10 +33,16 @@ msgstr ""
 msgid "dataroomActionCreate"
 msgstr ""
 
+msgid "dataroomActionCreateDataRoom"
+msgstr ""
+
 msgid "dataroomActionCreateFolder"
 msgstr ""
 
 msgid "dataroomActionDelete"
+msgstr ""
+
+msgid "dataroomActionDeleteDataRoom"
 msgstr ""
 
 msgid "dataroomActionDeleteFile"
@@ -46,6 +52,9 @@ msgid "dataroomActionDeleteFolder"
 msgstr ""
 
 msgid "dataroomActionRename"
+msgstr ""
+
+msgid "dataroomActionRenameDataRoom"
 msgstr ""
 
 msgid "dataroomActionRenameFile"
@@ -75,6 +84,12 @@ msgstr ""
 msgid "dataroomCurrentFolderContentsLabel"
 msgstr ""
 
+msgid "dataroomDeleteDataRoomImpact"
+msgstr ""
+
+msgid "dataroomDeleteDataRoomQuestion"
+msgstr ""
+
 msgid "dataroomDeleteFileQuestion"
 msgstr ""
 
@@ -84,13 +99,22 @@ msgstr ""
 msgid "dataroomDeleteFolderQuestion"
 msgstr ""
 
+msgid "dataroomDialogCreateDataRoomTitle"
+msgstr ""
+
 msgid "dataroomDialogCreateFolderTitle"
+msgstr ""
+
+msgid "dataroomDialogDeleteDataRoomTitle"
 msgstr ""
 
 msgid "dataroomDialogDeleteFileTitle"
 msgstr ""
 
 msgid "dataroomDialogDeleteFolderTitle"
+msgstr ""
+
+msgid "dataroomDialogRenameDataRoomTitle"
 msgstr ""
 
 msgid "dataroomDialogRenameFileTitle"
@@ -103,6 +127,15 @@ msgid "dataroomEmptyFolderBody"
 msgstr ""
 
 msgid "dataroomEmptyFolderTitle"
+msgstr ""
+
+msgid "dataroomErrorDataRoomNameDuplicate"
+msgstr ""
+
+msgid "dataroomErrorDataRoomNameEmpty"
+msgstr ""
+
+msgid "dataroomErrorDataRoomNameReserved"
 msgstr ""
 
 msgid "dataroomErrorFileNameDuplicate"
@@ -126,6 +159,15 @@ msgstr ""
 msgid "dataroomErrorPdfOnly"
 msgstr ""
 
+msgid "dataroomFeedbackDataRoomCreated"
+msgstr ""
+
+msgid "dataroomFeedbackDataRoomDeleted"
+msgstr ""
+
+msgid "dataroomFeedbackDataRoomRenamed"
+msgstr ""
+
 msgid "dataroomFeedbackFileDeleted"
 msgstr ""
 
@@ -142,6 +184,9 @@ msgid "dataroomFeedbackFolderDeleted"
 msgstr ""
 
 msgid "dataroomFeedbackFolderRenamed"
+msgstr ""
+
+msgid "dataroomFieldDataRoomName"
 msgstr ""
 
 msgid "dataroomFieldFileName"
@@ -166,6 +211,12 @@ msgid "dataroomNoDataRoomBody"
 msgstr ""
 
 msgid "dataroomNoDataRoomTitle"
+msgstr ""
+
+msgid "dataroomSeedDefaultDataRoomName"
+msgstr ""
+
+msgid "dataroomSeedDefaultRootFolderName"
 msgstr ""
 
 msgid "dataroomSelectLabel"

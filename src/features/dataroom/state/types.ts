@@ -30,6 +30,28 @@ export type DataRoomAction =
       }
     }
   | {
+      type: 'dataroom/createDataRoom'
+      payload: {
+        dataRoomId: NodeId
+        rootFolderId: NodeId
+        dataRoomName: string
+        rootFolderName: string
+      }
+    }
+  | {
+      type: 'dataroom/renameDataRoom'
+      payload: {
+        dataRoomId: NodeId
+        dataRoomName: string
+      }
+    }
+  | {
+      type: 'dataroom/deleteDataRoom'
+      payload: {
+        dataRoomId: NodeId
+      }
+    }
+  | {
       type: 'dataroom/createFolder'
       payload: {
         dataRoomId: NodeId

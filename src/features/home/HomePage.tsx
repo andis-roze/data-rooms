@@ -23,14 +23,19 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import {
+  getDataRoomDeleteSummary,
+  getDataRoomNameValidationError,
   getFileNameValidationError,
   getFolderDeleteSummary,
   getFolderNameValidationError,
   getPdfUploadValidationError,
+  hasDuplicateDataRoomName,
   hasDuplicateFileName,
   hasDuplicateFolderName,
+  normalizeNodeName,
   preparePdfUpload,
   type DataRoomState,
+  type DataRoom,
   type FileNode,
   type Folder,
   type NodeId,
@@ -56,15 +61,20 @@ interface FolderContentItem {
 const SORT_PREFERENCE_STORAGE_KEY = 'dataroom/view-preferences'
 let inMemorySortPreference: SortMode = 'name-asc'
 
-let fallbackIdCounter = 0
+function fallbackUuidV4(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16)
+    const value = char === 'x' ? random : (random & 0x3) | 0x8
+    return value.toString(16)
+  })
+}
 
-function generateNodeId(prefix: 'folder' | 'file'): NodeId {
+function generateNodeId(prefix: 'folder' | 'file' | 'dataroom'): NodeId {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return `${prefix}-${crypto.randomUUID()}`
   }
 
-  fallbackIdCounter += 1
-  return `${prefix}-${fallbackIdCounter}`
+  return `${prefix}-${fallbackUuidV4()}`
 }
 
 function isDefined<T>(value: T | undefined): value is T {
@@ -224,6 +234,56 @@ function FolderTreeNode({
   )
 }
 
+interface DataRoomTreeNodeProps {
+  dataRoom: DataRoom
+  state: DataRoomState
+  selectedDataRoomId: NodeId | null
+  selectedFolderId: NodeId | null
+  onSelectDataRoom: (dataRoomId: NodeId) => void
+  onSelectFolder: (folderId: NodeId) => void
+  renderDataRoomName: (name: string) => string
+  renderFolderName: (name: string) => string
+}
+
+function DataRoomTreeNode({
+  dataRoom,
+  state,
+  selectedDataRoomId,
+  selectedFolderId,
+  onSelectDataRoom,
+  onSelectFolder,
+  renderDataRoomName,
+  renderFolderName,
+}: DataRoomTreeNodeProps) {
+  const rootFolder = state.foldersById[dataRoom.rootFolderId]
+  const rootChildren = rootFolder ? getFolderChildren(state, rootFolder) : []
+  const dataRoomSelected = selectedDataRoomId === dataRoom.id
+  const rootSelected = selectedFolderId === dataRoom.rootFolderId
+
+  return (
+    <>
+      <ListItemButton
+        selected={dataRoomSelected && rootSelected}
+        onClick={() => onSelectDataRoom(dataRoom.id)}
+        sx={{ pl: 1.5 }}
+      >
+        <ListItemText primary={renderDataRoomName(dataRoom.name)} primaryTypographyProps={{ fontWeight: 700, noWrap: true }} />
+      </ListItemButton>
+      {rootChildren.map((childFolder) => (
+        <FolderTreeNode
+          key={childFolder.id}
+          folderId={childFolder.id}
+          state={state}
+          selectedFolderId={selectedFolderId}
+          onSelectFolder={onSelectFolder}
+          renderFolderName={renderFolderName}
+          depth={1}
+        />
+      ))}
+    </>
+  )
+}
+
 export function HomePage() {
   const { t } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
@@ -233,6 +293,9 @@ export function HomePage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [createDataRoomDialogOpen, setCreateDataRoomDialogOpen] = useState(false)
+  const [renameDataRoomDialogOpen, setRenameDataRoomDialogOpen] = useState(false)
+  const [deleteDataRoomDialogOpen, setDeleteDataRoomDialogOpen] = useState(false)
 
   const [renameFileDialogOpen, setRenameFileDialogOpen] = useState(false)
   const [deleteFileDialogOpen, setDeleteFileDialogOpen] = useState(false)
@@ -240,6 +303,8 @@ export function HomePage() {
 
   const [folderNameDraft, setFolderNameDraft] = useState('')
   const [folderNameError, setFolderNameError] = useState<string | null>(null)
+  const [dataRoomNameDraft, setDataRoomNameDraft] = useState('')
+  const [dataRoomNameError, setDataRoomNameError] = useState<string | null>(null)
 
   const [fileNameDraft, setFileNameDraft] = useState('')
   const [fileNameError, setFileNameError] = useState<string | null>(null)
@@ -249,29 +314,179 @@ export function HomePage() {
   const [sortMode, setSortMode] = useState<SortMode>(() => loadSortModePreference())
   const resolveDisplayName = (value: string) =>
     value.startsWith('i18n:') ? t(value.slice(5)) : value
+  const hasDuplicateDataRoomDisplayName = (candidateName: string, excludeDataRoomId?: NodeId) => {
+    const normalizedCandidate = normalizeNodeName(candidateName)
+
+    return entities.dataRoomOrder.some((dataRoomId) => {
+      if (excludeDataRoomId && dataRoomId === excludeDataRoomId) {
+        return false
+      }
+
+      const dataRoom = entities.dataRoomsById[dataRoomId]
+
+      if (!dataRoom) {
+        return false
+      }
+
+      return normalizeNodeName(resolveDisplayName(dataRoom.name)) === normalizedCandidate
+    })
+  }
 
   const dataRooms = entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
+
+  const activeDataRoom =
+    (selectedDataRoomId ? entities.dataRoomsById[selectedDataRoomId] : undefined) ?? dataRooms[0]
+  const rootFolder = activeDataRoom ? entities.foldersById[activeDataRoom.rootFolderId] : null
+  const canDeleteActiveDataRoom = Boolean(activeDataRoom)
+  const dataRoomDeleteSummary = activeDataRoom
+    ? getDataRoomDeleteSummary(entities, activeDataRoom.id)
+    : { folderCount: 0, fileCount: 0 }
+
+  const openCreateDataRoomDialog = () => {
+    setDataRoomNameDraft('')
+    setDataRoomNameError(null)
+    setCreateDataRoomDialogOpen(true)
+  }
+
+  const openRenameDataRoomDialog = () => {
+    if (!activeDataRoom) {
+      return
+    }
+
+    setDataRoomNameDraft(resolveDisplayName(activeDataRoom.name))
+    setDataRoomNameError(null)
+    setRenameDataRoomDialogOpen(true)
+  }
+
+  const handleCreateDataRoom = () => {
+    const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
+
+    if (validationError) {
+      setDataRoomNameError(
+        validationError === 'empty' ? t('dataroomErrorDataRoomNameEmpty') : t('dataroomErrorDataRoomNameReserved'),
+      )
+      return
+    }
+
+    if (hasDuplicateDataRoomDisplayName(dataRoomNameDraft) || hasDuplicateDataRoomName(entities, dataRoomNameDraft)) {
+      setDataRoomNameError(t('dataroomErrorDataRoomNameDuplicate'))
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/createDataRoom',
+      payload: {
+        dataRoomId: generateNodeId('dataroom'),
+        rootFolderId: generateNodeId('folder'),
+        dataRoomName: dataRoomNameDraft,
+        rootFolderName: t('dataroomSeedDefaultRootFolderName'),
+      },
+    })
+
+    setCreateDataRoomDialogOpen(false)
+    setFeedback({ message: t('dataroomFeedbackDataRoomCreated'), severity: 'success' })
+  }
+
+  const handleRenameDataRoom = () => {
+    if (!activeDataRoom) {
+      return
+    }
+
+    const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
+
+    if (validationError) {
+      setDataRoomNameError(
+        validationError === 'empty' ? t('dataroomErrorDataRoomNameEmpty') : t('dataroomErrorDataRoomNameReserved'),
+      )
+      return
+    }
+
+    if (
+      hasDuplicateDataRoomDisplayName(dataRoomNameDraft, activeDataRoom.id) ||
+      hasDuplicateDataRoomName(entities, dataRoomNameDraft, activeDataRoom.id)
+    ) {
+      setDataRoomNameError(t('dataroomErrorDataRoomNameDuplicate'))
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/renameDataRoom',
+      payload: {
+        dataRoomId: activeDataRoom.id,
+        dataRoomName: dataRoomNameDraft,
+      },
+    })
+
+    setRenameDataRoomDialogOpen(false)
+    setFeedback({ message: t('dataroomFeedbackDataRoomRenamed'), severity: 'success' })
+  }
+
+  const handleDeleteDataRoom = () => {
+    if (!activeDataRoom) {
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/deleteDataRoom',
+      payload: {
+        dataRoomId: activeDataRoom.id,
+      },
+    })
+
+    setDeleteDataRoomDialogOpen(false)
+    setFeedback({ message: t('dataroomFeedbackDataRoomDeleted'), severity: 'success' })
+  }
 
   if (dataRooms.length === 0) {
     return (
       <Container component="main" maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 4 }}>
-          <Typography variant="h1" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' } }}>
-            {t('dataroomNoDataRoomTitle')}
-          </Typography>
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            {t('dataroomNoDataRoomBody')}
-          </Typography>
+          <Stack spacing={2}>
+            <Typography variant="h1" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' } }}>
+              {t('dataroomNoDataRoomTitle')}
+            </Typography>
+            <Typography color="text.secondary">{t('dataroomNoDataRoomBody')}</Typography>
+            <Button variant="contained" onClick={openCreateDataRoomDialog}>
+              {t('dataroomActionCreateDataRoom')}
+            </Button>
+          </Stack>
         </Paper>
+
+        <Dialog open={createDataRoomDialogOpen} onClose={() => setCreateDataRoomDialogOpen(false)} fullWidth maxWidth="xs">
+          <DialogTitle>{t('dataroomDialogCreateDataRoomTitle')}</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              fullWidth
+              label={t('dataroomFieldDataRoomName')}
+              value={dataRoomNameDraft}
+              onChange={(event) => {
+                setDataRoomNameDraft(event.target.value)
+                setDataRoomNameError(null)
+              }}
+              error={Boolean(dataRoomNameError)}
+              helperText={dataRoomNameError ?? ' '}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  handleCreateDataRoom()
+                }
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCreateDataRoomDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
+            <Button onClick={handleCreateDataRoom} variant="contained">
+              {t('dataroomActionCreate')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     )
   }
 
-  const activeDataRoom =
-    (selectedDataRoomId ? entities.dataRoomsById[selectedDataRoomId] : undefined) ?? dataRooms[0]
-  const rootFolder = entities.foldersById[activeDataRoom.rootFolderId]
-
-  if (!rootFolder) {
+  if (!rootFolder || !activeDataRoom) {
     return (
       <Container component="main" maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 4 }}>
@@ -559,24 +774,23 @@ export function HomePage() {
             {t('dataroomSidebarTitle')}
           </Typography>
 
-          <FormControl fullWidth size="small">
-            <Select
-              value={activeDataRoom.id}
-              onChange={(event) => {
-                dispatch({
-                  type: 'dataroom/selectDataRoom',
-                  payload: { dataRoomId: event.target.value },
-                })
-              }}
-              aria-label={t('dataroomSelectLabel')}
+          <Stack direction={{ xs: 'column', sm: 'row', md: 'column' }} spacing={1} sx={{ mb: 1.5 }}>
+            <Button size="small" variant="contained" onClick={openCreateDataRoomDialog}>
+              {t('dataroomActionCreateDataRoom')}
+            </Button>
+            <Button size="small" variant="outlined" onClick={openRenameDataRoomDialog}>
+              {t('dataroomActionRenameDataRoom')}
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              disabled={!canDeleteActiveDataRoom}
+              onClick={() => setDeleteDataRoomDialogOpen(true)}
             >
-              {dataRooms.map((dataRoom) => (
-                <MenuItem key={dataRoom.id} value={dataRoom.id}>
-                  {resolveDisplayName(dataRoom.name)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {t('dataroomActionDeleteDataRoom')}
+            </Button>
+          </Stack>
 
           <Divider sx={{ my: 2 }} />
 
@@ -584,15 +798,23 @@ export function HomePage() {
             {t('dataroomFolderTreeTitle')}
           </Typography>
           <List dense disablePadding aria-label={t('dataroomFolderTreeTitle')}>
-            <FolderTreeNode
-              folderId={rootFolder.id}
-              state={entities}
-              selectedFolderId={activeFolder.id}
-              onSelectFolder={(folderId) => {
-                dispatch({ type: 'dataroom/selectFolder', payload: { folderId } })
-              }}
-              renderFolderName={resolveDisplayName}
-            />
+            {dataRooms.map((dataRoom) => (
+              <DataRoomTreeNode
+                key={dataRoom.id}
+                dataRoom={dataRoom}
+                state={entities}
+                selectedDataRoomId={selectedDataRoomId}
+                selectedFolderId={selectedFolderId}
+                onSelectDataRoom={(dataRoomId) => {
+                  dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId } })
+                }}
+                onSelectFolder={(folderId) => {
+                  dispatch({ type: 'dataroom/selectFolder', payload: { folderId } })
+                }}
+                renderDataRoomName={resolveDisplayName}
+                renderFolderName={resolveDisplayName}
+              />
+            ))}
           </List>
         </Box>
 
@@ -729,6 +951,87 @@ export function HomePage() {
           </Stack>
         </Box>
       </Paper>
+
+      <Dialog open={createDataRoomDialogOpen} onClose={() => setCreateDataRoomDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>{t('dataroomDialogCreateDataRoomTitle')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            label={t('dataroomFieldDataRoomName')}
+            value={dataRoomNameDraft}
+            onChange={(event) => {
+              setDataRoomNameDraft(event.target.value)
+              setDataRoomNameError(null)
+            }}
+            error={Boolean(dataRoomNameError)}
+            helperText={dataRoomNameError ?? ' '}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleCreateDataRoom()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateDataRoomDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
+          <Button onClick={handleCreateDataRoom} variant="contained">
+            {t('dataroomActionCreate')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={renameDataRoomDialogOpen} onClose={() => setRenameDataRoomDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>{t('dataroomDialogRenameDataRoomTitle')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            label={t('dataroomFieldDataRoomName')}
+            value={dataRoomNameDraft}
+            onChange={(event) => {
+              setDataRoomNameDraft(event.target.value)
+              setDataRoomNameError(null)
+            }}
+            error={Boolean(dataRoomNameError)}
+            helperText={dataRoomNameError ?? ' '}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleRenameDataRoom()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenameDataRoomDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
+          <Button onClick={handleRenameDataRoom} variant="contained">
+            {t('dataroomActionRename')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDataRoomDialogOpen} onClose={() => setDeleteDataRoomDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>{t('dataroomDialogDeleteDataRoomTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography>{t('dataroomDeleteDataRoomQuestion', { name: resolveDisplayName(activeDataRoom.name) })}</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            {t('dataroomDeleteDataRoomImpact', {
+              folderCount: dataRoomDeleteSummary.folderCount,
+              fileCount: dataRoomDeleteSummary.fileCount,
+            })}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDataRoomDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteDataRoom}>
+            {t('dataroomActionDelete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogCreateFolderTitle')}</DialogTitle>

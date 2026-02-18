@@ -28,6 +28,32 @@ export function getFileNameValidationError(name: string): NodeNameValidationErro
   return getNodeNameValidationError(name)
 }
 
+export function getDataRoomNameValidationError(name: string): NodeNameValidationError | null {
+  return getNodeNameValidationError(name)
+}
+
+export function hasDuplicateDataRoomName(
+  state: DataRoomState,
+  dataRoomName: string,
+  excludeDataRoomId?: NodeId,
+): boolean {
+  const normalizedCandidate = normalizeNodeName(dataRoomName)
+
+  return state.dataRoomOrder.some((dataRoomId) => {
+    if (excludeDataRoomId && dataRoomId === excludeDataRoomId) {
+      return false
+    }
+
+    const dataRoom = state.dataRoomsById[dataRoomId]
+
+    if (!dataRoom) {
+      return false
+    }
+
+    return normalizeNodeName(dataRoom.name) === normalizedCandidate
+  })
+}
+
 export function hasDuplicateFolderName(
   state: DataRoomState,
   parentFolderId: NodeId | null,
