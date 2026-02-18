@@ -24,6 +24,177 @@ msgstr ""
 msgid "cartItems"
 msgstr ""
 
+msgid "dataroomActionCancel"
+msgstr ""
+
+msgid "dataroomActionClose"
+msgstr ""
+
+msgid "dataroomActionCreate"
+msgstr ""
+
+msgid "dataroomActionCreateFolder"
+msgstr ""
+
+msgid "dataroomActionDelete"
+msgstr ""
+
+msgid "dataroomActionDeleteFile"
+msgstr ""
+
+msgid "dataroomActionDeleteFolder"
+msgstr ""
+
+msgid "dataroomActionRename"
+msgstr ""
+
+msgid "dataroomActionRenameFile"
+msgstr ""
+
+msgid "dataroomActionRenameFolder"
+msgstr ""
+
+msgid "dataroomActionUploadPdf"
+msgstr ""
+
+msgid "dataroomActionViewFile"
+msgstr ""
+
+msgid "dataroomAriaDeleteFile"
+msgstr ""
+
+msgid "dataroomAriaRenameFile"
+msgstr ""
+
+msgid "dataroomAriaViewFile"
+msgstr ""
+
+msgid "dataroomBreadcrumbsLabel"
+msgstr ""
+
+msgid "dataroomCurrentFolderContentsLabel"
+msgstr ""
+
+msgid "dataroomDeleteFileQuestion"
+msgstr ""
+
+msgid "dataroomDeleteFolderImpact"
+msgstr ""
+
+msgid "dataroomDeleteFolderQuestion"
+msgstr ""
+
+msgid "dataroomDialogCreateFolderTitle"
+msgstr ""
+
+msgid "dataroomDialogDeleteFileTitle"
+msgstr ""
+
+msgid "dataroomDialogDeleteFolderTitle"
+msgstr ""
+
+msgid "dataroomDialogRenameFileTitle"
+msgstr ""
+
+msgid "dataroomDialogRenameFolderTitle"
+msgstr ""
+
+msgid "dataroomEmptyFolderBody"
+msgstr ""
+
+msgid "dataroomEmptyFolderTitle"
+msgstr ""
+
+msgid "dataroomErrorFileNameDuplicate"
+msgstr ""
+
+msgid "dataroomErrorFileNameEmpty"
+msgstr ""
+
+msgid "dataroomErrorFileNameReserved"
+msgstr ""
+
+msgid "dataroomErrorFolderNameDuplicate"
+msgstr ""
+
+msgid "dataroomErrorFolderNameEmpty"
+msgstr ""
+
+msgid "dataroomErrorFolderNameReserved"
+msgstr ""
+
+msgid "dataroomErrorPdfOnly"
+msgstr ""
+
+msgid "dataroomFeedbackFileDeleted"
+msgstr ""
+
+msgid "dataroomFeedbackFileRenamed"
+msgstr ""
+
+msgid "dataroomFeedbackFileUploaded"
+msgstr ""
+
+msgid "dataroomFeedbackFolderCreated"
+msgstr ""
+
+msgid "dataroomFeedbackFolderDeleted"
+msgstr ""
+
+msgid "dataroomFeedbackFolderRenamed"
+msgstr ""
+
+msgid "dataroomFieldFileName"
+msgstr ""
+
+msgid "dataroomFieldFolderName"
+msgstr ""
+
+msgid "dataroomFilePreviewTitle"
+msgstr ""
+
+msgid "dataroomFilePreviewUnavailable"
+msgstr ""
+
+msgid "dataroomFolderItemType"
+msgstr ""
+
+msgid "dataroomFolderTreeTitle"
+msgstr ""
+
+msgid "dataroomNoDataRoomBody"
+msgstr ""
+
+msgid "dataroomNoDataRoomTitle"
+msgstr ""
+
+msgid "dataroomSelectLabel"
+msgstr ""
+
+msgid "dataroomSidebarTitle"
+msgstr ""
+
+msgid "dataroomSortLabel"
+msgstr ""
+
+msgid "dataroomSortNameAsc"
+msgstr ""
+
+msgid "dataroomSortNameDesc"
+msgstr ""
+
+msgid "dataroomSortType"
+msgstr ""
+
+msgid "dataroomSortUpdatedAsc"
+msgstr ""
+
+msgid "dataroomSortUpdatedDesc"
+msgstr ""
+
+msgid "dataroomStructureIncomplete"
+msgstr ""
+
 msgid "featureOneBody"
 msgstr ""
 

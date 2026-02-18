@@ -12,7 +12,7 @@ export function createSeedDataRoomState(now: number = Date.now()): DataRoomState
     dataRoomsById: {
       [dataRoomId]: {
         id: dataRoomId,
-        name: 'Acme Due Diligence Room',
+        name: 'i18n:dataroomSeedDefaultDataRoomName',
         rootFolderId,
         createdAt: now,
         updatedAt: now,
@@ -23,7 +23,7 @@ export function createSeedDataRoomState(now: number = Date.now()): DataRoomState
         id: rootFolderId,
         dataRoomId,
         parentFolderId: null,
-        name: 'Data Room',
+        name: 'i18n:dataroomSeedDefaultRootFolderName',
         childFolderIds: [],
         fileIds: [],
         createdAt: now,

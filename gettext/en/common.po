@@ -28,6 +28,177 @@ msgstr ""
 "{count, plural, =0 {Your cart is empty.} one {You have # item in your "
 "cart.} other {You have # items in your cart.}}"
 
+msgid "dataroomActionCancel"
+msgstr "Cancel"
+
+msgid "dataroomActionClose"
+msgstr "Close"
+
+msgid "dataroomActionCreate"
+msgstr "Create"
+
+msgid "dataroomActionCreateFolder"
+msgstr "Create folder"
+
+msgid "dataroomActionDelete"
+msgstr "Delete"
+
+msgid "dataroomActionDeleteFile"
+msgstr "Delete"
+
+msgid "dataroomActionDeleteFolder"
+msgstr "Delete folder"
+
+msgid "dataroomActionRename"
+msgstr "Rename"
+
+msgid "dataroomActionRenameFile"
+msgstr "Rename"
+
+msgid "dataroomActionRenameFolder"
+msgstr "Rename folder"
+
+msgid "dataroomActionUploadPdf"
+msgstr "Upload PDF"
+
+msgid "dataroomActionViewFile"
+msgstr "View"
+
+msgid "dataroomAriaDeleteFile"
+msgstr "Delete file {name}"
+
+msgid "dataroomAriaRenameFile"
+msgstr "Rename file {name}"
+
+msgid "dataroomAriaViewFile"
+msgstr "View file {name}"
+
+msgid "dataroomBreadcrumbsLabel"
+msgstr "Folder breadcrumbs"
+
+msgid "dataroomCurrentFolderContentsLabel"
+msgstr "Current folder contents"
+
+msgid "dataroomDeleteFileQuestion"
+msgstr "Delete \"{name}\"?"
+
+msgid "dataroomDeleteFolderImpact"
+msgstr "This will remove {folderCount} folder(s) and {fileCount} file(s)."
+
+msgid "dataroomDeleteFolderQuestion"
+msgstr "Delete \"{name}\" and all nested content?"
+
+msgid "dataroomDialogCreateFolderTitle"
+msgstr "Create folder"
+
+msgid "dataroomDialogDeleteFileTitle"
+msgstr "Delete file"
+
+msgid "dataroomDialogDeleteFolderTitle"
+msgstr "Delete folder"
+
+msgid "dataroomDialogRenameFileTitle"
+msgstr "Rename file"
+
+msgid "dataroomDialogRenameFolderTitle"
+msgstr "Rename folder"
+
+msgid "dataroomEmptyFolderBody"
+msgstr "Create a folder or upload a PDF to start organizing your Data Room."
+
+msgid "dataroomEmptyFolderTitle"
+msgstr "This folder is empty"
+
+msgid "dataroomErrorFileNameDuplicate"
+msgstr "File with this name already exists in this location."
+
+msgid "dataroomErrorFileNameEmpty"
+msgstr "File name cannot be empty."
+
+msgid "dataroomErrorFileNameReserved"
+msgstr "File name is not allowed."
+
+msgid "dataroomErrorFolderNameDuplicate"
+msgstr "Folder with this name already exists in this location."
+
+msgid "dataroomErrorFolderNameEmpty"
+msgstr "Folder name cannot be empty."
+
+msgid "dataroomErrorFolderNameReserved"
+msgstr "Folder name is not allowed."
+
+msgid "dataroomErrorPdfOnly"
+msgstr "Only PDF files are allowed."
+
+msgid "dataroomFeedbackFileDeleted"
+msgstr "File deleted."
+
+msgid "dataroomFeedbackFileRenamed"
+msgstr "File renamed."
+
+msgid "dataroomFeedbackFileUploaded"
+msgstr "PDF uploaded."
+
+msgid "dataroomFeedbackFolderCreated"
+msgstr "Folder created."
+
+msgid "dataroomFeedbackFolderDeleted"
+msgstr "Folder deleted."
+
+msgid "dataroomFeedbackFolderRenamed"
+msgstr "Folder renamed."
+
+msgid "dataroomFieldFileName"
+msgstr "File name"
+
+msgid "dataroomFieldFolderName"
+msgstr "Folder name"
+
+msgid "dataroomFilePreviewTitle"
+msgstr "File preview"
+
+msgid "dataroomFilePreviewUnavailable"
+msgstr "File preview is unavailable in this environment."
+
+msgid "dataroomFolderItemType"
+msgstr "Folder"
+
+msgid "dataroomFolderTreeTitle"
+msgstr "Folder tree"
+
+msgid "dataroomNoDataRoomBody"
+msgstr "A Data Room will appear here once it is created."
+
+msgid "dataroomNoDataRoomTitle"
+msgstr "No Data Room available"
+
+msgid "dataroomSelectLabel"
+msgstr "Select Data Room"
+
+msgid "dataroomSidebarTitle"
+msgstr "Data Rooms"
+
+msgid "dataroomSortLabel"
+msgstr "Sort contents"
+
+msgid "dataroomSortNameAsc"
+msgstr "Name (A-Z)"
+
+msgid "dataroomSortNameDesc"
+msgstr "Name (Z-A)"
+
+msgid "dataroomSortType"
+msgstr "Type (folders first)"
+
+msgid "dataroomSortUpdatedAsc"
+msgstr "Modified (oldest)"
+
+msgid "dataroomSortUpdatedDesc"
+msgstr "Modified (newest)"
+
+msgid "dataroomStructureIncomplete"
+msgstr "Data Room structure is incomplete"
+
 msgid "featureOneBody"
 msgstr "Vite, React, and strict TypeScript configured for fast iteration."
 

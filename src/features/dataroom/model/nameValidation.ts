@@ -1,29 +1,31 @@
 import type { DataRoomState, NodeId } from './types'
 
+export type NodeNameValidationError = 'empty' | 'reserved'
+
 export function normalizeNodeName(name: string): string {
   return name.trim().toLocaleLowerCase()
 }
 
-function getNodeNameValidationError(name: string, nodeLabel: string): string | null {
+function getNodeNameValidationError(name: string): NodeNameValidationError | null {
   const trimmed = name.trim()
 
   if (!trimmed) {
-    return `${nodeLabel} name cannot be empty.`
+    return 'empty'
   }
 
   if (trimmed === '.' || trimmed === '..') {
-    return `${nodeLabel} name is not allowed.`
+    return 'reserved'
   }
 
   return null
 }
 
-export function getFolderNameValidationError(name: string): string | null {
-  return getNodeNameValidationError(name, 'Folder')
+export function getFolderNameValidationError(name: string): NodeNameValidationError | null {
+  return getNodeNameValidationError(name)
 }
 
-export function getFileNameValidationError(name: string): string | null {
-  return getNodeNameValidationError(name, 'File')
+export function getFileNameValidationError(name: string): NodeNameValidationError | null {
+  return getNodeNameValidationError(name)
 }
 
 export function hasDuplicateFolderName(

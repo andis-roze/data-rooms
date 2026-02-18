@@ -21,6 +21,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { useTranslation } from 'react-i18next'
 import {
   getFileNameValidationError,
   getFolderDeleteSummary,
@@ -40,6 +41,20 @@ interface FeedbackState {
   message: string
   severity: 'success' | 'error'
 }
+
+type SortMode = 'name-asc' | 'name-desc' | 'updated-desc' | 'updated-asc' | 'type'
+
+interface FolderContentItem {
+  kind: 'folder' | 'file'
+  id: NodeId
+  name: string
+  updatedAt: number
+  folder?: Folder
+  file?: FileNode
+}
+
+const SORT_PREFERENCE_STORAGE_KEY = 'dataroom/view-preferences'
+let inMemorySortPreference: SortMode = 'name-asc'
 
 let fallbackIdCounter = 0
 
@@ -66,6 +81,50 @@ function getFolderChildren(state: DataRoomState, folder: Folder): Folder[] {
 
 function getFileChildren(state: DataRoomState, folder: Folder): FileNode[] {
   return folder.fileIds.map((id) => state.filesById[id]).filter(isDefined).sort(byNameAsc)
+}
+
+function loadSortModePreference(): SortMode {
+  if (typeof window === 'undefined') {
+    return inMemorySortPreference
+  }
+
+  try {
+    const raw = window.localStorage.getItem(SORT_PREFERENCE_STORAGE_KEY)
+
+    if (!raw) {
+      return inMemorySortPreference
+    }
+
+    const parsed = JSON.parse(raw) as { sortMode?: string }
+
+    if (
+      parsed.sortMode === 'name-asc' ||
+      parsed.sortMode === 'name-desc' ||
+      parsed.sortMode === 'updated-desc' ||
+      parsed.sortMode === 'updated-asc' ||
+      parsed.sortMode === 'type'
+    ) {
+      return parsed.sortMode
+    }
+  } catch {
+    return inMemorySortPreference
+  }
+
+  return inMemorySortPreference
+}
+
+function saveSortModePreference(sortMode: SortMode): void {
+  inMemorySortPreference = sortMode
+
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(SORT_PREFERENCE_STORAGE_KEY, JSON.stringify({ sortMode }))
+  } catch {
+    // Ignore persistence failures and keep in-memory preference.
+  }
 }
 
 function buildFolderPath(state: DataRoomState, folderId: NodeId): Folder[] {
@@ -112,6 +171,7 @@ interface FolderTreeNodeProps {
   state: DataRoomState
   selectedFolderId: NodeId | null
   onSelectFolder: (folderId: NodeId) => void
+  renderFolderName: (name: string) => string
   depth?: number
   visited?: Set<NodeId>
 }
@@ -121,6 +181,7 @@ function FolderTreeNode({
   state,
   selectedFolderId,
   onSelectFolder,
+  renderFolderName,
   depth = 0,
   visited = new Set<NodeId>(),
 }: FolderTreeNodeProps) {
@@ -145,7 +206,7 @@ function FolderTreeNode({
         onClick={() => onSelectFolder(folder.id)}
         sx={{ pl: 2 + depth * 2 }}
       >
-        <ListItemText primary={folder.name} primaryTypographyProps={{ noWrap: true }} />
+        <ListItemText primary={renderFolderName(folder.name)} primaryTypographyProps={{ noWrap: true }} />
       </ListItemButton>
       {children.map((childFolder) => (
         <FolderTreeNode
@@ -154,6 +215,7 @@ function FolderTreeNode({
           state={state}
           selectedFolderId={selectedFolderId}
           onSelectFolder={onSelectFolder}
+          renderFolderName={renderFolderName}
           depth={depth + 1}
           visited={nextVisited}
         />
@@ -163,6 +225,7 @@ function FolderTreeNode({
 }
 
 export function HomePage() {
+  const { t } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
@@ -183,6 +246,9 @@ export function HomePage() {
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
 
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [sortMode, setSortMode] = useState<SortMode>(() => loadSortModePreference())
+  const resolveDisplayName = (value: string) =>
+    value.startsWith('i18n:') ? t(value.slice(5)) : value
 
   const dataRooms = entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
 
@@ -191,10 +257,10 @@ export function HomePage() {
       <Container component="main" maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 4 }}>
           <Typography variant="h1" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' } }}>
-            No Data Room available
+            {t('dataroomNoDataRoomTitle')}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
-            A Data Room will appear here once it is created.
+            {t('dataroomNoDataRoomBody')}
           </Typography>
         </Paper>
       </Container>
@@ -210,7 +276,7 @@ export function HomePage() {
       <Container component="main" maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 4 }}>
           <Typography variant="h1" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' } }}>
-            Data Room structure is incomplete
+            {t('dataroomStructureIncomplete')}
           </Typography>
         </Paper>
       </Container>
@@ -222,6 +288,55 @@ export function HomePage() {
   const breadcrumbs = buildFolderPath(entities, activeFolder.id)
   const childFolders = getFolderChildren(entities, activeFolder)
   const childFiles = getFileChildren(entities, activeFolder)
+  const contentItems: FolderContentItem[] = [
+    ...childFolders.map((folder) => ({
+      kind: 'folder' as const,
+      id: folder.id,
+      name: folder.name,
+      updatedAt: folder.updatedAt,
+      folder,
+    })),
+    ...childFiles.map((file) => ({
+      kind: 'file' as const,
+      id: file.id,
+      name: file.name,
+      updatedAt: file.updatedAt,
+      file,
+    })),
+  ]
+  const sortedContentItems = [...contentItems].sort((a, b) => {
+    const compareName = () => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+
+    if (sortMode === 'type') {
+      if (a.kind !== b.kind) {
+        return a.kind === 'folder' ? -1 : 1
+      }
+
+      return compareName()
+    }
+
+    if (sortMode === 'name-asc') {
+      return compareName()
+    }
+
+    if (sortMode === 'name-desc') {
+      return compareName() * -1
+    }
+
+    if (sortMode === 'updated-asc') {
+      if (a.updatedAt === b.updatedAt) {
+        return compareName()
+      }
+
+      return a.updatedAt - b.updatedAt
+    }
+
+    if (a.updatedAt === b.updatedAt) {
+      return compareName()
+    }
+
+    return b.updatedAt - a.updatedAt
+  })
 
   const canDeleteActiveFolder = activeFolder.id !== rootFolder.id
   const deleteSummary = getFolderDeleteSummary(entities, activeFolder.id)
@@ -234,7 +349,7 @@ export function HomePage() {
   }
 
   const openRenameDialog = () => {
-    setFolderNameDraft(activeFolder.name)
+    setFolderNameDraft(resolveDisplayName(activeFolder.name))
     setFolderNameError(null)
     setRenameDialogOpen(true)
   }
@@ -260,12 +375,14 @@ export function HomePage() {
     const validationError = getFolderNameValidationError(folderNameDraft)
 
     if (validationError) {
-      setFolderNameError(validationError)
+      setFolderNameError(
+        validationError === 'empty' ? t('dataroomErrorFolderNameEmpty') : t('dataroomErrorFolderNameReserved'),
+      )
       return
     }
 
     if (hasDuplicateFolderName(entities, activeFolder.id, folderNameDraft)) {
-      setFolderNameError('Folder with this name already exists in this location.')
+      setFolderNameError(t('dataroomErrorFolderNameDuplicate'))
       return
     }
 
@@ -280,19 +397,21 @@ export function HomePage() {
     })
 
     setCreateDialogOpen(false)
-    setFeedback({ message: 'Folder created.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFolderCreated'), severity: 'success' })
   }
 
   const handleRenameFolder = () => {
     const validationError = getFolderNameValidationError(folderNameDraft)
 
     if (validationError) {
-      setFolderNameError(validationError)
+      setFolderNameError(
+        validationError === 'empty' ? t('dataroomErrorFolderNameEmpty') : t('dataroomErrorFolderNameReserved'),
+      )
       return
     }
 
     if (hasDuplicateFolderName(entities, activeFolder.parentFolderId, folderNameDraft, activeFolder.id)) {
-      setFolderNameError('Folder with this name already exists in this location.')
+      setFolderNameError(t('dataroomErrorFolderNameDuplicate'))
       return
     }
 
@@ -305,7 +424,7 @@ export function HomePage() {
     })
 
     setRenameDialogOpen(false)
-    setFeedback({ message: 'Folder renamed.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFolderRenamed'), severity: 'success' })
   }
 
   const handleDeleteFolder = () => {
@@ -317,7 +436,7 @@ export function HomePage() {
     })
 
     setDeleteDialogOpen(false)
-    setFeedback({ message: 'Folder deleted.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFolderDeleted'), severity: 'success' })
   }
 
   const handleUploadInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -330,7 +449,10 @@ export function HomePage() {
     const uploadError = getPdfUploadValidationError(selectedFile)
 
     if (uploadError) {
-      setFeedback({ message: uploadError, severity: 'error' })
+      setFeedback({
+        message: uploadError === 'invalidPdf' ? t('dataroomErrorPdfOnly') : t('dataroomErrorPdfOnly'),
+        severity: 'error',
+      })
       event.target.value = ''
       return
     }
@@ -339,13 +461,16 @@ export function HomePage() {
     const nameError = getFileNameValidationError(preparedUpload.fileName)
 
     if (nameError) {
-      setFeedback({ message: nameError, severity: 'error' })
+      setFeedback({
+        message: nameError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'),
+        severity: 'error',
+      })
       event.target.value = ''
       return
     }
 
     if (hasDuplicateFileName(entities, activeFolder.id, preparedUpload.fileName)) {
-      setFeedback({ message: 'File with this name already exists in this location.', severity: 'error' })
+      setFeedback({ message: t('dataroomErrorFileNameDuplicate'), severity: 'error' })
       event.target.value = ''
       return
     }
@@ -362,7 +487,7 @@ export function HomePage() {
       },
     })
 
-    setFeedback({ message: 'PDF uploaded.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFileUploaded'), severity: 'success' })
     event.target.value = ''
   }
 
@@ -374,12 +499,14 @@ export function HomePage() {
     const validationError = getFileNameValidationError(fileNameDraft)
 
     if (validationError) {
-      setFileNameError(validationError)
+      setFileNameError(
+        validationError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'),
+      )
       return
     }
 
     if (hasDuplicateFileName(entities, activeFile.parentFolderId, fileNameDraft, activeFile.id)) {
-      setFileNameError('File with this name already exists in this location.')
+      setFileNameError(t('dataroomErrorFileNameDuplicate'))
       return
     }
 
@@ -392,7 +519,7 @@ export function HomePage() {
     })
 
     setRenameFileDialogOpen(false)
-    setFeedback({ message: 'File renamed.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFileRenamed'), severity: 'success' })
   }
 
   const handleDeleteFile = () => {
@@ -408,7 +535,7 @@ export function HomePage() {
     })
 
     setDeleteFileDialogOpen(false)
-    setFeedback({ message: 'File deleted.', severity: 'success' })
+    setFeedback({ message: t('dataroomFeedbackFileDeleted'), severity: 'success' })
   }
 
   return (
@@ -429,7 +556,7 @@ export function HomePage() {
           sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}
         >
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-            Data Rooms
+            {t('dataroomSidebarTitle')}
           </Typography>
 
           <FormControl fullWidth size="small">
@@ -441,11 +568,11 @@ export function HomePage() {
                   payload: { dataRoomId: event.target.value },
                 })
               }}
-              aria-label="Select Data Room"
+              aria-label={t('dataroomSelectLabel')}
             >
               {dataRooms.map((dataRoom) => (
                 <MenuItem key={dataRoom.id} value={dataRoom.id}>
-                  {dataRoom.name}
+                  {resolveDisplayName(dataRoom.name)}
                 </MenuItem>
               ))}
             </Select>
@@ -454,9 +581,9 @@ export function HomePage() {
           <Divider sx={{ my: 2 }} />
 
           <Typography variant="subtitle2" color="text.secondary" sx={{ px: 1, pb: 1 }}>
-            Folder tree
+            {t('dataroomFolderTreeTitle')}
           </Typography>
-          <List dense disablePadding aria-label="Folder tree">
+          <List dense disablePadding aria-label={t('dataroomFolderTreeTitle')}>
             <FolderTreeNode
               folderId={rootFolder.id}
               state={entities}
@@ -464,6 +591,7 @@ export function HomePage() {
               onSelectFolder={(folderId) => {
                 dispatch({ type: 'dataroom/selectFolder', payload: { folderId } })
               }}
+              renderFolderName={resolveDisplayName}
             />
           </List>
         </Box>
@@ -472,9 +600,9 @@ export function HomePage() {
           <Stack spacing={2.5}>
             <Stack spacing={0.75}>
               <Typography variant="h1" sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
-                {activeDataRoom.name}
+                {resolveDisplayName(activeDataRoom.name)}
               </Typography>
-              <Breadcrumbs aria-label="Folder breadcrumbs">
+              <Breadcrumbs aria-label={t('dataroomBreadcrumbsLabel')}>
                 {breadcrumbs.map((folder) => (
                   <Button
                     key={folder.id}
@@ -484,7 +612,7 @@ export function HomePage() {
                       dispatch({ type: 'dataroom/selectFolder', payload: { folderId: folder.id } })
                     }}
                   >
-                    {folder.name}
+                    {resolveDisplayName(folder.name)}
                   </Button>
                 ))}
               </Breadcrumbs>
@@ -492,20 +620,34 @@ export function HomePage() {
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Button variant="contained" onClick={openCreateDialog}>
-                Create folder
+                {t('dataroomActionCreateFolder')}
               </Button>
               <Button variant="outlined" onClick={openRenameDialog}>
-                Rename folder
+                {t('dataroomActionRenameFolder')}
               </Button>
               <Button variant="outlined" color="error" disabled={!canDeleteActiveFolder} onClick={() => setDeleteDialogOpen(true)}>
-                Delete folder
+                {t('dataroomActionDeleteFolder')}
               </Button>
               <Button variant="text" onClick={() => uploadInputRef.current?.click()}>
-                Upload PDF
+                {t('dataroomActionUploadPdf')}
               </Button>
-              <Button variant="text" disabled>
-                Sort: Name (A-Z)
-              </Button>
+              <FormControl size="small" sx={{ minWidth: 190 }}>
+                <Select
+                  value={sortMode}
+                  aria-label={t('dataroomSortLabel')}
+                  onChange={(event) => {
+                    const value = event.target.value as SortMode
+                    setSortMode(value)
+                    saveSortModePreference(value)
+                  }}
+                >
+                  <MenuItem value="name-asc">{t('dataroomSortNameAsc')}</MenuItem>
+                  <MenuItem value="name-desc">{t('dataroomSortNameDesc')}</MenuItem>
+                  <MenuItem value="updated-desc">{t('dataroomSortUpdatedDesc')}</MenuItem>
+                  <MenuItem value="updated-asc">{t('dataroomSortUpdatedAsc')}</MenuItem>
+                  <MenuItem value="type">{t('dataroomSortType')}</MenuItem>
+                </Select>
+              </FormControl>
             </Stack>
 
             <input
@@ -518,59 +660,67 @@ export function HomePage() {
             />
 
             <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
-              <List aria-label="Current folder contents">
-                {childFolders.map((folder) => (
-                  <ListItemButton
-                    key={folder.id}
-                    onClick={() => {
-                      dispatch({ type: 'dataroom/selectFolder', payload: { folderId: folder.id } })
-                    }}
-                  >
-                    <ListItemText primary={folder.name} secondary="Folder" />
-                  </ListItemButton>
-                ))}
+              <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
+                {sortedContentItems.map((item) => {
+                  if (item.kind === 'folder' && item.folder) {
+                    return (
+                      <ListItemButton
+                        key={item.id}
+                        onClick={() => {
+                          dispatch({ type: 'dataroom/selectFolder', payload: { folderId: item.folder.id } })
+                        }}
+                      >
+                        <ListItemText primary={resolveDisplayName(item.folder.name)} secondary={t('dataroomFolderItemType')} />
+                      </ListItemButton>
+                    )
+                  }
 
-                {childFiles.map((file) => (
-                  <ListItem
-                    key={file.id}
-                    secondaryAction={
-                      <Stack direction="row" spacing={0.5}>
-                        <Button
-                          size="small"
-                          aria-label={`View file ${file.name}`}
-                          onClick={() => openViewFileDialog(file)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          size="small"
-                          aria-label={`Rename file ${file.name}`}
-                          onClick={() => openRenameFileDialog(file)}
-                        >
-                          Rename
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          aria-label={`Delete file ${file.name}`}
-                          onClick={() => openDeleteFileDialog(file)}
-                        >
-                          Delete
-                        </Button>
-                      </Stack>
-                    }
-                  >
-                    <ListItemText primary={file.name} secondary={`PDF - ${formatFileSize(file.size)}`} />
-                  </ListItem>
-                ))}
+                  if (item.kind === 'file' && item.file) {
+                    return (
+                      <ListItem
+                        key={item.id}
+                        secondaryAction={
+                          <Stack direction="row" spacing={0.5}>
+                            <Button
+                              size="small"
+                              aria-label={t('dataroomAriaViewFile', { name: item.file.name })}
+                              onClick={() => openViewFileDialog(item.file)}
+                            >
+                              {t('dataroomActionViewFile')}
+                            </Button>
+                            <Button
+                              size="small"
+                              aria-label={t('dataroomAriaRenameFile', { name: item.file.name })}
+                              onClick={() => openRenameFileDialog(item.file)}
+                            >
+                              {t('dataroomActionRenameFile')}
+                            </Button>
+                            <Button
+                              size="small"
+                              color="error"
+                              aria-label={t('dataroomAriaDeleteFile', { name: item.file.name })}
+                              onClick={() => openDeleteFileDialog(item.file)}
+                            >
+                              {t('dataroomActionDeleteFile')}
+                            </Button>
+                          </Stack>
+                        }
+                      >
+                        <ListItemText primary={item.file.name} secondary={`PDF - ${formatFileSize(item.file.size)}`} />
+                      </ListItem>
+                    )
+                  }
 
-                {childFolders.length === 0 && childFiles.length === 0 ? (
+                  return null
+                })}
+
+                {sortedContentItems.length === 0 ? (
                   <Box sx={{ px: 2, py: 4 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                      This folder is empty
+                      {t('dataroomEmptyFolderTitle')}
                     </Typography>
                     <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                      Create a folder or upload a PDF to start organizing your Data Room.
+                      {t('dataroomEmptyFolderBody')}
                     </Typography>
                   </Box>
                 ) : null}
@@ -581,13 +731,13 @@ export function HomePage() {
       </Paper>
 
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Create folder</DialogTitle>
+        <DialogTitle>{t('dataroomDialogCreateFolderTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             fullWidth
-            label="Folder name"
+            label={t('dataroomFieldFolderName')}
             value={folderNameDraft}
             onChange={(event) => {
               setFolderNameDraft(event.target.value)
@@ -604,21 +754,21 @@ export function HomePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setCreateDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
           <Button onClick={handleCreateFolder} variant="contained">
-            Create
+            {t('dataroomActionCreate')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Rename folder</DialogTitle>
+        <DialogTitle>{t('dataroomDialogRenameFolderTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             fullWidth
-            label="Folder name"
+            label={t('dataroomFieldFolderName')}
             value={folderNameDraft}
             onChange={(event) => {
               setFolderNameDraft(event.target.value)
@@ -635,37 +785,40 @@ export function HomePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setRenameDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
           <Button onClick={handleRenameFolder} variant="contained">
-            Rename
+            {t('dataroomActionRename')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Delete folder</DialogTitle>
+        <DialogTitle>{t('dataroomDialogDeleteFolderTitle')}</DialogTitle>
         <DialogContent>
-          <Typography>Delete "{activeFolder.name}" and all nested content?</Typography>
+          <Typography>{t('dataroomDeleteFolderQuestion', { name: resolveDisplayName(activeFolder.name) })}</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
-            This will remove {deleteSummary.folderCount} folder(s) and {deleteSummary.fileCount} file(s).
+            {t('dataroomDeleteFolderImpact', {
+              folderCount: deleteSummary.folderCount,
+              fileCount: deleteSummary.fileCount,
+            })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
           <Button color="error" variant="contained" onClick={handleDeleteFolder}>
-            Delete
+            {t('dataroomActionDelete')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={renameFileDialogOpen} onClose={() => setRenameFileDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Rename file</DialogTitle>
+        <DialogTitle>{t('dataroomDialogRenameFileTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             fullWidth
-            label="File name"
+            label={t('dataroomFieldFileName')}
             value={fileNameDraft}
             onChange={(event) => {
               setFileNameDraft(event.target.value)
@@ -682,28 +835,28 @@ export function HomePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenameFileDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setRenameFileDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
           <Button onClick={handleRenameFile} variant="contained">
-            Rename
+            {t('dataroomActionRename')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={deleteFileDialogOpen} onClose={() => setDeleteFileDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Delete file</DialogTitle>
+        <DialogTitle>{t('dataroomDialogDeleteFileTitle')}</DialogTitle>
         <DialogContent>
-          <Typography>Delete "{activeFile?.name ?? ''}"?</Typography>
+          <Typography>{t('dataroomDeleteFileQuestion', { name: activeFile?.name ?? '' })}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteFileDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteFileDialogOpen(false)}>{t('dataroomActionCancel')}</Button>
           <Button color="error" variant="contained" onClick={handleDeleteFile}>
-            Delete
+            {t('dataroomActionDelete')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={viewFileDialogOpen} onClose={() => setViewFileDialogOpen(false)} fullWidth maxWidth="md">
-        <DialogTitle>{activeFile?.name ?? 'File preview'}</DialogTitle>
+        <DialogTitle>{activeFile?.name ?? t('dataroomFilePreviewTitle')}</DialogTitle>
         <DialogContent>
           {activeFile?.objectUrl ? (
             <Box
@@ -713,11 +866,11 @@ export function HomePage() {
               sx={{ width: '100%', minHeight: '70vh', border: 0 }}
             />
           ) : (
-            <Typography color="text.secondary">File preview is unavailable in this environment.</Typography>
+            <Typography color="text.secondary">{t('dataroomFilePreviewUnavailable')}</Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewFileDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setViewFileDialogOpen(false)}>{t('dataroomActionClose')}</Button>
         </DialogActions>
       </Dialog>
 

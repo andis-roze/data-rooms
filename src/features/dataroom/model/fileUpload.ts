@@ -5,12 +5,14 @@ export interface PreparedPdfUpload {
   objectUrl: string
 }
 
-export function getPdfUploadValidationError(file: File): string | null {
+export type PdfUploadValidationError = 'invalidPdf'
+
+export function getPdfUploadValidationError(file: File): PdfUploadValidationError | null {
   const hasPdfMimeType = file.type === 'application/pdf'
   const hasPdfExtension = file.name.toLocaleLowerCase().endsWith('.pdf')
 
   if (!hasPdfMimeType && !hasPdfExtension) {
-    return 'Only PDF files are allowed.'
+    return 'invalidPdf'
   }
 
   return null

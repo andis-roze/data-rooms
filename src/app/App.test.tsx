@@ -22,6 +22,10 @@ function renderRoute(path: string) {
 describe('App routing and localization', () => {
   beforeEach(async () => {
     clearDataRoomState()
+    const storage = window.localStorage as Partial<Storage>
+    if (typeof storage.removeItem === 'function') {
+      storage.removeItem('dataroom/view-preferences')
+    }
     await i18n.changeLanguage('en')
   })
 
@@ -94,6 +98,30 @@ describe('App routing and localization', () => {
     expect(screen.queryByText('nda.pdf')).not.toBeInTheDocument()
   })
 
+  it('applies selected sort mode and persists it across remounts', async () => {
+    const user = userEvent.setup()
+    const firstRender = renderRoute('/')
+    const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+
+    await user.upload(uploadInput, new File(['%PDF-1.4 a'], 'zeta.pdf', { type: 'application/pdf' }))
+    await user.upload(uploadInput, new File(['%PDF-1.4 b'], 'alpha.pdf', { type: 'application/pdf' }))
+
+    const sortSelect = screen.getAllByRole('combobox')[1]
+    await user.click(sortSelect)
+    await user.click(screen.getByRole('option', { name: 'Name (Z-A)' }))
+
+    const storage = window.localStorage as Partial<Storage>
+    if (typeof storage.getItem === 'function') {
+      expect(storage.getItem('dataroom/view-preferences')).toContain('name-desc')
+    }
+    expect(screen.getAllByRole('combobox')[1]).toHaveTextContent('Name (Z-A)')
+
+    firstRender.unmount()
+    renderRoute('/')
+
+    expect(screen.getAllByRole('combobox')[1]).toHaveTextContent('Name (Z-A)')
+  })
+
   it('switches language to German from header controls', async () => {
     const user = userEvent.setup()
     renderRoute('/')
@@ -101,6 +129,6 @@ describe('App routing and localization', () => {
     await user.click(screen.getByRole('button', { name: 'DE' }))
 
     expect(screen.getByRole('link', { name: 'Start' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Raum' })).toBeInTheDocument()
   })
 })
