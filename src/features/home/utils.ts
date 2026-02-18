@@ -108,7 +108,7 @@ export function buildFolderPath(state: DataRoomState, folderId: NodeId): Folder[
     }
 
     visited.add(currentId)
-    const folder = state.foldersById[currentId]
+    const folder: Folder | undefined = state.foldersById[currentId]
 
     if (!folder) {
       break

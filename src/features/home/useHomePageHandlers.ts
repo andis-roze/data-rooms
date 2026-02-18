@@ -1,5 +1,4 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
-import type { TFunction } from 'i18next'
 import {
   getDataRoomNameValidationError,
   getFileNameValidationError,
@@ -20,7 +19,7 @@ import type { SortField, SortState } from './types'
 import { generateNodeId, saveSortModePreference } from './utils'
 
 interface UseHomePageHandlersParams {
-  t: TFunction
+  t: (key: string, options?: Record<string, unknown>) => string
   entities: DataRoomState
   dispatch: Dispatch<DataRoomAction>
   activeDataRoom: DataRoom | undefined

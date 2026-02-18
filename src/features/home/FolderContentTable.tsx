@@ -95,6 +95,8 @@ export function FolderContentTable({
       <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
         {items.map((item) => {
           if (item.kind === 'folder' && item.folder) {
+            const folder = item.folder
+
             return (
               <ListItem key={item.id} disablePadding sx={{ px: 2, py: 1 }}>
                 <Box
@@ -110,16 +112,16 @@ export function FolderContentTable({
                     size="small"
                     color="inherit"
                     sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
-                    aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(item.folder.name) })}
-                    onClick={() => onSelectFolder(item.folder.id)}
+                    aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(folder.name) })}
+                    onClick={() => onSelectFolder(folder.id)}
                   >
-                    <Typography noWrap>{item.displayName ?? resolveDisplayName(item.folder.name)}</Typography>
+                    <Typography noWrap>{item.displayName ?? resolveDisplayName(folder.name)}</Typography>
                   </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
                     {t('dataroomFolderItemType')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {formatUpdatedAt(item.folder.updatedAt, locale)}
+                    {formatUpdatedAt(folder.updatedAt, locale)}
                   </Typography>
                   <Box
                     sx={{
@@ -141,8 +143,8 @@ export function FolderContentTable({
                         <Button
                           size="small"
                           sx={{ minWidth: 84 }}
-                          aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(item.folder.name) })}
-                          onClick={() => onOpenRenameFolder(item.folder)}
+                          aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
+                          onClick={() => onOpenRenameFolder(folder)}
                         >
                           {t('dataroomActionRename')}
                         </Button>
@@ -150,8 +152,8 @@ export function FolderContentTable({
                           size="small"
                           color="error"
                           sx={{ minWidth: 84 }}
-                          aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(item.folder.name) })}
-                          onClick={() => onOpenDeleteFolder(item.folder)}
+                          aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
+                          onClick={() => onOpenDeleteFolder(folder)}
                         >
                           {t('dataroomActionDelete')}
                         </Button>
@@ -164,6 +166,8 @@ export function FolderContentTable({
           }
 
           if (item.kind === 'file' && item.file) {
+            const file = item.file
+
             return (
               <ListItem key={item.id} disablePadding sx={{ px: 2, py: 1 }}>
                 <Box
@@ -179,16 +183,16 @@ export function FolderContentTable({
                     size="small"
                     color="inherit"
                     sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
-                    aria-label={t('dataroomAriaViewFile', { name: item.file.name })}
-                    onClick={() => onOpenViewFile(item.file)}
+                    aria-label={t('dataroomAriaViewFile', { name: file.name })}
+                    onClick={() => onOpenViewFile(file)}
                   >
-                    <Typography noWrap>{item.file.name}</Typography>
+                    <Typography noWrap>{file.name}</Typography>
                   </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {`${t('dataroomFileItemType')} - ${formatFileSize(item.file.size)}`}
+                    {`${t('dataroomFileItemType')} - ${formatFileSize(file.size)}`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-                    {formatUpdatedAt(item.file.updatedAt, locale)}
+                    {formatUpdatedAt(file.updatedAt, locale)}
                   </Typography>
                   <Box
                     sx={{
@@ -203,8 +207,8 @@ export function FolderContentTable({
                     <Button
                       size="small"
                       sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaRenameFile', { name: item.file.name })}
-                      onClick={() => onOpenRenameFile(item.file)}
+                      aria-label={t('dataroomAriaRenameFile', { name: file.name })}
+                      onClick={() => onOpenRenameFile(file)}
                     >
                       {t('dataroomActionRenameFile')}
                     </Button>
@@ -212,8 +216,8 @@ export function FolderContentTable({
                       size="small"
                       color="error"
                       sx={{ minWidth: 84 }}
-                      aria-label={t('dataroomAriaDeleteFile', { name: item.file.name })}
-                      onClick={() => onOpenDeleteFile(item.file)}
+                      aria-label={t('dataroomAriaDeleteFile', { name: file.name })}
+                      onClick={() => onOpenDeleteFile(file)}
                     >
                       {t('dataroomActionDeleteFile')}
                     </Button>

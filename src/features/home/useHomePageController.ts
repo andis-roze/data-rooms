@@ -47,9 +47,12 @@ export function useHomePageController() {
 
   const [feedbackQueue, setFeedbackQueue] = useState<FeedbackState[]>([])
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
+  const rawTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  const tr = (key: string, options?: Record<string, unknown>): string =>
+    rawTranslate(key, options)
 
   const resolveDisplayName = (value: string) =>
-    value.startsWith('i18n:') ? t(value.slice(5)) : value
+    value.startsWith('i18n:') ? tr(value.slice(5)) : value
 
   const enqueueFeedback = (message: string, severity: FeedbackState['severity']) => {
     setFeedbackQueue((previous) => [...previous, { id: feedbackIdRef.current++, message, severity }])
@@ -158,7 +161,7 @@ export function useHomePageController() {
   const activeFile = activeFileId ? entities.filesById[activeFileId] : null
 
   const handlers = useHomePageHandlers({
-    t,
+    t: tr,
     entities,
     dispatch,
     activeDataRoom,
