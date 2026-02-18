@@ -55,6 +55,8 @@ export function FeedbackStack({ feedbackQueue, timeoutMs, onDismissFeedback }: F
   return (
     <Stack
       spacing={1}
+      aria-live="polite"
+      aria-atomic="false"
       sx={{
         position: 'fixed',
         bottom: 24,

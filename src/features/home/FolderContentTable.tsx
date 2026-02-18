@@ -64,6 +64,7 @@ export function FolderContentTable({
           sx={{ justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
           onClick={() => onToggleSort('name')}
           aria-label={t('dataroomSortByNameAria')}
+          aria-pressed={sortState.field === 'name'}
         >
           {t('dataroomColumnName')} {sortIndicator('name')}
         </Button>
@@ -73,6 +74,7 @@ export function FolderContentTable({
           sx={{ display: { xs: 'none', md: 'inline-flex' }, justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
           onClick={() => onToggleSort('type')}
           aria-label={t('dataroomSortByTypeAria')}
+          aria-pressed={sortState.field === 'type'}
         >
           {t('dataroomColumnType')} {sortIndicator('type')}
         </Button>
@@ -82,6 +84,7 @@ export function FolderContentTable({
           sx={{ display: { xs: 'none', md: 'inline-flex' }, justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
           onClick={() => onToggleSort('updated')}
           aria-label={t('dataroomSortByUpdatedAria')}
+          aria-pressed={sortState.field === 'updated'}
         >
           {t('dataroomColumnUpdated')} {sortIndicator('updated')}
         </Button>
@@ -122,7 +125,7 @@ export function FolderContentTable({
         })}
 
         {items.length === 0 ? (
-          <Box sx={{ px: 2, py: 4 }}>
+          <Box sx={{ px: 2, py: 4 }} role="status" aria-live="polite">
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
               {t('dataroomEmptyFolderTitle')}
             </Typography>

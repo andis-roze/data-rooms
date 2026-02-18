@@ -82,13 +82,25 @@ export function FilePreviewDialog({
       <DialogTitle>{activeFileName ?? t('dataroomFilePreviewTitle')}</DialogTitle>
       <DialogContent>
         {isLoading ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <Box
+            role="status"
+            aria-live="polite"
+            aria-label={t('dataroomFilePreviewLoading')}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}
+          >
             <CircularProgress />
+            <Typography color="text.secondary">{t('dataroomFilePreviewLoading')}</Typography>
           </Box>
         ) : null}
 
         {!isLoading && previewUrl && activeFileName ? (
-          <Box component="iframe" title={activeFileName} src={previewUrl} sx={{ width: '100%', minHeight: '70vh', border: 0 }} />
+          <Box
+            component="iframe"
+            title={activeFileName}
+            src={previewUrl}
+            aria-busy={isLoading}
+            sx={{ width: '100%', minHeight: '70vh', border: 0 }}
+          />
         ) : null}
 
         {!isLoading && (!previewUrl || !activeFileName) ? (

@@ -77,6 +77,7 @@
   "dataroomDeleteFolderImpact": "Dabei werden {folderCount} Ordner und {fileCount} Dateien entfernt.",
   "dataroomDeleteFileQuestion": "\"{name}\" loschen?",
   "dataroomFilePreviewTitle": "Dateivorschau",
+  "dataroomFilePreviewLoading": "Dateivorschau wird geladen...",
   "dataroomFilePreviewUnavailable": "Dateivorschau ist in dieser Umgebung nicht verfugbar.",
   "dataroomAriaViewFile": "Datei {name} ansehen",
   "dataroomAriaRenameFile": "Datei {name} umbenennen",
@@ -106,5 +107,6 @@
   "dataroomSortByNameAria": "Nach Name sortieren",
   "dataroomSortByTypeAria": "Nach Typ sortieren",
   "dataroomSortByUpdatedAria": "Nach Anderungsdatum sortieren",
+  "dataroomKeyboardShortcutsHint": "Kurzbefehle: Ctrl+Shift+N erstellt einen Ordner, Ctrl+Shift+U startet den Upload.",
   "dataroomErrorFileStorageFailed": "Datei konnte nicht im Browser-Speicher abgelegt werden."
 }
