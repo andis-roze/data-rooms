@@ -8,9 +8,9 @@ import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 
 interface FolderDialogsProps {
-  createDialogOpen: boolean
-  renameDialogOpen: boolean
-  deleteDialogOpen: boolean
+  createFolderDialogOpen: boolean
+  renameFolderDialogOpen: boolean
+  deleteFolderDialogOpen: boolean
   folderNameDraft: string
   folderNameError: string | null
   activeFolderName: string
@@ -26,9 +26,9 @@ interface FolderDialogsProps {
 }
 
 export function FolderDialogs({
-  createDialogOpen,
-  renameDialogOpen,
-  deleteDialogOpen,
+  createFolderDialogOpen,
+  renameFolderDialogOpen,
+  deleteFolderDialogOpen,
   folderNameDraft,
   folderNameError,
   activeFolderName,
@@ -46,7 +46,7 @@ export function FolderDialogs({
 
   return (
     <>
-      <Dialog open={createDialogOpen} onClose={onCloseCreateFolderDialog} fullWidth maxWidth="xs">
+      <Dialog open={createFolderDialogOpen} onClose={onCloseCreateFolderDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogCreateFolderTitle')}</DialogTitle>
         <DialogContent>
           <TextField
@@ -76,7 +76,7 @@ export function FolderDialogs({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={renameDialogOpen} onClose={onCloseRenameFolderDialog} fullWidth maxWidth="xs">
+      <Dialog open={renameFolderDialogOpen} onClose={onCloseRenameFolderDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogRenameFolderTitle')}</DialogTitle>
         <DialogContent>
           <TextField
@@ -106,7 +106,7 @@ export function FolderDialogs({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteDialogOpen} onClose={onCloseDeleteFolderDialog} fullWidth maxWidth="xs">
+      <Dialog open={deleteFolderDialogOpen} onClose={onCloseDeleteFolderDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogDeleteFolderTitle')}</DialogTitle>
         <DialogContent>
           <Typography>

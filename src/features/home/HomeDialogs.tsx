@@ -9,9 +9,9 @@ interface HomeDialogsProps {
   createDataRoomDialogOpen: boolean
   renameDataRoomDialogOpen: boolean
   deleteDataRoomDialogOpen: boolean
-  createDialogOpen: boolean
-  renameDialogOpen: boolean
-  deleteDialogOpen: boolean
+  createFolderDialogOpen: boolean
+  renameFolderDialogOpen: boolean
+  deleteFolderDialogOpen: boolean
   renameFileDialogOpen: boolean
   deleteFileDialogOpen: boolean
   viewFileDialogOpen: boolean
@@ -54,9 +54,9 @@ export function HomeDialogs({
   createDataRoomDialogOpen,
   renameDataRoomDialogOpen,
   deleteDataRoomDialogOpen,
-  createDialogOpen,
-  renameDialogOpen,
-  deleteDialogOpen,
+  createFolderDialogOpen,
+  renameFolderDialogOpen,
+  deleteFolderDialogOpen,
   renameFileDialogOpen,
   deleteFileDialogOpen,
   viewFileDialogOpen,
@@ -114,9 +114,9 @@ export function HomeDialogs({
       />
 
       <FolderDialogs
-        createDialogOpen={createDialogOpen}
-        renameDialogOpen={renameDialogOpen}
-        deleteDialogOpen={deleteDialogOpen}
+        createFolderDialogOpen={createFolderDialogOpen}
+        renameFolderDialogOpen={renameFolderDialogOpen}
+        deleteFolderDialogOpen={deleteFolderDialogOpen}
         folderNameDraft={folderNameDraft}
         folderNameError={folderNameError}
         activeFolderName={activeFolderName}
