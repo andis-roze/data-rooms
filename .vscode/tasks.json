@@ -42,6 +42,12 @@
     },
     {
       "type": "npm",
+      "script": "test:coverage",
+      "group": "test",
+      "label": "npm: test:coverage"
+    },
+    {
+      "type": "npm",
       "script": "test",
       "group": "test",
       "isBackground": true,
