@@ -40,7 +40,7 @@ describe('App routing and localization', () => {
     expect(screen.getByText('This folder is empty')).toBeInTheDocument()
   })
 
-  it('creates, renames, and deletes a folder from the toolbar flow', async () => {
+  it('creates, renames, and deletes a folder from row actions', async () => {
     const user = userEvent.setup()
     renderRoute('/')
 
@@ -51,7 +51,8 @@ describe('App routing and localization', () => {
 
     expect(screen.getAllByText('Finance').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: 'Rename folder' }))
+    await user.click(screen.getByRole('button', { name: 'Data Room' }))
+    await user.click(screen.getByRole('button', { name: 'Rename folder Finance' }))
     const renameInput = screen.getByRole('textbox', { name: 'Folder name' })
     await user.clear(renameInput)
     await user.type(renameInput, 'Legal')
@@ -60,7 +61,7 @@ describe('App routing and localization', () => {
 
     expect(screen.getAllByText('Legal').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: 'Delete folder' }))
+    await user.click(screen.getByRole('button', { name: 'Delete folder Legal' }))
     await user.click(screen.getByRole('button', { name: 'Delete' }))
     await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete folder' }))
 

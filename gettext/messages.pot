@@ -51,6 +51,9 @@ msgstr ""
 msgid "dataroomActionDeleteFolder"
 msgstr ""
 
+msgid "dataroomActionOpenFolder"
+msgstr ""
+
 msgid "dataroomActionRename"
 msgstr ""
 
@@ -72,13 +75,34 @@ msgstr ""
 msgid "dataroomAriaDeleteFile"
 msgstr ""
 
+msgid "dataroomAriaDeleteFolder"
+msgstr ""
+
+msgid "dataroomAriaOpenFolder"
+msgstr ""
+
 msgid "dataroomAriaRenameFile"
+msgstr ""
+
+msgid "dataroomAriaRenameFolder"
 msgstr ""
 
 msgid "dataroomAriaViewFile"
 msgstr ""
 
 msgid "dataroomBreadcrumbsLabel"
+msgstr ""
+
+msgid "dataroomColumnActions"
+msgstr ""
+
+msgid "dataroomColumnName"
+msgstr ""
+
+msgid "dataroomColumnType"
+msgstr ""
+
+msgid "dataroomColumnUpdated"
 msgstr ""
 
 msgid "dataroomCurrentFolderContentsLabel"
@@ -195,6 +219,9 @@ msgstr ""
 msgid "dataroomFieldFolderName"
 msgstr ""
 
+msgid "dataroomFileItemType"
+msgstr ""
+
 msgid "dataroomFilePreviewTitle"
 msgstr ""
 
@@ -223,6 +250,15 @@ msgid "dataroomSelectLabel"
 msgstr ""
 
 msgid "dataroomSidebarTitle"
+msgstr ""
+
+msgid "dataroomSortByNameAria"
+msgstr ""
+
+msgid "dataroomSortByTypeAria"
+msgstr ""
+
+msgid "dataroomSortByUpdatedAria"
 msgstr ""
 
 msgid "dataroomSortLabel"

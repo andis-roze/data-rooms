@@ -55,6 +55,9 @@ msgstr "Loschen"
 msgid "dataroomActionDeleteFolder"
 msgstr "Ordner loschen"
 
+msgid "dataroomActionOpenFolder"
+msgstr "Offnen"
+
 msgid "dataroomActionRename"
 msgstr "Umbenennen"
 
@@ -76,14 +79,35 @@ msgstr "Ansehen"
 msgid "dataroomAriaDeleteFile"
 msgstr "Datei {name} loschen"
 
+msgid "dataroomAriaDeleteFolder"
+msgstr "Ordner {name} loschen"
+
+msgid "dataroomAriaOpenFolder"
+msgstr "Ordner {name} offnen"
+
 msgid "dataroomAriaRenameFile"
 msgstr "Datei {name} umbenennen"
+
+msgid "dataroomAriaRenameFolder"
+msgstr "Ordner {name} umbenennen"
 
 msgid "dataroomAriaViewFile"
 msgstr "Datei {name} ansehen"
 
 msgid "dataroomBreadcrumbsLabel"
 msgstr "Ordner-Pfad"
+
+msgid "dataroomColumnActions"
+msgstr "Aktionen"
+
+msgid "dataroomColumnName"
+msgstr "Name"
+
+msgid "dataroomColumnType"
+msgstr "Typ"
+
+msgid "dataroomColumnUpdated"
+msgstr "Geandert"
 
 msgid "dataroomCurrentFolderContentsLabel"
 msgstr "Inhalt des aktuellen Ordners"
@@ -201,6 +225,9 @@ msgstr "Dateiname"
 msgid "dataroomFieldFolderName"
 msgstr "Ordnername"
 
+msgid "dataroomFileItemType"
+msgstr "PDF"
+
 msgid "dataroomFilePreviewTitle"
 msgstr "Dateivorschau"
 
@@ -230,6 +257,15 @@ msgstr "Datenraum auswahlen"
 
 msgid "dataroomSidebarTitle"
 msgstr "Datenraume"
+
+msgid "dataroomSortByNameAria"
+msgstr "Nach Name sortieren"
+
+msgid "dataroomSortByTypeAria"
+msgstr "Nach Typ sortieren"
+
+msgid "dataroomSortByUpdatedAria"
+msgstr "Nach Anderungsdatum sortieren"
 
 msgid "dataroomSortLabel"
 msgstr "Inhalt sortieren"

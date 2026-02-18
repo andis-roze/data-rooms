@@ -55,6 +55,9 @@ msgstr "Delete"
 msgid "dataroomActionDeleteFolder"
 msgstr "Delete folder"
 
+msgid "dataroomActionOpenFolder"
+msgstr "Open"
+
 msgid "dataroomActionRename"
 msgstr "Rename"
 
@@ -76,14 +79,35 @@ msgstr "View"
 msgid "dataroomAriaDeleteFile"
 msgstr "Delete file {name}"
 
+msgid "dataroomAriaDeleteFolder"
+msgstr "Delete folder {name}"
+
+msgid "dataroomAriaOpenFolder"
+msgstr "Open folder {name}"
+
 msgid "dataroomAriaRenameFile"
 msgstr "Rename file {name}"
+
+msgid "dataroomAriaRenameFolder"
+msgstr "Rename folder {name}"
 
 msgid "dataroomAriaViewFile"
 msgstr "View file {name}"
 
 msgid "dataroomBreadcrumbsLabel"
 msgstr "Folder breadcrumbs"
+
+msgid "dataroomColumnActions"
+msgstr "Actions"
+
+msgid "dataroomColumnName"
+msgstr "Name"
+
+msgid "dataroomColumnType"
+msgstr "Type"
+
+msgid "dataroomColumnUpdated"
+msgstr "Updated"
 
 msgid "dataroomCurrentFolderContentsLabel"
 msgstr "Current folder contents"
@@ -199,6 +223,9 @@ msgstr "File name"
 msgid "dataroomFieldFolderName"
 msgstr "Folder name"
 
+msgid "dataroomFileItemType"
+msgstr "PDF"
+
 msgid "dataroomFilePreviewTitle"
 msgstr "File preview"
 
@@ -228,6 +255,15 @@ msgstr "Select Data Room"
 
 msgid "dataroomSidebarTitle"
 msgstr "Data Rooms"
+
+msgid "dataroomSortByNameAria"
+msgstr "Sort by name"
+
+msgid "dataroomSortByTypeAria"
+msgstr "Sort by type"
+
+msgid "dataroomSortByUpdatedAria"
+msgstr "Sort by updated date"
 
 msgid "dataroomSortLabel"
 msgstr "Sort contents"
