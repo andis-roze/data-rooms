@@ -40,6 +40,15 @@ export default defineConfig(({ mode }) => {
       setupFiles: './src/test/setupTests.ts',
       globals: true,
       css: true,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html'],
+        thresholds: {
+          statements: 60,
+          lines: 60,
+          functions: 60,
+        },
+      },
     },
   }
 })
