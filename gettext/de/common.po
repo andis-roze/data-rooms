@@ -177,6 +177,9 @@ msgstr "Dateiname darf nicht leer sein."
 msgid "dataroomErrorFileNameReserved"
 msgstr "Dateiname ist nicht erlaubt."
 
+msgid "dataroomErrorFileStorageFailed"
+msgstr "Datei konnte nicht im Browser-Speicher abgelegt werden."
+
 msgid "dataroomErrorFolderNameDuplicate"
 msgstr "Ein Ordner mit diesem Namen existiert hier bereits."
 
@@ -227,6 +230,9 @@ msgstr "Ordnername"
 
 msgid "dataroomFileItemType"
 msgstr "PDF"
+
+msgid "dataroomFilePreviewLoading"
+msgstr "Dateivorschau wird geladen..."
 
 msgid "dataroomFilePreviewTitle"
 msgstr "Dateivorschau"

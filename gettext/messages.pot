@@ -171,6 +171,9 @@ msgstr ""
 msgid "dataroomErrorFileNameReserved"
 msgstr ""
 
+msgid "dataroomErrorFileStorageFailed"
+msgstr ""
+
 msgid "dataroomErrorFolderNameDuplicate"
 msgstr ""
 
@@ -220,6 +223,9 @@ msgid "dataroomFieldFolderName"
 msgstr ""
 
 msgid "dataroomFileItemType"
+msgstr ""
+
+msgid "dataroomFilePreviewLoading"
 msgstr ""
 
 msgid "dataroomFilePreviewTitle"

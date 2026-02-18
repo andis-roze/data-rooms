@@ -175,6 +175,9 @@ msgstr "File name cannot be empty."
 msgid "dataroomErrorFileNameReserved"
 msgstr "File name is not allowed."
 
+msgid "dataroomErrorFileStorageFailed"
+msgstr "Unable to store file in browser storage."
+
 msgid "dataroomErrorFolderNameDuplicate"
 msgstr "Folder with this name already exists in this location."
 
@@ -225,6 +228,9 @@ msgstr "Folder name"
 
 msgid "dataroomFileItemType"
 msgstr "PDF"
+
+msgid "dataroomFilePreviewLoading"
+msgstr "Loading file preview..."
 
 msgid "dataroomFilePreviewTitle"
 msgstr "File preview"

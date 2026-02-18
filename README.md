@@ -1,32 +1,64 @@
-# Polyglot UI Starter
+# Data Room Home Assignment
 
-Minimal React + TypeScript starter with:
-- Vite
-- i18next + react-i18next + i18next-icu
-- React Router
-- MUI theme
-- Vitest + Testing Library
+Single-page Data Room MVP built with React + TypeScript + MUI.
+
+## Demo
+
+- Public URL: `TODO: add deployment URL`
+
+## Features
+
+- Data Room CRUD
+- Nested folder CRUD with cascade delete
+- PDF upload, rename, delete, and preview
+- Duplicate-name validation (case-insensitive, trim-normalized)
+- Folder breadcrumbs and tree navigation
+- Sorting by name/type/updated with persisted preference
+- Localized UI (`en`, `de`)
+
+## Architecture
+
+- UI: React function components with feature-first structure under `src/features`.
+- State: `Context + useReducer` in `src/features/dataroom/state`.
+- Domain logic: pure operations in `src/features/dataroom/model` (validation, tree mutations, delete analysis).
+- Persistence:
+  - Metadata persisted in `localStorage`.
+  - PDF blobs persisted in IndexedDB for stable previews.
+- Testing:
+  - Unit tests for mutation/validation/sorting.
+  - Integration tests for core end-to-end flows.
+
+## Tradeoffs
+
+- Chose client-only persistence for fast implementation and local reproducibility.
+- Kept reducer operations pure to reduce regression risk in nested tree operations.
+- Avoided backend/auth in core scope to prioritize reliability of CRUD and validation behavior.
 
 ## Requirements
 
 - Node.js LTS
 - npm
 
-## Development
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Hot reloading is enabled by default via Vite HMR.
+## Run With Docker
 
-If you run the app inside Docker/VM/remote environments and browser reload does not trigger, copy `.env.example` to `.env` and set:
-- `VITE_HMR_HOST` (the hostname your browser uses)
-- `VITE_HMR_PORT` and `VITE_HMR_CLIENT_PORT` (usually `5173`)
-- `VITE_HMR_POLLING=true` when filesystem events are not forwarded
+Build and run:
 
-## Quality checks
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- `http://localhost:8080`
+
+## Quality Checks
 
 ```bash
 npm run lint
@@ -34,54 +66,41 @@ npm run test:run
 npm run build
 ```
 
-## Localization setup
+## Testing Checklist
 
-Runtime translations are file-based and stored in:
-- `src/i18n/locales/en/common.json`
-- `src/i18n/locales/de/common.json`
+- Create, rename, and delete folders in nested structures.
+- Verify duplicate-name errors for data rooms, folders, and files.
+- Upload PDF, rename it, preview it, and delete it.
+- Delete folder subtree and verify descendant cleanup.
+- Change sort mode and verify preference persists after reload.
+- Switch language between English and German.
 
-Translator-facing catalogs are gettext-based and stored in:
-- `gettext/messages.pot`
-- `gettext/en/common.po`
-- `gettext/de/common.po`
+## Localization
 
-The app loads JSON catalogs via `src/i18n/resources.ts`.
+- Runtime catalogs:
+  - `src/i18n/locales/en/common.json`
+  - `src/i18n/locales/de/common.json`
+- Gettext catalogs:
+  - `gettext/messages.pot`
+  - `gettext/en/common.po`
+  - `gettext/de/common.po`
 
-### Automatic key extraction
-
-Extract keys from `t('...')` usage, update `en` JSON, and sync gettext catalogs:
+Useful commands:
 
 ```bash
 npm run i18n:extract
-```
-
-This uses `i18next-parser` (`i18next-parser.config.cjs`) and writes to:
-- `src/i18n/locales/en/common.json`
-- `gettext/messages.pot`
-- `gettext/en/common.po`
-- `gettext/<lang>/common.po`
-
-### Compile gettext catalogs for runtime
-
-Compile PO files back to runtime JSON:
-
-```bash
 npm run i18n:gettext:compile
+npm run i18n:sync
 ```
 
-For convenience, `npm run i18n:sync` runs:
-- `i18n:extract`
-- `i18n:gettext:compile`
+## Known Limitations
 
-### Typical workflow
+- No backend or multi-user sync.
+- Data is browser-local only.
+- Large-file behavior depends on browser storage limits.
 
-1. Add new UI key in code (`t('newKey')`).
-2. Run `npm run i18n:extract`.
-3. Translate in `gettext/<lang>/common.po`.
-4. Run `npm run i18n:gettext:compile`.
-5. Commit updated `.po`, `.pot`, and locale JSON files.
+## Future Improvements
 
-## Notes
-
-- ICU messages are enabled, so plural and number formatting are locale-aware in translation strings.
-- For non-English catalogs, empty PO translations are omitted in JSON output so runtime falls back to English.
+- Add backend persistence and sharing.
+- Add robust file indexing/search.
+- Add role-based access model and audit trail.
