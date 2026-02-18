@@ -1,5 +1,6 @@
 import type { DataRoomState, NodeId } from './types'
 
+// Collects folder/file ids affected by cascading delete operations.
 export interface DeleteTargets {
   folderIds: Set<NodeId>
   fileIds: Set<NodeId>

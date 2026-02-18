@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { CreateDataRoomDialog } from './CreateDataRoomDialog'
 import { NamePromptDialog } from './NamePromptDialog'
 
+// Handles create/rename/delete dialogs for data room actions.
 interface DataRoomDialogsProps {
   createDataRoomDialogOpen: boolean
   renameDataRoomDialogOpen: boolean
@@ -17,7 +18,7 @@ interface DataRoomDialogsProps {
   activeDataRoomName: string
   dataRoomDeleteSummary: { folderCount: number; fileCount: number }
   onCloseCreateDataRoomDialog: () => void
-  onOpenDataRoomNameChange: (value: string) => void
+  onDataRoomNameChange: (value: string) => void
   onCreateDataRoom: () => void
   onCloseRenameDataRoomDialog: () => void
   onRenameDataRoom: () => void
@@ -34,7 +35,7 @@ export function DataRoomDialogs({
   activeDataRoomName,
   dataRoomDeleteSummary,
   onCloseCreateDataRoomDialog,
-  onOpenDataRoomNameChange,
+  onDataRoomNameChange,
   onCreateDataRoom,
   onCloseRenameDataRoomDialog,
   onRenameDataRoom,
@@ -50,7 +51,7 @@ export function DataRoomDialogs({
         dataRoomNameDraft={dataRoomNameDraft}
         dataRoomNameError={dataRoomNameError}
         onClose={onCloseCreateDataRoomDialog}
-        onDataRoomNameDraftChange={onOpenDataRoomNameChange}
+        onDataRoomNameDraftChange={onDataRoomNameChange}
         onSubmit={onCreateDataRoom}
       />
 
@@ -63,7 +64,7 @@ export function DataRoomDialogs({
         cancelLabel={t('dataroomActionCancel')}
         submitLabel={t('dataroomActionRename')}
         onClose={onCloseRenameDataRoomDialog}
-        onValueChange={onOpenDataRoomNameChange}
+        onValueChange={onDataRoomNameChange}
         onSubmit={onRenameDataRoom}
       />
 

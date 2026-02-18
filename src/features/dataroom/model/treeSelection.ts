@@ -1,5 +1,6 @@
 import type { DataRoomState, NodeId } from './types'
 
+// Selection guards/fallbacks used by reducer after structural mutations.
 export interface DataRoomSelection {
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null

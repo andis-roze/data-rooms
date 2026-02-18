@@ -21,6 +21,7 @@ import { loadSortModePreference } from './services/sortPreference'
 import type { FeedbackState, SortState } from './types'
 import { useHomePageHandlers } from './useHomePageHandlers'
 
+// Main coordinator for home page state, derived view data, and user interaction handlers.
 export function useHomePageController(): HomePageViewModel {
   const { t, i18n } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
@@ -52,10 +53,10 @@ export function useHomePageController(): HomePageViewModel {
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
   const feedbackTimeoutMs = loadFeedbackTimeoutMs()
 
-  const rawTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
-  const tr = (key: string, options?: Record<string, unknown>): string => rawTranslate(key, options)
+  const i18nTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  const translate = (key: string, options?: Record<string, unknown>): string => i18nTranslate(key, options)
 
-  const resolveDisplayName = (value: string) => (value.startsWith('i18n:') ? tr(value.slice(5)) : value)
+  const resolveDisplayName = (value: string) => (value.startsWith('i18n:') ? translate(value.slice(5)) : value)
 
   const enqueueFeedback = (message: string, severity: FeedbackState['severity']) => {
     setFeedbackQueue((previous) => [...previous, { id: feedbackIdRef.current++, message, severity }])
@@ -111,7 +112,7 @@ export function useHomePageController(): HomePageViewModel {
 
   const actions = useHomePageHandlers({
     dataRoom: {
-      t: tr,
+      t: translate,
       entities,
       dispatch,
       activeDataRoom,
@@ -126,7 +127,7 @@ export function useHomePageController(): HomePageViewModel {
       setIsDeleteDataRoomDialogOpen,
     },
     folder: {
-      t: tr,
+      t: translate,
       entities,
       dispatch,
       activeDataRoom,
@@ -143,7 +144,7 @@ export function useHomePageController(): HomePageViewModel {
       setIsDeleteFolderDialogOpen,
     },
     file: {
-      t: tr,
+      t: translate,
       entities,
       dispatch,
       activeFolder,

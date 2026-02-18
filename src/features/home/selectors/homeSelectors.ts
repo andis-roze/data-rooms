@@ -3,6 +3,7 @@ import type { FolderContentItem, SortState } from '../model/homeViewTypes'
 import { sortContentItems } from './homeSorting'
 import { buildFolderPath, getFileChildren, getFolderChildren, isDefined } from './homeTree'
 
+// Home-page focused selectors to keep view derivation out of UI components/controllers.
 export function selectDataRooms(entities: DataRoomState): DataRoom[] {
   return entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
 }
@@ -45,7 +46,7 @@ export function selectVisibleContentItems(
   const childFiles = getFileChildren(entities, activeFolder)
   const parentFolder = activeFolder.parentFolderId ? entities.foldersById[activeFolder.parentFolderId] : undefined
 
-  const parentNavigationItem: FolderContentItem[] = parentFolder
+  const parentFolderNavigationItems: FolderContentItem[] = parentFolder
     ? [
         {
           kind: 'folder',
@@ -59,7 +60,7 @@ export function selectVisibleContentItems(
       ]
     : []
 
-  const contentItems: FolderContentItem[] = [
+  const childContentItems: FolderContentItem[] = [
     ...childFolders.map((folder) => ({
       kind: 'folder' as const,
       id: folder.id,
@@ -76,5 +77,5 @@ export function selectVisibleContentItems(
     })),
   ]
 
-  return [...parentNavigationItem, ...sortContentItems(contentItems, sortState)]
+  return [...parentFolderNavigationItems, ...sortContentItems(childContentItems, sortState)]
 }

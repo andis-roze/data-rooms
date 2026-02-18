@@ -1,5 +1,6 @@
 import type { FolderContentItem, SortField, SortState } from '../model/homeViewTypes'
 
+// Sort utilities for mixed folder/file table rows.
 export function sortContentItems(items: FolderContentItem[], sortState: SortState): FolderContentItem[] {
   return [...items].sort((a, b) => {
     const compareName = () => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })

@@ -1,6 +1,7 @@
 import type { FileNode, Folder } from '../../dataroom/model'
 import { HomeDialogs } from '../HomeDialogs'
 
+// Maps controller state/handlers into the flattened HomeDialogs props.
 interface HomePageDialogsContainerProps {
   dialogs: {
     isCreateDataRoomDialogOpen: boolean
@@ -89,7 +90,7 @@ export function HomePageDialogsContainer({
       dataRoomDeleteSummary={dataRoomDeleteSummary}
       folderDeleteSummary={folderDeleteSummary}
       onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
-      onOpenDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
+      onDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
       onCreateDataRoom={handlers.handleCreateDataRoom}
       onCloseRenameDataRoomDialog={handlers.closeRenameDataRoomDialog}
       onRenameDataRoom={handlers.handleRenameDataRoom}

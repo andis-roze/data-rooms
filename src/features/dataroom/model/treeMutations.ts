@@ -10,6 +10,7 @@ import {
 import { collectFolderAndFileIds } from './treeDeleteTargets'
 import type { DataRoomState, FileNode, Folder, NodeId, UnixMs } from './types'
 
+// Pure immutable mutation helpers for data room, folder, and file tree operations.
 export interface CreateDataRoomInput {
   dataRoomId: NodeId
   rootFolderId: NodeId

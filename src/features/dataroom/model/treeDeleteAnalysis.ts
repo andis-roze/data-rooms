@@ -1,6 +1,7 @@
 import { collectFolderAndFileIds } from './treeDeleteTargets'
 import type { DataRoomState, NodeId } from './types'
 
+// Derives user-facing delete impact data and file-id collections for cleanup work.
 export interface FolderDeleteSummary {
   folderCount: number
   fileCount: number

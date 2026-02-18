@@ -1,5 +1,6 @@
 import type { DataRoomState, FileNode, Folder, NodeId } from '../../dataroom/model'
 
+// Tree traversal helpers shared by home selectors.
 export function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined
 }

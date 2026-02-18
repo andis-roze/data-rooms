@@ -6,6 +6,7 @@ import { FolderDialogs } from './dialogs/FolderDialogs'
 export { CreateDataRoomDialog } from './dialogs/CreateDataRoomDialog'
 export { FeedbackStack } from './dialogs/FeedbackStack'
 
+// Composes all home-page dialogs behind a single prop surface for container usage.
 interface HomeDialogsProps {
   createDataRoomDialogOpen: boolean
   renameDataRoomDialogOpen: boolean
@@ -30,7 +31,7 @@ interface HomeDialogsProps {
   dataRoomDeleteSummary: { folderCount: number; fileCount: number }
   folderDeleteSummary: { folderCount: number; fileCount: number }
   onCloseCreateDataRoomDialog: () => void
-  onOpenDataRoomNameChange: (value: string) => void
+  onDataRoomNameChange: (value: string) => void
   onCreateDataRoom: () => void
   onCloseRenameDataRoomDialog: () => void
   onRenameDataRoom: () => void
@@ -75,7 +76,7 @@ export function HomeDialogs({
   dataRoomDeleteSummary,
   folderDeleteSummary,
   onCloseCreateDataRoomDialog,
-  onOpenDataRoomNameChange,
+  onDataRoomNameChange,
   onCreateDataRoom,
   onCloseRenameDataRoomDialog,
   onRenameDataRoom,
@@ -106,7 +107,7 @@ export function HomeDialogs({
         activeDataRoomName={activeDataRoomName}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
         onCloseCreateDataRoomDialog={onCloseCreateDataRoomDialog}
-        onOpenDataRoomNameChange={onOpenDataRoomNameChange}
+        onDataRoomNameChange={onDataRoomNameChange}
         onCreateDataRoom={onCreateDataRoom}
         onCloseRenameDataRoomDialog={onCloseRenameDataRoomDialog}
         onRenameDataRoom={onRenameDataRoom}

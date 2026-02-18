@@ -2,7 +2,7 @@ import { useHomePageActions as useComposedHomePageActions } from './hooks/useHom
 
 type UseHomePageActionsParams = Parameters<typeof useComposedHomePageActions>[0]
 
-// Backward-compatible wrapper while action logic stays in focused hooks.
+// Compatibility layer to keep older imports stable while logic lives in focused hooks.
 export function useHomePageHandlers(params: UseHomePageActionsParams) {
   return useComposedHomePageActions(params)
 }
