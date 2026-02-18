@@ -71,7 +71,6 @@ export interface CreateFileInput {
   fileName: string
   size: number
   mimeType: 'application/pdf'
-  objectUrl: string
   now: UnixMs
 }
 
@@ -332,7 +331,7 @@ export function renameFolder(state: DataRoomState, input: RenameFolderInput): Da
 }
 
 export function createFile(state: DataRoomState, input: CreateFileInput): DataRoomState {
-  const { parentFolderId, fileId, fileName, size, mimeType, objectUrl, now } = input
+  const { parentFolderId, fileId, fileName, size, mimeType, now } = input
   const parent = state.foldersById[parentFolderId]
 
   if (!parent) {
@@ -351,7 +350,6 @@ export function createFile(state: DataRoomState, input: CreateFileInput): DataRo
     name: fileName.trim(),
     mimeType,
     size,
-    objectUrl,
     createdAt: now,
     updatedAt: now,
   }
@@ -539,6 +537,32 @@ export function getDataRoomDeleteSummary(state: DataRoomState, dataRoomId: NodeI
     folderCount: result.folderCount,
     fileCount: result.fileCount,
   }
+}
+
+export function getFileIdsForFolderCascadeDelete(state: DataRoomState, folderId: NodeId): NodeId[] {
+  const folder = state.foldersById[folderId]
+
+  if (!folder) {
+    return []
+  }
+
+  const dataRoom = state.dataRoomsById[folder.dataRoomId]
+
+  if (!dataRoom || dataRoom.rootFolderId === folderId) {
+    return []
+  }
+
+  return [...collectFolderAndFileIds(state, folderId).fileIds]
+}
+
+export function getFileIdsForDataRoomDelete(state: DataRoomState, dataRoomId: NodeId): NodeId[] {
+  const dataRoom = state.dataRoomsById[dataRoomId]
+
+  if (!dataRoom) {
+    return []
+  }
+
+  return [...collectFolderAndFileIds(state, dataRoom.rootFolderId).fileIds]
 }
 
 export function deleteFolderCascade(

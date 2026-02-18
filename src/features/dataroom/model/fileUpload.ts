@@ -2,7 +2,6 @@ export interface PreparedPdfUpload {
   fileName: string
   size: number
   mimeType: 'application/pdf'
-  objectUrl: string
 }
 
 export type PdfUploadValidationError = 'invalidPdf'
@@ -18,19 +17,10 @@ export function getPdfUploadValidationError(file: File): PdfUploadValidationErro
   return null
 }
 
-function createObjectUrl(file: File): string {
-  if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
-    return URL.createObjectURL(file)
-  }
-
-  return ''
-}
-
 export function preparePdfUpload(file: File): PreparedPdfUpload {
   return {
     fileName: file.name.trim(),
     size: file.size,
     mimeType: 'application/pdf',
-    objectUrl: createObjectUrl(file),
   }
 }

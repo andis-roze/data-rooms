@@ -26,7 +26,6 @@ export interface FileNode {
   name: string
   mimeType: 'application/pdf'
   size: number
-  objectUrl: string
   createdAt: UnixMs
   updatedAt: UnixMs
 }

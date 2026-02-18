@@ -81,7 +81,6 @@ export type DataRoomAction =
         fileName: string
         size: number
         mimeType: 'application/pdf'
-        objectUrl: string
       }
     }
   | {
