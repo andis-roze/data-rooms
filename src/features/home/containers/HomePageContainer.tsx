@@ -126,7 +126,7 @@ export function HomePageContainer() {
         activeFolderName={resolveDisplayName(activeFolder.name)}
         targetFolderName={targetFolder ? resolveDisplayName(targetFolder.name) : null}
         activeFileName={activeFile?.name ?? null}
-        activeFileObjectUrl={activeFile?.objectUrl ?? null}
+        activeFileId={activeFile?.id ?? null}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
         folderDeleteSummary={folderDeleteSummary}
         onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}

@@ -1,3 +1,4 @@
+import type { NodeId } from '../dataroom/model'
 import { DataRoomDialogs } from './dialogs/DataRoomDialogs'
 import { FileDialogs } from './dialogs/FileDialogs'
 import { FilePreviewDialog } from './dialogs/FilePreviewDialog'
@@ -24,8 +25,8 @@ interface HomeDialogsProps {
   activeDataRoomName: string
   activeFolderName: string
   targetFolderName: string | null
+  activeFileId: NodeId | null
   activeFileName: string | null
-  activeFileObjectUrl: string | null
   dataRoomDeleteSummary: { folderCount: number; fileCount: number }
   folderDeleteSummary: { folderCount: number; fileCount: number }
   onCloseCreateDataRoomDialog: () => void
@@ -69,8 +70,8 @@ export function HomeDialogs({
   activeDataRoomName,
   activeFolderName,
   targetFolderName,
+  activeFileId,
   activeFileName,
-  activeFileObjectUrl,
   dataRoomDeleteSummary,
   folderDeleteSummary,
   onCloseCreateDataRoomDialog,
@@ -146,8 +147,8 @@ export function HomeDialogs({
 
       <FilePreviewDialog
         viewFileDialogOpen={viewFileDialogOpen}
+        activeFileId={activeFileId}
         activeFileName={activeFileName}
-        activeFileObjectUrl={activeFileObjectUrl}
         onCloseViewFileDialog={onCloseViewFileDialog}
       />
     </>
