@@ -2,10 +2,10 @@ import { render, screen, waitForElementToBeRemoved, within } from '@testing-libr
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AppProviders } from './providers/AppProviders'
-import { appRoutes } from './router'
-import i18n from '../i18n/config'
-import { clearDataRoomState } from '../features/dataroom/model'
+import { AppProviders } from '../../app/providers/AppProviders'
+import { appRoutes } from '../../app/router'
+import i18n from '../../i18n/config'
+import { clearDataRoomState } from '../../features/dataroom/model'
 
 function renderRoute(path: string) {
   const router = createMemoryRouter(appRoutes, {
