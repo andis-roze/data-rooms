@@ -71,6 +71,12 @@ async function uploadPdf(user: ReturnType<typeof userEvent.setup>, name: string)
   await user.upload(uploadInput, file)
 }
 
+async function uploadNonPdf(user: ReturnType<typeof userEvent.setup>, name: string): Promise<void> {
+  const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+  const file = new File(['plain text'], name, { type: 'text/plain' })
+  await user.upload(uploadInput, file)
+}
+
 describe('App routing and localization', () => {
   beforeEach(async () => {
     clearDataRoomState()
@@ -200,5 +206,32 @@ describe('App routing and localization', () => {
 
     expect(screen.getByRole('link', { name: 'Start' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Raum' })).toBeInTheDocument()
+  })
+
+  it('navigates nested folders from table actions and breadcrumbs', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await createFolder(user, 'Invoices')
+
+    const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
+    expect(within(breadcrumbs).getByRole('button', { name: 'Finance' })).toBeInTheDocument()
+    expect(within(breadcrumbs).getByRole('button', { name: 'Invoices' })).toBeInTheDocument()
+
+    await user.click(within(breadcrumbs).getByRole('button', { name: 'Data Room' }))
+
+    expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
+  })
+
+  it('rejects non-pdf uploads with a clear error', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    renderRoute('/')
+
+    await uploadNonPdf(user, 'notes.txt')
+
+    expect(screen.getByText('Only PDF files are allowed.')).toBeInTheDocument()
+    expect(screen.queryByText('notes.txt')).not.toBeInTheDocument()
   })
 })
