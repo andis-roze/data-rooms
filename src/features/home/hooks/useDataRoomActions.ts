@@ -1,6 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react'
 import {
+  deleteManyFileBlobs,
   getDataRoomNameValidationError,
+  getFileIdsForDataRoomDelete,
   hasDuplicateDataRoomName,
   type DataRoom,
   type DataRoomState,
@@ -140,10 +142,12 @@ export function useDataRoomActions({
     enqueueFeedback(t('dataroomFeedbackDataRoomRenamed'), 'success')
   }
 
-  const handleDeleteDataRoom = () => {
+  const handleDeleteDataRoom = async () => {
     if (!activeDataRoom) {
       return
     }
+
+    const fileIdsToDelete = getFileIdsForDataRoomDelete(entities, activeDataRoom.id)
 
     dispatch({
       type: 'dataroom/deleteDataRoom',
@@ -152,6 +156,12 @@ export function useDataRoomActions({
 
     setIsDeleteDataRoomDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackDataRoomDeleted'), 'success')
+
+    try {
+      await deleteManyFileBlobs(fileIdsToDelete)
+    } catch {
+      // Best-effort cleanup only.
+    }
   }
 
   return {

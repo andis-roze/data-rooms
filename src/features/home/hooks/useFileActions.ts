@@ -1,9 +1,11 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import {
+  deleteFileBlob,
   getFileNameValidationError,
   getPdfUploadValidationError,
   hasDuplicateFileName,
   preparePdfUpload,
+  putFileBlob,
   type DataRoomState,
   type FileNode,
   type Folder,
@@ -77,7 +79,7 @@ export function useFileActions({
     setIsViewFileDialogOpen(false)
   }
 
-  const handleUploadInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleUploadInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (!activeFolder) {
       return
     }
@@ -111,15 +113,24 @@ export function useFileActions({
       return
     }
 
+    const fileId = generateNodeId('file')
+
+    try {
+      await putFileBlob(fileId, selectedFile)
+    } catch {
+      enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
+      event.target.value = ''
+      return
+    }
+
     dispatch({
       type: 'dataroom/uploadFile',
       payload: {
         parentFolderId: activeFolder.id,
-        fileId: generateNodeId('file'),
+        fileId,
         fileName: preparedUpload.fileName,
         size: preparedUpload.size,
         mimeType: preparedUpload.mimeType,
-        objectUrl: preparedUpload.objectUrl,
       },
     })
 
@@ -158,20 +169,28 @@ export function useFileActions({
     enqueueFeedback(t('dataroomFeedbackFileRenamed'), 'success')
   }
 
-  const handleDeleteFile = () => {
+  const handleDeleteFile = async () => {
     if (!activeFile) {
       return
     }
 
+    const fileId = activeFile.id
+
     dispatch({
       type: 'dataroom/deleteFile',
       payload: {
-        fileId: activeFile.id,
+        fileId,
       },
     })
 
     setIsDeleteFileDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
+
+    try {
+      await deleteFileBlob(fileId)
+    } catch {
+      // Best-effort cleanup only.
+    }
   }
 
   return {

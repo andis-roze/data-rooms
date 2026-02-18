@@ -105,5 +105,6 @@
   "dataroomFeedbackFileDeleted": "Datei geloscht.",
   "dataroomSortByNameAria": "Nach Name sortieren",
   "dataroomSortByTypeAria": "Nach Typ sortieren",
-  "dataroomSortByUpdatedAria": "Nach Anderungsdatum sortieren"
+  "dataroomSortByUpdatedAria": "Nach Anderungsdatum sortieren",
+  "dataroomErrorFileStorageFailed": "Datei konnte nicht im Browser-Speicher abgelegt werden."
 }

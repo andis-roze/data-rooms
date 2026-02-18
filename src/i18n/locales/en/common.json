@@ -105,5 +105,6 @@
   "secondaryAction": "View Documentation",
   "sectionTitle": "What this starter includes",
   "subtitle": "A minimal React + TypeScript starter with i18next and a polished Material UI theme.",
-  "title": "Build products that speak every language"
+  "title": "Build products that speak every language",
+  "dataroomErrorFileStorageFailed": "Unable to store file in browser storage."
 }

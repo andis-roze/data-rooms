@@ -1,5 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import {
+  deleteManyFileBlobs,
+  getFileIdsForFolderCascadeDelete,
   getFolderNameValidationError,
   hasDuplicateFolderName,
   type DataRoom,
@@ -148,10 +150,12 @@ export function useFolderActions({
     enqueueFeedback(t('dataroomFeedbackFolderRenamed'), 'success')
   }
 
-  const handleDeleteFolder = () => {
+  const handleDeleteFolder = async () => {
     if (!targetFolder) {
       return
     }
+
+    const fileIdsToDelete = getFileIdsForFolderCascadeDelete(entities, targetFolder.id)
 
     dispatch({
       type: 'dataroom/deleteFolder',
@@ -161,6 +165,12 @@ export function useFolderActions({
     setIsDeleteFolderDialogOpen(false)
     setTargetFolderId(null)
     enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
+
+    try {
+      await deleteManyFileBlobs(fileIdsToDelete)
+    } catch {
+      // Best-effort cleanup only.
+    }
   }
 
   return {
