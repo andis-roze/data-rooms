@@ -8,7 +8,21 @@ function getLocalStorage(): Storage | null {
     return null
   }
 
-  return window.localStorage
+  const localStorageRef = window.localStorage as Partial<Storage> | undefined
+
+  if (!localStorageRef) {
+    return null
+  }
+
+  if (
+    typeof localStorageRef.getItem !== 'function' ||
+    typeof localStorageRef.setItem !== 'function' ||
+    typeof localStorageRef.removeItem !== 'function'
+  ) {
+    return null
+  }
+
+  return localStorageRef as Storage
 }
 
 function isDataRoomState(value: unknown): value is DataRoomState {

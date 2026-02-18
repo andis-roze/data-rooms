@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import { CssBaseline, GlobalStyles, ThemeProvider } from '@mui/material'
+import { DataRoomProvider } from '../../features/dataroom/state'
 import { appTheme } from '../theme'
 
 export function AppProviders({ children }: PropsWithChildren) {
@@ -15,7 +16,7 @@ export function AppProviders({ children }: PropsWithChildren) {
           },
         }}
       />
-      {children}
+      <DataRoomProvider>{children}</DataRoomProvider>
     </ThemeProvider>
   )
 }
