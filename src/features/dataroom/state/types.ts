@@ -51,3 +51,27 @@ export type DataRoomAction =
         folderId: NodeId
       }
     }
+  | {
+      type: 'dataroom/uploadFile'
+      payload: {
+        parentFolderId: NodeId
+        fileId: NodeId
+        fileName: string
+        size: number
+        mimeType: 'application/pdf'
+        objectUrl: string
+      }
+    }
+  | {
+      type: 'dataroom/renameFile'
+      payload: {
+        fileId: NodeId
+        fileName: string
+      }
+    }
+  | {
+      type: 'dataroom/deleteFile'
+      payload: {
+        fileId: NodeId
+      }
+    }

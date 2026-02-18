@@ -4,18 +4,26 @@ export function normalizeNodeName(name: string): string {
   return name.trim().toLocaleLowerCase()
 }
 
-export function getFolderNameValidationError(name: string): string | null {
+function getNodeNameValidationError(name: string, nodeLabel: string): string | null {
   const trimmed = name.trim()
 
   if (!trimmed) {
-    return 'Folder name cannot be empty.'
+    return `${nodeLabel} name cannot be empty.`
   }
 
   if (trimmed === '.' || trimmed === '..') {
-    return 'Folder name is not allowed.'
+    return `${nodeLabel} name is not allowed.`
   }
 
   return null
+}
+
+export function getFolderNameValidationError(name: string): string | null {
+  return getNodeNameValidationError(name, 'Folder')
+}
+
+export function getFileNameValidationError(name: string): string | null {
+  return getNodeNameValidationError(name, 'File')
 }
 
 export function hasDuplicateFolderName(
@@ -48,5 +56,34 @@ export function hasDuplicateFolderName(
     }
 
     return normalizeNodeName(child.name) === normalizedCandidate
+  })
+}
+
+export function hasDuplicateFileName(
+  state: DataRoomState,
+  parentFolderId: NodeId,
+  fileName: string,
+  excludeFileId?: NodeId,
+): boolean {
+  const parent = state.foldersById[parentFolderId]
+
+  if (!parent) {
+    return false
+  }
+
+  const normalizedCandidate = normalizeNodeName(fileName)
+
+  return parent.fileIds.some((fileId) => {
+    if (excludeFileId && fileId === excludeFileId) {
+      return false
+    }
+
+    const file = state.filesById[fileId]
+
+    if (!file) {
+      return false
+    }
+
+    return normalizeNodeName(file.name) === normalizedCandidate
   })
 }

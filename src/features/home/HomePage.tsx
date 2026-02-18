@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
@@ -11,6 +11,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import MenuItem from '@mui/material/MenuItem'
@@ -21,15 +22,35 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import {
+  getFileNameValidationError,
   getFolderDeleteSummary,
   getFolderNameValidationError,
+  getPdfUploadValidationError,
+  hasDuplicateFileName,
   hasDuplicateFolderName,
+  preparePdfUpload,
   type DataRoomState,
   type FileNode,
   type Folder,
   type NodeId,
 } from '../dataroom/model'
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
+
+interface FeedbackState {
+  message: string
+  severity: 'success' | 'error'
+}
+
+let fallbackIdCounter = 0
+
+function generateNodeId(prefix: 'folder' | 'file'): NodeId {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`
+  }
+
+  fallbackIdCounter += 1
+  return `${prefix}-${fallbackIdCounter}`
+}
 
 function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined
@@ -84,14 +105,6 @@ function formatFileSize(bytes: number): string {
 
   const mb = kb / 1024
   return `${mb.toFixed(1)} MB`
-}
-
-function generateFolderId(): NodeId {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `folder-${crypto.randomUUID()}`
-  }
-
-  return `folder-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 interface FolderTreeNodeProps {
@@ -152,13 +165,24 @@ function FolderTreeNode({
 export function HomePage() {
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
+  const uploadInputRef = useRef<HTMLInputElement | null>(null)
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  const [renameFileDialogOpen, setRenameFileDialogOpen] = useState(false)
+  const [deleteFileDialogOpen, setDeleteFileDialogOpen] = useState(false)
+  const [viewFileDialogOpen, setViewFileDialogOpen] = useState(false)
+
   const [folderNameDraft, setFolderNameDraft] = useState('')
   const [folderNameError, setFolderNameError] = useState<string | null>(null)
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
+
+  const [fileNameDraft, setFileNameDraft] = useState('')
+  const [fileNameError, setFileNameError] = useState<string | null>(null)
+  const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
+
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null)
 
   const dataRooms = entities.dataRoomOrder.map((id) => entities.dataRoomsById[id]).filter(isDefined)
 
@@ -201,6 +225,7 @@ export function HomePage() {
 
   const canDeleteActiveFolder = activeFolder.id !== rootFolder.id
   const deleteSummary = getFolderDeleteSummary(entities, activeFolder.id)
+  const activeFile = activeFileId ? entities.filesById[activeFileId] : null
 
   const openCreateDialog = () => {
     setFolderNameDraft('')
@@ -212,6 +237,23 @@ export function HomePage() {
     setFolderNameDraft(activeFolder.name)
     setFolderNameError(null)
     setRenameDialogOpen(true)
+  }
+
+  const openRenameFileDialog = (file: FileNode) => {
+    setActiveFileId(file.id)
+    setFileNameDraft(file.name)
+    setFileNameError(null)
+    setRenameFileDialogOpen(true)
+  }
+
+  const openDeleteFileDialog = (file: FileNode) => {
+    setActiveFileId(file.id)
+    setDeleteFileDialogOpen(true)
+  }
+
+  const openViewFileDialog = (file: FileNode) => {
+    setActiveFileId(file.id)
+    setViewFileDialogOpen(true)
   }
 
   const handleCreateFolder = () => {
@@ -232,13 +274,13 @@ export function HomePage() {
       payload: {
         dataRoomId: activeDataRoom.id,
         parentFolderId: activeFolder.id,
-        folderId: generateFolderId(),
+        folderId: generateNodeId('folder'),
         folderName: folderNameDraft,
       },
     })
 
     setCreateDialogOpen(false)
-    setFeedbackMessage('Folder created.')
+    setFeedback({ message: 'Folder created.', severity: 'success' })
   }
 
   const handleRenameFolder = () => {
@@ -263,7 +305,7 @@ export function HomePage() {
     })
 
     setRenameDialogOpen(false)
-    setFeedbackMessage('Folder renamed.')
+    setFeedback({ message: 'Folder renamed.', severity: 'success' })
   }
 
   const handleDeleteFolder = () => {
@@ -275,7 +317,98 @@ export function HomePage() {
     })
 
     setDeleteDialogOpen(false)
-    setFeedbackMessage('Folder deleted.')
+    setFeedback({ message: 'Folder deleted.', severity: 'success' })
+  }
+
+  const handleUploadInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+
+    if (!selectedFile) {
+      return
+    }
+
+    const uploadError = getPdfUploadValidationError(selectedFile)
+
+    if (uploadError) {
+      setFeedback({ message: uploadError, severity: 'error' })
+      event.target.value = ''
+      return
+    }
+
+    const preparedUpload = preparePdfUpload(selectedFile)
+    const nameError = getFileNameValidationError(preparedUpload.fileName)
+
+    if (nameError) {
+      setFeedback({ message: nameError, severity: 'error' })
+      event.target.value = ''
+      return
+    }
+
+    if (hasDuplicateFileName(entities, activeFolder.id, preparedUpload.fileName)) {
+      setFeedback({ message: 'File with this name already exists in this location.', severity: 'error' })
+      event.target.value = ''
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/uploadFile',
+      payload: {
+        parentFolderId: activeFolder.id,
+        fileId: generateNodeId('file'),
+        fileName: preparedUpload.fileName,
+        size: preparedUpload.size,
+        mimeType: preparedUpload.mimeType,
+        objectUrl: preparedUpload.objectUrl,
+      },
+    })
+
+    setFeedback({ message: 'PDF uploaded.', severity: 'success' })
+    event.target.value = ''
+  }
+
+  const handleRenameFile = () => {
+    if (!activeFile) {
+      return
+    }
+
+    const validationError = getFileNameValidationError(fileNameDraft)
+
+    if (validationError) {
+      setFileNameError(validationError)
+      return
+    }
+
+    if (hasDuplicateFileName(entities, activeFile.parentFolderId, fileNameDraft, activeFile.id)) {
+      setFileNameError('File with this name already exists in this location.')
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/renameFile',
+      payload: {
+        fileId: activeFile.id,
+        fileName: fileNameDraft,
+      },
+    })
+
+    setRenameFileDialogOpen(false)
+    setFeedback({ message: 'File renamed.', severity: 'success' })
+  }
+
+  const handleDeleteFile = () => {
+    if (!activeFile) {
+      return
+    }
+
+    dispatch({
+      type: 'dataroom/deleteFile',
+      payload: {
+        fileId: activeFile.id,
+      },
+    })
+
+    setDeleteFileDialogOpen(false)
+    setFeedback({ message: 'File deleted.', severity: 'success' })
   }
 
   return (
@@ -367,13 +500,22 @@ export function HomePage() {
               <Button variant="outlined" color="error" disabled={!canDeleteActiveFolder} onClick={() => setDeleteDialogOpen(true)}>
                 Delete folder
               </Button>
-              <Button variant="text" disabled>
+              <Button variant="text" onClick={() => uploadInputRef.current?.click()}>
                 Upload PDF
               </Button>
               <Button variant="text" disabled>
                 Sort: Name (A-Z)
               </Button>
             </Stack>
+
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={handleUploadInputChange}
+              data-testid="upload-pdf-input"
+              style={{ display: 'none' }}
+            />
 
             <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
               <List aria-label="Current folder contents">
@@ -389,9 +531,37 @@ export function HomePage() {
                 ))}
 
                 {childFiles.map((file) => (
-                  <ListItemButton key={file.id}>
+                  <ListItem
+                    key={file.id}
+                    secondaryAction={
+                      <Stack direction="row" spacing={0.5}>
+                        <Button
+                          size="small"
+                          aria-label={`View file ${file.name}`}
+                          onClick={() => openViewFileDialog(file)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="small"
+                          aria-label={`Rename file ${file.name}`}
+                          onClick={() => openRenameFileDialog(file)}
+                        >
+                          Rename
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          aria-label={`Delete file ${file.name}`}
+                          onClick={() => openDeleteFileDialog(file)}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    }
+                  >
                     <ListItemText primary={file.name} secondary={`PDF - ${formatFileSize(file.size)}`} />
-                  </ListItemButton>
+                  </ListItem>
                 ))}
 
                 {childFolders.length === 0 && childFiles.length === 0 ? (
@@ -475,9 +645,7 @@ export function HomePage() {
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>Delete folder</DialogTitle>
         <DialogContent>
-          <Typography>
-            Delete "{activeFolder.name}" and all nested content?
-          </Typography>
+          <Typography>Delete "{activeFolder.name}" and all nested content?</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             This will remove {deleteSummary.folderCount} folder(s) and {deleteSummary.fileCount} file(s).
           </Typography>
@@ -490,14 +658,77 @@ export function HomePage() {
         </DialogActions>
       </Dialog>
 
+      <Dialog open={renameFileDialogOpen} onClose={() => setRenameFileDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Rename file</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            fullWidth
+            label="File name"
+            value={fileNameDraft}
+            onChange={(event) => {
+              setFileNameDraft(event.target.value)
+              setFileNameError(null)
+            }}
+            error={Boolean(fileNameError)}
+            helperText={fileNameError ?? ' '}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleRenameFile()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRenameFileDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRenameFile} variant="contained">
+            Rename
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteFileDialogOpen} onClose={() => setDeleteFileDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Delete file</DialogTitle>
+        <DialogContent>
+          <Typography>Delete "{activeFile?.name ?? ''}"?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteFileDialogOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteFile}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={viewFileDialogOpen} onClose={() => setViewFileDialogOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>{activeFile?.name ?? 'File preview'}</DialogTitle>
+        <DialogContent>
+          {activeFile?.objectUrl ? (
+            <Box
+              component="iframe"
+              title={activeFile.name}
+              src={activeFile.objectUrl}
+              sx={{ width: '100%', minHeight: '70vh', border: 0 }}
+            />
+          ) : (
+            <Typography color="text.secondary">File preview is unavailable in this environment.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewFileDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
-        open={Boolean(feedbackMessage)}
+        open={Boolean(feedback)}
         autoHideDuration={2500}
-        onClose={() => setFeedbackMessage(null)}
+        onClose={() => setFeedback(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert severity="success" variant="filled" onClose={() => setFeedbackMessage(null)}>
-          {feedbackMessage}
+        <Alert severity={feedback?.severity ?? 'success'} variant="filled" onClose={() => setFeedback(null)}>
+          {feedback?.message}
         </Alert>
       </Snackbar>
     </Container>

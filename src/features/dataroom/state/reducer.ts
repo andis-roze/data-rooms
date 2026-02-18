@@ -1,10 +1,13 @@
 import {
+  createFile,
   createFolder,
   createSeedDataRoomState,
+  deleteFile,
   deleteFolderCascade,
   getDefaultSelection,
   hasDataRoom,
   hasFolder,
+  renameFile,
   renameFolder,
   resolveSelection,
   type DataRoomState,
@@ -130,6 +133,54 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
         entities: result.nextState,
         selectedDataRoomId: selection.selectedDataRoomId,
         selectedFolderId: selection.selectedFolderId,
+      }
+    }
+
+    case 'dataroom/uploadFile': {
+      const entities = createFile(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (entities === state.entities) {
+        return state
+      }
+
+      return {
+        ...state,
+        entities,
+      }
+    }
+
+    case 'dataroom/renameFile': {
+      const entities = renameFile(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (entities === state.entities) {
+        return state
+      }
+
+      return {
+        ...state,
+        entities,
+      }
+    }
+
+    case 'dataroom/deleteFile': {
+      const entities = deleteFile(state.entities, {
+        ...action.payload,
+        now: Date.now(),
+      })
+
+      if (entities === state.entities) {
+        return state
+      }
+
+      return {
+        ...state,
+        entities,
       }
     }
 

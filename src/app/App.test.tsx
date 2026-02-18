@@ -1,4 +1,4 @@
-import { render, screen, waitForElementToBeRemoved } from '@testing-library/react'
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -62,6 +62,36 @@ describe('App routing and localization', () => {
 
     expect(screen.queryByText('Legal')).not.toBeInTheDocument()
     expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
+  })
+
+  it('uploads, renames, and deletes a pdf file with duplicate validation', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+    const file = new File(['%PDF-1.4 test'], 'contract.pdf', { type: 'application/pdf' })
+
+    await user.upload(uploadInput, file)
+    expect(screen.getByText('contract.pdf')).toBeInTheDocument()
+
+    await user.upload(uploadInput, file)
+    expect(screen.getByText('File with this name already exists in this location.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Rename file contract.pdf' }))
+    const renameFileInput = screen.getByRole('textbox', { name: 'File name' })
+    await user.clear(renameFileInput)
+    await user.type(renameFileInput, 'nda.pdf')
+    await user.click(screen.getByRole('button', { name: 'Rename' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Rename file' }))
+
+    expect(screen.getByText('nda.pdf')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Delete file nda.pdf' }))
+    const deleteFileDialog = screen.getByRole('dialog', { name: 'Delete file' })
+    await user.click(within(deleteFileDialog).getByRole('button', { name: 'Delete' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete file' }))
+
+    expect(screen.queryByText('nda.pdf')).not.toBeInTheDocument()
   })
 
   it('switches language to German from header controls', async () => {

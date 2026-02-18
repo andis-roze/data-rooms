@@ -1,5 +1,11 @@
-import { getFolderNameValidationError, hasDuplicateFolderName, normalizeNodeName } from './nameValidation'
-import type { DataRoomState, Folder, NodeId, UnixMs } from './types'
+import {
+  getFileNameValidationError,
+  getFolderNameValidationError,
+  hasDuplicateFileName,
+  hasDuplicateFolderName,
+  normalizeNodeName,
+} from './nameValidation'
+import type { DataRoomState, FileNode, Folder, NodeId, UnixMs } from './types'
 
 export interface DataRoomSelection {
   selectedDataRoomId: NodeId | null
@@ -31,6 +37,27 @@ export interface DeleteFolderCascadeResult {
   fallbackFolderId: NodeId | null
   deletedFolderCount: number
   deletedFileCount: number
+}
+
+export interface CreateFileInput {
+  parentFolderId: NodeId
+  fileId: NodeId
+  fileName: string
+  size: number
+  mimeType: 'application/pdf'
+  objectUrl: string
+  now: UnixMs
+}
+
+export interface RenameFileInput {
+  fileId: NodeId
+  fileName: string
+  now: UnixMs
+}
+
+export interface DeleteFileInput {
+  fileId: NodeId
+  now: UnixMs
 }
 
 export interface FolderDeleteSummary {
@@ -120,15 +147,7 @@ export function createFolder(state: DataRoomState, input: CreateFolderInput): Da
 
   const folderNameError = getFolderNameValidationError(folderName)
 
-  if (folderNameError) {
-    return state
-  }
-
-  if (hasDuplicateFolderName(state, parentFolderId, folderName)) {
-    return state
-  }
-
-  if (state.foldersById[folderId]) {
+  if (folderNameError || hasDuplicateFolderName(state, parentFolderId, folderName) || state.foldersById[folderId]) {
     return state
   }
 
@@ -173,14 +192,9 @@ export function renameFolder(state: DataRoomState, input: RenameFolderInput): Da
   }
 
   const folderNameError = getFolderNameValidationError(folderName)
-
-  if (folderNameError) {
-    return state
-  }
-
   const nextName = folderName.trim()
 
-  if (normalizeNodeName(nextName) === normalizeNodeName(folder.name)) {
+  if (folderNameError || normalizeNodeName(nextName) === normalizeNodeName(folder.name)) {
     return state
   }
 
@@ -208,7 +222,142 @@ export function renameFolder(state: DataRoomState, input: RenameFolderInput): Da
   }
 }
 
-function collectFolderAndFileIds(state: DataRoomState, rootFolderId: NodeId): FolderDeleteSummary & { folderIds: Set<NodeId>; fileIds: Set<NodeId> } {
+export function createFile(state: DataRoomState, input: CreateFileInput): DataRoomState {
+  const { parentFolderId, fileId, fileName, size, mimeType, objectUrl, now } = input
+  const parent = state.foldersById[parentFolderId]
+
+  if (!parent) {
+    return state
+  }
+
+  const fileNameError = getFileNameValidationError(fileName)
+
+  if (fileNameError || state.filesById[fileId] || hasDuplicateFileName(state, parentFolderId, fileName)) {
+    return state
+  }
+
+  const nextFile: FileNode = {
+    id: fileId,
+    parentFolderId,
+    name: fileName.trim(),
+    mimeType,
+    size,
+    objectUrl,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  return {
+    ...state,
+    filesById: {
+      ...state.filesById,
+      [fileId]: nextFile,
+    },
+    foldersById: {
+      ...state.foldersById,
+      [parentFolderId]: {
+        ...parent,
+        fileIds: [...parent.fileIds, fileId],
+        updatedAt: now,
+      },
+    },
+    dataRoomsById: {
+      ...state.dataRoomsById,
+      [parent.dataRoomId]: {
+        ...state.dataRoomsById[parent.dataRoomId],
+        updatedAt: now,
+      },
+    },
+  }
+}
+
+export function renameFile(state: DataRoomState, input: RenameFileInput): DataRoomState {
+  const { fileId, fileName, now } = input
+  const file = state.filesById[fileId]
+
+  if (!file) {
+    return state
+  }
+
+  const fileNameError = getFileNameValidationError(fileName)
+  const nextName = fileName.trim()
+
+  if (fileNameError || normalizeNodeName(nextName) === normalizeNodeName(file.name)) {
+    return state
+  }
+
+  if (hasDuplicateFileName(state, file.parentFolderId, nextName, fileId)) {
+    return state
+  }
+
+  const parent = state.foldersById[file.parentFolderId]
+
+  if (!parent) {
+    return state
+  }
+
+  return {
+    ...state,
+    filesById: {
+      ...state.filesById,
+      [fileId]: {
+        ...file,
+        name: nextName,
+        updatedAt: now,
+      },
+    },
+    dataRoomsById: {
+      ...state.dataRoomsById,
+      [parent.dataRoomId]: {
+        ...state.dataRoomsById[parent.dataRoomId],
+        updatedAt: now,
+      },
+    },
+  }
+}
+
+export function deleteFile(state: DataRoomState, input: DeleteFileInput): DataRoomState {
+  const { fileId, now } = input
+  const file = state.filesById[fileId]
+
+  if (!file) {
+    return state
+  }
+
+  const parent = state.foldersById[file.parentFolderId]
+
+  if (!parent) {
+    return state
+  }
+
+  const nextFilesById = { ...state.filesById }
+  delete nextFilesById[fileId]
+
+  return {
+    ...state,
+    filesById: nextFilesById,
+    foldersById: {
+      ...state.foldersById,
+      [parent.id]: {
+        ...parent,
+        fileIds: parent.fileIds.filter((id) => id !== fileId),
+        updatedAt: now,
+      },
+    },
+    dataRoomsById: {
+      ...state.dataRoomsById,
+      [parent.dataRoomId]: {
+        ...state.dataRoomsById[parent.dataRoomId],
+        updatedAt: now,
+      },
+    },
+  }
+}
+
+function collectFolderAndFileIds(
+  state: DataRoomState,
+  rootFolderId: NodeId,
+): FolderDeleteSummary & { folderIds: Set<NodeId>; fileIds: Set<NodeId> } {
   const folderIds = new Set<NodeId>()
   const fileIds = new Set<NodeId>()
   const stack: NodeId[] = [rootFolderId]
