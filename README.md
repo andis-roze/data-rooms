@@ -15,7 +15,6 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 - Folder breadcrumbs and tree navigation
 - Sorting by name/type/updated with persisted preference
 - Localized UI (`en`, `de`)
-- Optional Google auth gate with immediate post-auth Google Drive ping
 
 ## Architecture
 
@@ -33,13 +32,11 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 
 - Chose client-only persistence for fast implementation and local reproducibility.
 - Kept reducer operations pure to reduce regression risk in nested tree operations.
-- Kept Google auth optional and environment-driven so local/core workflows still run without external credentials.
 
 ## Requirements
 
 - Node.js LTS
 - npm
-- Optional for auth flow: Google OAuth Web Client ID
 
 ## Run Locally
 
@@ -47,14 +44,6 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 npm install
 npm run dev
 ```
-
-Optional auth setup (`.env.local`):
-
-```bash
-VITE_GOOGLE_CLIENT_ID=your_google_oauth_web_client_id
-```
-
-When configured, the app requires Google sign-in for the Home page and immediately performs a lightweight Drive API ping after login.
 
 ## Run With Docker
 
@@ -108,7 +97,6 @@ npm run i18n:sync
 - No backend or multi-user sync.
 - Data is browser-local only.
 - Large-file behavior depends on browser storage limits.
-- Google auth is client-side OAuth and depends on correct Google Cloud OAuth origin configuration.
 
 ## Future Improvements
 
