@@ -31,7 +31,7 @@ export function HomePageContainer() {
   } = selection
 
   const { resolveDisplayName } = viewHelpers
-  const { dialogs, forms, uploadInputRef, sortState, feedbackQueue } = uiState
+  const { dialogs, forms, uploadInputRef, sortState, feedbackQueue, feedbackTimeoutMs } = uiState
 
   if (dataRooms.length === 0) {
     return (
@@ -151,7 +151,11 @@ export function HomePageContainer() {
         onCloseViewFileDialog={handlers.closeViewFileDialog}
       />
 
-      <FeedbackStack feedbackQueue={feedbackQueue} onDismissFeedback={handlers.dismissFeedback} />
+      <FeedbackStack
+        feedbackQueue={feedbackQueue}
+        timeoutMs={feedbackTimeoutMs}
+        onDismissFeedback={handlers.dismissFeedback}
+      />
     </Container>
   )
 }

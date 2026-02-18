@@ -15,6 +15,7 @@ import {
   selectRootFolder,
   selectVisibleContentItems,
 } from './selectors/homeSelectors'
+import { loadFeedbackTimeoutMs } from './services/feedback'
 import { loadSortModePreference } from './services/sortPreference'
 import type { FeedbackState, SortState } from './types'
 import { useHomePageHandlers } from './useHomePageHandlers'
@@ -48,6 +49,7 @@ export function useHomePageController() {
 
   const [feedbackQueue, setFeedbackQueue] = useState<FeedbackState[]>([])
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
+  const feedbackTimeoutMs = loadFeedbackTimeoutMs()
 
   const rawTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
   const tr = (key: string, options?: Record<string, unknown>): string => rawTranslate(key, options)
@@ -185,6 +187,7 @@ export function useHomePageController() {
     uiState: {
       uploadInputRef,
       sortState,
+      feedbackTimeoutMs,
       feedbackQueue,
       dialogs: {
         isCreateDataRoomDialogOpen,
