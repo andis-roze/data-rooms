@@ -1,29 +1,32 @@
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import {
   getFileNameValidationError,
   getPdfUploadValidationError,
   hasDuplicateFileName,
   preparePdfUpload,
+  type DataRoomState,
+  type FileNode,
+  type Folder,
+  type NodeId,
 } from '../../dataroom/model'
-import type { HomeActionCommonParams } from './actionParams'
+import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
 
-type Params = Pick<
-  HomeActionCommonParams,
-  | 't'
-  | 'entities'
-  | 'dispatch'
-  | 'activeFolder'
-  | 'activeFile'
-  | 'fileNameDraft'
-  | 'enqueueFeedback'
-  | 'setRenameFileDialogOpen'
-  | 'setDeleteFileDialogOpen'
-  | 'setViewFileDialogOpen'
-  | 'setActiveFileId'
-  | 'setFileNameDraft'
-  | 'setFileNameError'
->
+interface UseFileActionsParams {
+  t: (key: string, options?: Record<string, unknown>) => string
+  entities: DataRoomState
+  dispatch: Dispatch<DataRoomAction>
+  activeFolder: Folder | null
+  activeFile: FileNode | null
+  fileNameDraft: string
+  enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  setActiveFileId: Dispatch<SetStateAction<NodeId | null>>
+  setFileNameDraft: Dispatch<SetStateAction<string>>
+  setFileNameError: Dispatch<SetStateAction<string | null>>
+  setIsRenameFileDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsDeleteFileDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsViewFileDialogOpen: Dispatch<SetStateAction<boolean>>
+}
 
 export function useFileActions({
   t,
@@ -33,28 +36,45 @@ export function useFileActions({
   activeFile,
   fileNameDraft,
   enqueueFeedback,
-  setRenameFileDialogOpen,
-  setDeleteFileDialogOpen,
-  setViewFileDialogOpen,
   setActiveFileId,
   setFileNameDraft,
   setFileNameError,
-}: Params) {
-  const openRenameFileDialog = (file: { id: string; name: string }) => {
+  setIsRenameFileDialogOpen,
+  setIsDeleteFileDialogOpen,
+  setIsViewFileDialogOpen,
+}: UseFileActionsParams) {
+  const handleFileNameDraftChange = (value: string) => {
+    setFileNameDraft(value)
+    setFileNameError(null)
+  }
+
+  const openRenameFileDialog = (file: FileNode) => {
     setActiveFileId(file.id)
     setFileNameDraft(file.name)
     setFileNameError(null)
-    setRenameFileDialogOpen(true)
+    setIsRenameFileDialogOpen(true)
   }
 
-  const openDeleteFileDialog = (file: { id: string }) => {
-    setActiveFileId(file.id)
-    setDeleteFileDialogOpen(true)
+  const closeRenameFileDialog = () => {
+    setIsRenameFileDialogOpen(false)
   }
 
-  const openViewFileDialog = (file: { id: string }) => {
+  const openDeleteFileDialog = (file: FileNode) => {
     setActiveFileId(file.id)
-    setViewFileDialogOpen(true)
+    setIsDeleteFileDialogOpen(true)
+  }
+
+  const closeDeleteFileDialog = () => {
+    setIsDeleteFileDialogOpen(false)
+  }
+
+  const openViewFileDialog = (file: FileNode) => {
+    setActiveFileId(file.id)
+    setIsViewFileDialogOpen(true)
+  }
+
+  const closeViewFileDialog = () => {
+    setIsViewFileDialogOpen(false)
   }
 
   const handleUploadInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +154,7 @@ export function useFileActions({
       },
     })
 
-    setRenameFileDialogOpen(false)
+    setIsRenameFileDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackFileRenamed'), 'success')
   }
 
@@ -150,14 +170,18 @@ export function useFileActions({
       },
     })
 
-    setDeleteFileDialogOpen(false)
+    setIsDeleteFileDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
   }
 
   return {
+    handleFileNameDraftChange,
     openRenameFileDialog,
+    closeRenameFileDialog,
     openDeleteFileDialog,
+    closeDeleteFileDialog,
     openViewFileDialog,
+    closeViewFileDialog,
     handleUploadInputChange,
     handleRenameFile,
     handleDeleteFile,

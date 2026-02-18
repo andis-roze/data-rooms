@@ -1,14 +1,20 @@
-import type { HomeActionCommonParams } from './actionParams'
 import { useDataRoomActions } from './useDataRoomActions'
 import { useFileActions } from './useFileActions'
 import { useFolderActions } from './useFolderActions'
 import { useSortActions } from './useSortActions'
 
-export function useHomePageActions(params: HomeActionCommonParams) {
-  const dataRoomActions = useDataRoomActions(params)
-  const folderActions = useFolderActions(params)
-  const fileActions = useFileActions(params)
-  const sortActions = useSortActions(params)
+interface UseHomePageActionsParams {
+  dataRoom: Parameters<typeof useDataRoomActions>[0]
+  folder: Parameters<typeof useFolderActions>[0]
+  file: Parameters<typeof useFileActions>[0]
+  sort: Parameters<typeof useSortActions>[0]
+}
+
+export function useHomePageActions(params: UseHomePageActionsParams) {
+  const dataRoomActions = useDataRoomActions(params.dataRoom)
+  const folderActions = useFolderActions(params.folder)
+  const fileActions = useFileActions(params.file)
+  const sortActions = useSortActions(params.sort)
 
   return {
     ...dataRoomActions,

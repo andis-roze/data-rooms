@@ -1,28 +1,32 @@
+import type { Dispatch, SetStateAction } from 'react'
 import {
   getFolderNameValidationError,
   hasDuplicateFolderName,
+  type DataRoom,
+  type DataRoomState,
+  type Folder,
+  type NodeId,
 } from '../../dataroom/model'
-import type { HomeActionCommonParams } from './actionParams'
+import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
 
-type Params = Pick<
-  HomeActionCommonParams,
-  | 't'
-  | 'entities'
-  | 'dispatch'
-  | 'activeDataRoom'
-  | 'activeFolder'
-  | 'targetFolder'
-  | 'folderNameDraft'
-  | 'enqueueFeedback'
-  | 'setCreateDialogOpen'
-  | 'setRenameDialogOpen'
-  | 'setDeleteDialogOpen'
-  | 'setTargetFolderId'
-  | 'setFolderNameDraft'
-  | 'setFolderNameError'
-  | 'resolveDisplayName'
->
+interface UseFolderActionsParams {
+  t: (key: string, options?: Record<string, unknown>) => string
+  entities: DataRoomState
+  dispatch: Dispatch<DataRoomAction>
+  activeDataRoom: DataRoom | undefined
+  activeFolder: Folder | null
+  targetFolder: Folder | null
+  folderNameDraft: string
+  resolveDisplayName: (value: string) => string
+  enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  setFolderNameDraft: Dispatch<SetStateAction<string>>
+  setFolderNameError: Dispatch<SetStateAction<string | null>>
+  setTargetFolderId: Dispatch<SetStateAction<NodeId | null>>
+  setIsCreateFolderDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsRenameFolderDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsDeleteFolderDialogOpen: Dispatch<SetStateAction<boolean>>
+}
 
 export function useFolderActions({
   t,
@@ -32,41 +36,50 @@ export function useFolderActions({
   activeFolder,
   targetFolder,
   folderNameDraft,
+  resolveDisplayName,
   enqueueFeedback,
-  setCreateDialogOpen,
-  setRenameDialogOpen,
-  setDeleteDialogOpen,
-  setTargetFolderId,
   setFolderNameDraft,
   setFolderNameError,
-  resolveDisplayName,
-}: Params) {
-  const openCreateDialog = () => {
-    setFolderNameDraft('')
+  setTargetFolderId,
+  setIsCreateFolderDialogOpen,
+  setIsRenameFolderDialogOpen,
+  setIsDeleteFolderDialogOpen,
+}: UseFolderActionsParams) {
+  const handleFolderNameDraftChange = (value: string) => {
+    setFolderNameDraft(value)
     setFolderNameError(null)
-    setCreateDialogOpen(true)
   }
 
-  const openRenameDialog = (folder: { id: string; name: string }) => {
+  const openCreateFolderDialog = () => {
+    setFolderNameDraft('')
+    setFolderNameError(null)
+    setIsCreateFolderDialogOpen(true)
+  }
+
+  const closeCreateFolderDialog = () => {
+    setIsCreateFolderDialogOpen(false)
+  }
+
+  const openRenameFolderDialog = (folder: Folder) => {
     setTargetFolderId(folder.id)
     setFolderNameDraft(resolveDisplayName(folder.name))
     setFolderNameError(null)
-    setRenameDialogOpen(true)
+    setIsRenameFolderDialogOpen(true)
   }
 
-  const openDeleteDialog = (folder: { id: string }) => {
-    setTargetFolderId(folder.id)
-    setDeleteDialogOpen(true)
-  }
-
-  const closeRenameDialog = () => {
-    setRenameDialogOpen(false)
+  const closeRenameFolderDialog = () => {
+    setIsRenameFolderDialogOpen(false)
     setTargetFolderId(null)
     setFolderNameError(null)
   }
 
-  const closeDeleteDialog = () => {
-    setDeleteDialogOpen(false)
+  const openDeleteFolderDialog = (folder: Folder) => {
+    setTargetFolderId(folder.id)
+    setIsDeleteFolderDialogOpen(true)
+  }
+
+  const closeDeleteFolderDialog = () => {
+    setIsDeleteFolderDialogOpen(false)
     setTargetFolderId(null)
   }
 
@@ -99,7 +112,7 @@ export function useFolderActions({
       },
     })
 
-    setCreateDialogOpen(false)
+    setIsCreateFolderDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackFolderCreated'), 'success')
   }
 
@@ -130,7 +143,7 @@ export function useFolderActions({
       },
     })
 
-    setRenameDialogOpen(false)
+    setIsRenameFolderDialogOpen(false)
     setTargetFolderId(null)
     enqueueFeedback(t('dataroomFeedbackFolderRenamed'), 'success')
   }
@@ -145,17 +158,19 @@ export function useFolderActions({
       payload: { folderId: targetFolder.id },
     })
 
-    setDeleteDialogOpen(false)
+    setIsDeleteFolderDialogOpen(false)
     setTargetFolderId(null)
     enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
   }
 
   return {
-    openCreateDialog,
-    openRenameDialog,
-    openDeleteDialog,
-    closeRenameDialog,
-    closeDeleteDialog,
+    handleFolderNameDraftChange,
+    openCreateFolderDialog,
+    closeCreateFolderDialog,
+    openRenameFolderDialog,
+    closeRenameFolderDialog,
+    openDeleteFolderDialog,
+    closeDeleteFolderDialog,
     handleCreateFolder,
     handleRenameFolder,
     handleDeleteFolder,

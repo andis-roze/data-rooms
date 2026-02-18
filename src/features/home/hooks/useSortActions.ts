@@ -1,11 +1,14 @@
-import type { HomeActionCommonParams } from './actionParams'
+import type { Dispatch, SetStateAction } from 'react'
+import type { SortField, SortState } from '../model/homeViewTypes'
 import { getNextSortState } from '../selectors/homeSorting'
-import type { SortField } from '../model/homeViewTypes'
 import { saveSortModePreference } from '../services/sortPreference'
 
-type Params = Pick<HomeActionCommonParams, 'sortState' | 'setSortState'>
+interface UseSortActionsParams {
+  sortState: SortState
+  setSortState: Dispatch<SetStateAction<SortState>>
+}
 
-export function useSortActions({ sortState, setSortState }: Params) {
+export function useSortActions({ sortState, setSortState }: UseSortActionsParams) {
   const toggleSort = (field: SortField) => {
     const nextState = getNextSortState(sortState, field)
 

@@ -1,26 +1,29 @@
+import type { Dispatch, SetStateAction } from 'react'
 import {
   getDataRoomNameValidationError,
   hasDuplicateDataRoomName,
+  type DataRoom,
+  type DataRoomState,
+  type NodeId,
 } from '../../dataroom/model'
-import type { HomeActionCommonParams } from './actionParams'
+import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
 
-type Params = Pick<
-  HomeActionCommonParams,
-  | 't'
-  | 'entities'
-  | 'dispatch'
-  | 'activeDataRoom'
-  | 'dataRoomNameDraft'
-  | 'resolveDisplayName'
-  | 'hasDuplicateDataRoomDisplayName'
-  | 'enqueueFeedback'
-  | 'setCreateDataRoomDialogOpen'
-  | 'setRenameDataRoomDialogOpen'
-  | 'setDeleteDataRoomDialogOpen'
-  | 'setDataRoomNameDraft'
-  | 'setDataRoomNameError'
->
+interface UseDataRoomActionsParams {
+  t: (key: string, options?: Record<string, unknown>) => string
+  entities: DataRoomState
+  dispatch: Dispatch<DataRoomAction>
+  activeDataRoom: DataRoom | undefined
+  dataRoomNameDraft: string
+  resolveDisplayName: (value: string) => string
+  hasDuplicateDataRoomDisplayName: (candidateName: string, excludeDataRoomId?: NodeId) => boolean
+  enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  setDataRoomNameDraft: Dispatch<SetStateAction<string>>
+  setDataRoomNameError: Dispatch<SetStateAction<string | null>>
+  setIsCreateDataRoomDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsRenameDataRoomDialogOpen: Dispatch<SetStateAction<boolean>>
+  setIsDeleteDataRoomDialogOpen: Dispatch<SetStateAction<boolean>>
+}
 
 export function useDataRoomActions({
   t,
@@ -31,16 +34,16 @@ export function useDataRoomActions({
   resolveDisplayName,
   hasDuplicateDataRoomDisplayName,
   enqueueFeedback,
-  setCreateDataRoomDialogOpen,
-  setRenameDataRoomDialogOpen,
-  setDeleteDataRoomDialogOpen,
   setDataRoomNameDraft,
   setDataRoomNameError,
-}: Params) {
+  setIsCreateDataRoomDialogOpen,
+  setIsRenameDataRoomDialogOpen,
+  setIsDeleteDataRoomDialogOpen,
+}: UseDataRoomActionsParams) {
   const openCreateDataRoomDialog = () => {
     setDataRoomNameDraft('')
     setDataRoomNameError(null)
-    setCreateDataRoomDialogOpen(true)
+    setIsCreateDataRoomDialogOpen(true)
   }
 
   const openRenameDataRoomDialog = () => {
@@ -50,7 +53,28 @@ export function useDataRoomActions({
 
     setDataRoomNameDraft(resolveDisplayName(activeDataRoom.name))
     setDataRoomNameError(null)
-    setRenameDataRoomDialogOpen(true)
+    setIsRenameDataRoomDialogOpen(true)
+  }
+
+  const openDeleteDataRoomDialog = () => {
+    setIsDeleteDataRoomDialogOpen(true)
+  }
+
+  const closeCreateDataRoomDialog = () => {
+    setIsCreateDataRoomDialogOpen(false)
+  }
+
+  const closeRenameDataRoomDialog = () => {
+    setIsRenameDataRoomDialogOpen(false)
+  }
+
+  const closeDeleteDataRoomDialog = () => {
+    setIsDeleteDataRoomDialogOpen(false)
+  }
+
+  const handleDataRoomNameDraftChange = (value: string) => {
+    setDataRoomNameDraft(value)
+    setDataRoomNameError(null)
   }
 
   const handleCreateDataRoom = () => {
@@ -78,7 +102,7 @@ export function useDataRoomActions({
       },
     })
 
-    setCreateDataRoomDialogOpen(false)
+    setIsCreateDataRoomDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackDataRoomCreated'), 'success')
   }
 
@@ -112,7 +136,7 @@ export function useDataRoomActions({
       },
     })
 
-    setRenameDataRoomDialogOpen(false)
+    setIsRenameDataRoomDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackDataRoomRenamed'), 'success')
   }
 
@@ -126,13 +150,18 @@ export function useDataRoomActions({
       payload: { dataRoomId: activeDataRoom.id },
     })
 
-    setDeleteDataRoomDialogOpen(false)
+    setIsDeleteDataRoomDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackDataRoomDeleted'), 'success')
   }
 
   return {
     openCreateDataRoomDialog,
     openRenameDataRoomDialog,
+    openDeleteDataRoomDialog,
+    closeCreateDataRoomDialog,
+    closeRenameDataRoomDialog,
+    closeDeleteDataRoomDialog,
+    handleDataRoomNameDraftChange,
     handleCreateDataRoom,
     handleRenameDataRoom,
     handleDeleteDataRoom,
