@@ -4,7 +4,7 @@ import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { FileNode } from '../../dataroom/model'
-import { formatFileSize, formatUpdatedAt } from '../services/formatters'
+import { formatFileSize, formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 
 interface FileRowProps {
   itemId: string
@@ -45,8 +45,9 @@ export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile
           sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
           aria-label={t('dataroomAriaViewFile', { name: file.name })}
           onClick={() => onOpenViewFile(file)}
+          title={file.name}
         >
-          <Typography noWrap>{file.name}</Typography>
+          <Typography noWrap>{formatPathForDisplay(file.name)}</Typography>
         </Button>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           {`${t('dataroomFileItemType')} - ${formatFileSize(file.size)}`}

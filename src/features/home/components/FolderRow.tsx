@@ -4,7 +4,7 @@ import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { Folder, NodeId } from '../../dataroom/model'
-import { formatUpdatedAt } from '../services/formatters'
+import { formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 
 interface FolderRowProps {
   itemId: string
@@ -58,8 +58,9 @@ export function FolderRow({
           sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
           aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(folder.name) })}
           onClick={() => onSelectFolder(folder.id)}
+          title={displayName ?? resolveDisplayName(folder.name)}
         >
-          <Typography noWrap>{displayName ?? resolveDisplayName(folder.name)}</Typography>
+          <Typography noWrap>{formatPathForDisplay(displayName ?? resolveDisplayName(folder.name))}</Typography>
         </Button>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           {t('dataroomFolderItemType')}

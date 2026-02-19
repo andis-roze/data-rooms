@@ -1,6 +1,7 @@
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import type { DataRoom, DataRoomState, NodeId } from '../dataroom/model'
+import { formatPathForDisplay } from './services/formatters'
 import { getFolderChildren } from './utils'
 
 interface FolderTreeNodeProps {
@@ -35,6 +36,7 @@ function FolderTreeNode({
   const nextVisited = new Set(visited)
   nextVisited.add(folderId)
   const children = getFolderChildren(state, folder)
+  const folderDisplayName = renderFolderName(folder.name)
 
   return (
     <>
@@ -42,8 +44,10 @@ function FolderTreeNode({
         selected={selectedFolderId === folder.id}
         onClick={() => onSelectFolder(folder.id)}
         sx={{ pl: 2 + depth * 2 }}
+        title={folderDisplayName}
+        aria-label={folderDisplayName}
       >
-        <ListItemText primary={renderFolderName(folder.name)} primaryTypographyProps={{ noWrap: true }} />
+        <ListItemText primary={formatPathForDisplay(folderDisplayName)} primaryTypographyProps={{ noWrap: true }} />
       </ListItemButton>
       {children.map((childFolder) => (
         <FolderTreeNode
@@ -86,6 +90,7 @@ export function DataRoomTreeNode({
   const rootChildren = rootFolder ? getFolderChildren(state, rootFolder) : []
   const dataRoomSelected = selectedDataRoomId === dataRoom.id
   const rootSelected = selectedFolderId === dataRoom.rootFolderId
+  const dataRoomDisplayName = renderDataRoomName(dataRoom.name)
 
   return (
     <>
@@ -93,8 +98,13 @@ export function DataRoomTreeNode({
         selected={dataRoomSelected && rootSelected}
         onClick={() => onSelectDataRoom(dataRoom.id)}
         sx={{ pl: 1.5 }}
+        title={dataRoomDisplayName}
+        aria-label={dataRoomDisplayName}
       >
-        <ListItemText primary={renderDataRoomName(dataRoom.name)} primaryTypographyProps={{ fontWeight: 700, noWrap: true }} />
+        <ListItemText
+          primary={formatPathForDisplay(dataRoomDisplayName)}
+          primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
+        />
       </ListItemButton>
       {rootChildren.map((childFolder) => (
         <FolderTreeNode

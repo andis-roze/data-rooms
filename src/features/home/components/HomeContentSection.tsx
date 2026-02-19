@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import type { ChangeEvent, RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Folder, NodeId } from '../../dataroom/model'
+import { formatPathForDisplay } from '../services/formatters'
 import { FolderContentTable } from '../FolderContentTable'
 import type { FileItem, FolderContentItem, SortState } from '../types'
 
@@ -51,13 +52,23 @@ export function HomeContentSection({
   onOpenDeleteFile,
 }: HomeContentSectionProps) {
   const { t } = useTranslation()
+  const activeDataRoomDisplayName = formatPathForDisplay(activeDataRoomName)
 
   return (
     <Box component="section" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
       <Stack spacing={2.5}>
         <Stack spacing={0.75}>
-          <Typography variant="h1" sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
-            {activeDataRoomName}
+          <Typography
+            variant="h1"
+            title={activeDataRoomName}
+            sx={{
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {activeDataRoomDisplayName}
           </Typography>
           <Breadcrumbs aria-label={t('dataroomBreadcrumbsLabel')}>
             {breadcrumbs.map((folder) => (
@@ -66,8 +77,10 @@ export function HomeContentSection({
                 size="small"
                 color={folder.id === activeFolderId ? 'primary' : 'inherit'}
                 onClick={() => onSelectFolder(folder.id)}
+                title={resolveDisplayName(folder.name)}
+                aria-label={resolveDisplayName(folder.name)}
               >
-                {resolveDisplayName(folder.name)}
+                {formatPathForDisplay(resolveDisplayName(folder.name))}
               </Button>
             ))}
           </Breadcrumbs>
