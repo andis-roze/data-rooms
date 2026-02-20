@@ -49,6 +49,24 @@ export function useDataRoomActions({
     }
   }
 
+  const validateDataRoomName = (excludeDataRoomId?: NodeId): boolean => {
+    const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
+    if (validationError) {
+      setDataRoomNameError(getDataRoomNameValidationMessage(t, validationError))
+      return false
+    }
+
+    const hasDuplicateName =
+      hasDuplicateDataRoomDisplayName(dataRoomNameDraft, excludeDataRoomId) ||
+      hasDuplicateDataRoomName(entities, dataRoomNameDraft, excludeDataRoomId)
+    if (hasDuplicateName) {
+      setDataRoomNameError(t('dataroomErrorDataRoomNameDuplicate'))
+      return false
+    }
+
+    return true
+  }
+
   const openCreateDataRoomDialog = () => {
     setDataRoomNameDraft('')
     setDataRoomNameError(null)
@@ -105,15 +123,7 @@ export function useDataRoomActions({
   }
 
   const handleCreateDataRoom = () => {
-    const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
-
-    if (validationError) {
-      setDataRoomNameError(getDataRoomNameValidationMessage(t, validationError))
-      return
-    }
-
-    if (hasDuplicateDataRoomDisplayName(dataRoomNameDraft) || hasDuplicateDataRoomName(entities, dataRoomNameDraft)) {
-      setDataRoomNameError(t('dataroomErrorDataRoomNameDuplicate'))
+    if (!validateDataRoomName()) {
       return
     }
 
@@ -136,18 +146,7 @@ export function useDataRoomActions({
       return
     }
 
-    const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
-
-    if (validationError) {
-      setDataRoomNameError(getDataRoomNameValidationMessage(t, validationError))
-      return
-    }
-
-    if (
-      hasDuplicateDataRoomDisplayName(dataRoomNameDraft, activeDataRoom.id) ||
-      hasDuplicateDataRoomName(entities, dataRoomNameDraft, activeDataRoom.id)
-    ) {
-      setDataRoomNameError(t('dataroomErrorDataRoomNameDuplicate'))
+    if (!validateDataRoomName(activeDataRoom.id)) {
       return
     }
 
