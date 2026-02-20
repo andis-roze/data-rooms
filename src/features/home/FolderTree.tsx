@@ -91,6 +91,8 @@ interface FolderTreeNodeProps {
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   onToggleContentItemSelection: (itemId: NodeId) => void
+  onStartDragMove: (itemId: NodeId) => void
+  onEndDragMove: () => void
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
@@ -114,6 +116,8 @@ function FolderTreeNode({
   selectedContentItemIds,
   indeterminateFolderIds,
   onToggleContentItemSelection,
+  onStartDragMove,
+  onEndDragMove,
   dragMoveActive,
   dragMoveTargetFolderId,
   onSetDragMoveTargetFolder,
@@ -167,6 +171,13 @@ function FolderTreeNode({
           }}
         />
         <ListItemButton
+          draggable
+          onDragStart={(event) => {
+            event.dataTransfer.effectAllowed = 'move'
+            event.dataTransfer.setData('text/plain', folder.id)
+            onStartDragMove(folder.id)
+          }}
+          onDragEnd={onEndDragMove}
           selected={selectedFolderId === folder.id}
           onDragEnter={() => {
             if (dragMoveActive) {
@@ -188,7 +199,30 @@ function FolderTreeNode({
             pl: 1,
             minWidth: 0,
             flex: 1,
-            cursor: dragMoveActive ? (isDragTarget ? (canDrop ? 'move' : 'not-allowed') : 'default') : 'pointer',
+            userSelect: 'none',
+            cursor: dragMoveActive
+              ? isDragTarget
+                ? canDrop
+                  ? 'move'
+                  : 'not-allowed'
+                : 'default'
+              : isSelected
+                ? 'move'
+                : 'grab',
+            '&:hover': {
+              cursor: dragMoveActive
+                ? isDragTarget
+                  ? canDrop
+                    ? 'move'
+                    : 'not-allowed'
+                  : 'default'
+                : isSelected
+                  ? 'move'
+                  : 'grab',
+            },
+            '&:active': {
+              cursor: 'grabbing',
+            },
             outline: dragMoveActive && isDragTarget ? '1px dashed' : 'none',
             outlineColor: canDrop ? 'success.main' : 'error.main',
             bgcolor: dragMoveActive && isDragTarget ? (canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover') : undefined,
@@ -265,6 +299,8 @@ function FolderTreeNode({
               selectedContentItemIds={selectedContentItemIds}
               indeterminateFolderIds={indeterminateFolderIds}
               onToggleContentItemSelection={onToggleContentItemSelection}
+              onStartDragMove={onStartDragMove}
+              onEndDragMove={onEndDragMove}
               dragMoveActive={dragMoveActive}
               dragMoveTargetFolderId={dragMoveTargetFolderId}
               onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
@@ -293,6 +329,8 @@ interface DataRoomTreeNodeProps {
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   onToggleContentItemSelection: (itemId: NodeId) => void
+  onStartDragMove: (itemId: NodeId) => void
+  onEndDragMove: () => void
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
@@ -314,6 +352,8 @@ export function DataRoomTreeNode({
   selectedContentItemIds,
   indeterminateFolderIds,
   onToggleContentItemSelection,
+  onStartDragMove,
+  onEndDragMove,
   dragMoveActive,
   dragMoveTargetFolderId,
   onSetDragMoveTargetFolder,
@@ -341,6 +381,8 @@ export function DataRoomTreeNode({
           selectedContentItemIds={selectedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
           onToggleContentItemSelection={onToggleContentItemSelection}
+          onStartDragMove={onStartDragMove}
+          onEndDragMove={onEndDragMove}
           dragMoveActive={dragMoveActive}
           dragMoveTargetFolderId={dragMoveTargetFolderId}
           onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}

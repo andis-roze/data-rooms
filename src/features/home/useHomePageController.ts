@@ -36,6 +36,7 @@ export function useHomePageController(): HomePageViewModel {
   const dispatch = useDataRoomDispatch()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
   const feedbackIdRef = useRef(0)
+  const dragMoveItemIdsRef = useRef<NodeId[]>([])
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false)
   const [isRenameFolderDialogOpen, setIsRenameFolderDialogOpen] = useState(false)
@@ -551,13 +552,16 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const isDragMoveActive = dragMoveItemIds.length > 0
+  const getCurrentDragMoveItemIds = () => (dragMoveItemIds.length > 0 ? dragMoveItemIds : dragMoveItemIdsRef.current)
   const resolveDragMoveItemIds = (itemId: NodeId) =>
     selectedContentItemIds.includes(itemId) ? selectedContentItemIds : [itemId]
   const startDragMove = (itemId: NodeId) => {
     if (!entities.foldersById[itemId] && !entities.filesById[itemId]) {
       return
     }
-    setDragMoveItemIds(resolveDragMoveItemIds(itemId))
+    const nextDragItemIds = resolveDragMoveItemIds(itemId)
+    dragMoveItemIdsRef.current = nextDragItemIds
+    setDragMoveItemIds(nextDragItemIds)
     setDragMoveTargetFolderId(null)
   }
   const endDragMove = () => {
@@ -568,16 +572,25 @@ export function useHomePageController(): HomePageViewModel {
     setDragMoveTargetFolderId(folderId)
   }
   const canDropOnFolder = (folderId: NodeId) => {
-    if (!isDragMoveActive) {
+    const currentDragItemIds = getCurrentDragMoveItemIds()
+    if (currentDragItemIds.length === 0) {
       return false
     }
-    return getMoveValidationError(dragMoveItemIds, folderId) === null
+    return getMoveValidationError(currentDragItemIds, folderId) === null
   }
   const dropOnFolder = (folderId: NodeId) => {
+    const currentDragItemIds = getCurrentDragMoveItemIds()
     if (!canDropOnFolder(folderId)) {
       return
     }
-    applyMove(dragMoveItemIds, folderId)
+    applyMove(currentDragItemIds, folderId)
+    endDragMove()
+  }
+  const moveItemsToFolder = (itemIds: NodeId[], folderId: NodeId) => {
+    if (itemIds.length === 0 || getMoveValidationError(itemIds, folderId) !== null) {
+      return
+    }
+    applyMove(itemIds, folderId)
     endDragMove()
   }
 
@@ -828,6 +841,7 @@ export function useHomePageController(): HomePageViewModel {
       moveDestinationFolderOptions,
       moveValidationError,
       dragMoveActive: isDragMoveActive,
+      dragMoveItemIds,
       dragMoveTargetFolderId,
     },
     viewHelpers: {
@@ -882,6 +896,7 @@ export function useHomePageController(): HomePageViewModel {
       setDragMoveTargetFolder,
       canDropOnFolder,
       dropOnFolder,
+      moveItemsToFolder,
     },
   }
 }

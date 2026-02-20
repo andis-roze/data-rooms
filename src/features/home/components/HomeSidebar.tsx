@@ -1,5 +1,10 @@
 import { type MouseEvent, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
@@ -23,6 +28,7 @@ interface HomeSidebarProps {
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   dragMoveActive: boolean
+  dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
   canDeleteActiveDataRoom: boolean
   onCreateDataRoom: () => void
@@ -34,9 +40,11 @@ interface HomeSidebarProps {
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
   onToggleContentItemSelection: (itemId: NodeId) => void
+  onStartDragMove: (itemId: NodeId) => void
+  onEndDragMove: () => void
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
-  onDropOnFolder: (folderId: NodeId) => void
+  onMoveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
   resolveDisplayName: (value: string) => string
 }
 
@@ -48,6 +56,7 @@ export function HomeSidebar({
   selectedContentItemIds,
   indeterminateFolderIds,
   dragMoveActive,
+  dragMoveItemIds,
   dragMoveTargetFolderId,
   canDeleteActiveDataRoom,
   onCreateDataRoom,
@@ -59,9 +68,11 @@ export function HomeSidebar({
   onOpenRenameFolder,
   onOpenDeleteFolder,
   onToggleContentItemSelection,
+  onStartDragMove,
+  onEndDragMove,
   onSetDragMoveTargetFolder,
   onCanDropOnFolder,
-  onDropOnFolder,
+  onMoveItemsToFolder,
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
@@ -70,6 +81,15 @@ export function HomeSidebar({
   const [menuAnchorReference, setMenuAnchorReference] = useState<'anchorEl' | 'anchorPosition'>('anchorEl')
   const [menuAnchorPosition, setMenuAnchorPosition] = useState<{ top: number; left: number } | undefined>(undefined)
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false)
+  const [moveConfirmState, setMoveConfirmState] = useState<{
+    open: boolean
+    itemIds: NodeId[]
+    destinationFolderId: NodeId | null
+  }>({
+    open: false,
+    itemIds: [],
+    destinationFolderId: null,
+  })
   const activeDataRoom =
     (selectedDataRoomId ? dataRooms.find((dataRoom) => dataRoom.id === selectedDataRoomId) : undefined) ?? dataRooms[0]
   const visibleDataRooms = activeDataRoom ? [activeDataRoom] : []
@@ -159,6 +179,41 @@ export function HomeSidebar({
       onSelectDataRoom(nextDataRoomId)
     }
   }
+
+  const closeMoveConfirmDialog = () => {
+    setMoveConfirmState({
+      open: false,
+      itemIds: [],
+      destinationFolderId: null,
+    })
+  }
+
+  const openMoveConfirmDialog = (destinationFolderId: NodeId) => {
+    if (!onCanDropOnFolder(destinationFolderId)) {
+      return
+    }
+    const pendingIds = dragMoveItemIds.length > 0 ? dragMoveItemIds : selectedContentItemIds
+    if (pendingIds.length === 0) {
+      return
+    }
+    setMoveConfirmState({
+      open: true,
+      itemIds: pendingIds,
+      destinationFolderId,
+    })
+  }
+
+  const confirmMove = () => {
+    if (!moveConfirmState.destinationFolderId || moveConfirmState.itemIds.length === 0) {
+      return
+    }
+    onMoveItemsToFolder(moveConfirmState.itemIds, moveConfirmState.destinationFolderId)
+    closeMoveConfirmDialog()
+  }
+
+  const pendingDestinationFolderName = moveConfirmState.destinationFolderId
+    ? resolveDisplayName(entities.foldersById[moveConfirmState.destinationFolderId]?.name ?? '')
+    : ''
 
   return (
     <Box component="aside" sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}>
@@ -252,17 +307,36 @@ export function HomeSidebar({
             selectedContentItemIds={selectedContentItemIds}
             indeterminateFolderIds={indeterminateFolderIds}
             onToggleContentItemSelection={onToggleContentItemSelection}
+            onStartDragMove={onStartDragMove}
+            onEndDragMove={onEndDragMove}
             dragMoveActive={dragMoveActive}
             dragMoveTargetFolderId={dragMoveTargetFolderId}
             onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
             onCanDropOnFolder={onCanDropOnFolder}
-            onDropOnFolder={onDropOnFolder}
+            onDropOnFolder={openMoveConfirmDialog}
             renderFolderName={resolveDisplayName}
             collapsedNodeIds={collapsedNodeIds}
             onToggleNode={toggleNode}
           />
         ))}
       </List>
+      <Dialog open={moveConfirmState.open} onClose={closeMoveConfirmDialog} fullWidth maxWidth="xs">
+        <DialogTitle>{t('dataroomDialogMoveTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography>{t('dataroomMoveSelectedQuestion', { count: moveConfirmState.itemIds.length })}</Typography>
+          {pendingDestinationFolderName ? (
+            <Typography color="text.secondary" sx={{ mt: 1 }}>
+              {`${t('dataroomFieldDestinationFolder')}: ${pendingDestinationFolderName}`}
+            </Typography>
+          ) : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeMoveConfirmDialog}>{t('dataroomActionCancel')}</Button>
+          <Button variant="contained" onClick={confirmMove}>
+            {t('dataroomActionMove')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

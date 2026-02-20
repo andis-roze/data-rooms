@@ -450,23 +450,34 @@ export function moveFolder(state: DataRoomState, input: MoveFolderInput): DataRo
     return state
   }
 
-  const sourceParent = state.foldersById[folder.parentFolderId]
-  if (!sourceParent) {
+  if (!state.foldersById[folder.parentFolderId]) {
     return state
   }
+
+  // Defensive normalization: ensure the folder is detached from any previous parent references
+  // before attaching it to the destination. This avoids duplicate tree entries if stale state
+  // already contains the folder id in multiple parent lists.
+  const normalizedFoldersById = { ...state.foldersById }
+  for (const currentFolder of Object.values(state.foldersById)) {
+    if (!currentFolder.childFolderIds.includes(folder.id)) {
+      continue
+    }
+    normalizedFoldersById[currentFolder.id] = {
+      ...currentFolder,
+      childFolderIds: currentFolder.childFolderIds.filter((id) => id !== folder.id),
+      updatedAt: now,
+    }
+  }
+
+  const destinationChildren = normalizedFoldersById[destinationFolder.id]?.childFolderIds ?? []
 
   return {
     ...state,
     foldersById: {
-      ...state.foldersById,
-      [sourceParent.id]: {
-        ...sourceParent,
-        childFolderIds: sourceParent.childFolderIds.filter((id) => id !== folder.id),
-        updatedAt: now,
-      },
+      ...normalizedFoldersById,
       [destinationFolder.id]: {
         ...destinationFolder,
-        childFolderIds: [...destinationFolder.childFolderIds, folder.id],
+        childFolderIds: destinationChildren.includes(folder.id) ? destinationChildren : [...destinationChildren, folder.id],
         updatedAt: now,
       },
       [folder.id]: {

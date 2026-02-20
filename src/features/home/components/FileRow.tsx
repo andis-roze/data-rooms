@@ -31,10 +31,54 @@ interface FileRowProps {
 }
 
 const mobileGridTemplate = '36px minmax(0,1fr) auto'
+const MAX_DRAG_PREVIEW_NAMES = 3
 
 const actionGridTemplate = {
   xs: 'repeat(3, max-content)',
   md: 'repeat(3, max-content)',
+}
+
+const getSelectedFileNamesInList = (currentRow: HTMLLIElement) => {
+  const currentList = currentRow.closest('[role="list"]')
+  if (!currentList) {
+    return []
+  }
+
+  return Array.from(currentList.querySelectorAll<HTMLElement>('[data-drag-file-name][data-content-selected="true"]'))
+    .map((element) => element.dataset.dragFileName)
+    .filter((name): name is string => Boolean(name))
+}
+
+const createDragPreviewElement = (names: string[]) => {
+  const previewContainer = document.createElement('div')
+  previewContainer.style.position = 'fixed'
+  previewContainer.style.top = '-9999px'
+  previewContainer.style.left = '-9999px'
+  previewContainer.style.pointerEvents = 'none'
+  previewContainer.style.background = 'rgba(33, 33, 33, 0.92)'
+  previewContainer.style.color = '#fff'
+  previewContainer.style.padding = '8px 10px'
+  previewContainer.style.borderRadius = '8px'
+  previewContainer.style.fontSize = '12px'
+  previewContainer.style.lineHeight = '1.35'
+  previewContainer.style.maxWidth = '280px'
+  previewContainer.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.35)'
+
+  const visibleNames = names.slice(0, MAX_DRAG_PREVIEW_NAMES)
+  visibleNames.forEach((name) => {
+    const line = document.createElement('div')
+    line.textContent = name
+    previewContainer.appendChild(line)
+  })
+
+  if (names.length > MAX_DRAG_PREVIEW_NAMES) {
+    const summary = document.createElement('div')
+    summary.textContent = `+${names.length - MAX_DRAG_PREVIEW_NAMES} more`
+    summary.style.opacity = '0.85'
+    previewContainer.appendChild(summary)
+  }
+
+  return previewContainer
 }
 
 export function FileRow({
@@ -53,6 +97,8 @@ export function FileRow({
   onOpenMoveFile,
 }: FileRowProps) {
   const { t } = useTranslation()
+  const idleHoverCursor = selected ? 'move' : 'grab'
+  const activeCursor = dragMoveActive ? 'grabbing' : idleHoverCursor
 
   return (
     <ListItem
@@ -60,15 +106,30 @@ export function FileRow({
       disablePadding
       draggable
       onDragStart={(event: DragEvent<HTMLLIElement>) => {
+        const previewNames = selected ? getSelectedFileNamesInList(event.currentTarget) : []
+        const namesToPreview = previewNames.length > 0 ? previewNames : [file.name]
         event.dataTransfer.effectAllowed = 'move'
         event.dataTransfer.setData('text/plain', file.id)
+        if (typeof event.dataTransfer.setDragImage === 'function') {
+          const previewElement = createDragPreviewElement(namesToPreview)
+          document.body.appendChild(previewElement)
+          event.dataTransfer.setDragImage(previewElement, 12, 12)
+          setTimeout(() => {
+            previewElement.remove()
+          }, 0)
+        }
         onDragMoveStart(file.id)
       }}
       onDragEnd={onDragMoveEnd}
+      data-drag-file-name={file.name}
+      data-content-selected={selected ? 'true' : 'false'}
       sx={{
         px: 2,
         py: 1,
-        cursor: dragMoveActive ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        cursor: activeCursor,
+        '&:hover': { cursor: activeCursor },
+        '&:active': { cursor: 'grabbing' },
       }}
     >
       <Box

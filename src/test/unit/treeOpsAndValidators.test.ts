@@ -207,6 +207,81 @@ describe('tree mutations', () => {
     expect(blocked).toBe(state)
   })
 
+  it('treats moving folder to current parent as no-op', () => {
+    const state = createStateWithNestedTree()
+
+    const next = moveFolder(state, {
+      folderId: 'folder-a-1',
+      destinationFolderId: 'folder-a',
+      now: NOW + 42,
+    })
+
+    expect(next).toBe(state)
+  })
+
+  it('blocks moving root folder and moving across data rooms', () => {
+    const state = createStateWithNestedTree()
+    const rootFolderId = state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId
+
+    const blockedRootMove = moveFolder(state, {
+      folderId: rootFolderId,
+      destinationFolderId: 'folder-a',
+      now: NOW + 43,
+    })
+
+    expect(blockedRootMove).toBe(state)
+
+    const withSecondRoom = createDataRoom(state, {
+      dataRoomId: 'dataroom-2',
+      rootFolderId: 'root-2',
+      dataRoomName: 'Room 2',
+      rootFolderName: 'Root 2',
+      now: NOW + 44,
+    })
+
+    const withSecondRoomFolder = createFolder(withSecondRoom, {
+      dataRoomId: 'dataroom-2',
+      parentFolderId: 'root-2',
+      folderId: 'folder-r2-a',
+      folderName: 'Cross destination',
+      now: NOW + 45,
+    })
+
+    const blockedCrossRoomMove = moveFolder(withSecondRoomFolder, {
+      folderId: 'folder-a-1',
+      destinationFolderId: 'folder-r2-a',
+      now: NOW + 46,
+    })
+
+    expect(blockedCrossRoomMove).toBe(withSecondRoomFolder)
+  })
+
+  it('normalizes stale parent references when moving folders', () => {
+    const state = createStateWithNestedTree()
+    const withStaleParentRefs = {
+      ...state,
+      foldersById: {
+        ...state.foldersById,
+        'folder-b': {
+          ...state.foldersById['folder-b'],
+          childFolderIds: [...state.foldersById['folder-b'].childFolderIds, 'folder-a-1'],
+        },
+      },
+    }
+
+    const moved = moveFolder(withStaleParentRefs, {
+      folderId: 'folder-a-1',
+      destinationFolderId: 'folder-b',
+      now: NOW + 47,
+    })
+
+    const parentRefs = Object.values(moved.foldersById).filter((folder) => folder.childFolderIds.includes('folder-a-1'))
+    expect(parentRefs).toHaveLength(1)
+    expect(parentRefs[0]?.id).toBe('folder-b')
+    expect(parentRefs[0]?.childFolderIds.filter((id) => id === 'folder-a-1')).toHaveLength(1)
+    expect(moved.foldersById['folder-a-1'].parentFolderId).toBe('folder-b')
+  })
+
   it('moves files across folders and blocks duplicate conflicts', () => {
     const state = createStateWithNestedTree()
 

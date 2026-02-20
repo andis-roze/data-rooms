@@ -73,18 +73,24 @@ export function FolderRow({
   onOpenMoveFolder,
 }: FolderRowProps) {
   const { t } = useTranslation()
+  const isDraggable = !isParentNavigation
+  const idleHoverCursor = selected ? 'move' : 'grab'
+  const activeCursor = dragMoveActive ? 'grabbing' : idleHoverCursor
 
   return (
     <ListItem
       key={itemId}
       disablePadding
-      draggable={!isParentNavigation}
+      draggable={isDraggable}
       onDragStart={(event) => {
         if (isParentNavigation) {
           return
         }
         event.dataTransfer.effectAllowed = 'move'
         event.dataTransfer.setData('text/plain', folder.id)
+        if (typeof event.dataTransfer.setDragImage === 'function') {
+          event.dataTransfer.setDragImage(event.currentTarget, 0, 0)
+        }
         onDragMoveStart(folder.id)
       }}
       onDragEnd={onDragMoveEnd}
@@ -102,8 +108,10 @@ export function FolderRow({
       sx={{
         px: 2,
         py: 1,
-        cursor: !isParentNavigation ? 'grab' : undefined,
-        '&:active': !isParentNavigation ? { cursor: 'grabbing' } : undefined,
+        userSelect: 'none',
+        cursor: isDraggable ? activeCursor : undefined,
+        '&:hover': isDraggable ? { cursor: activeCursor } : undefined,
+        '&:active': isDraggable ? { cursor: 'grabbing' } : undefined,
         outline: dragMoveActive && dragMoveTargeted ? '1px dashed' : 'none',
         outlineColor: canDrop ? 'success.main' : 'error.main',
         bgcolor: dragMoveActive && dragMoveTargeted ? (canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover') : undefined,

@@ -42,6 +42,7 @@ export function HomePageContainer() {
     moveDestinationFolderOptions,
     moveValidationError,
     dragMoveActive,
+    dragMoveItemIds,
     dragMoveTargetFolderId,
   } = selection
 
@@ -102,6 +103,7 @@ export function HomePageContainer() {
           selectedContentItemIds={selectedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
           dragMoveActive={dragMoveActive}
+          dragMoveItemIds={dragMoveItemIds}
           dragMoveTargetFolderId={dragMoveTargetFolderId}
           canDeleteActiveDataRoom={canDeleteActiveDataRoom}
           onCreateDataRoom={handlers.openCreateDataRoomDialog}
@@ -113,9 +115,11 @@ export function HomePageContainer() {
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
           onToggleContentItemSelection={handlers.toggleContentItemSelection}
+          onStartDragMove={handlers.startDragMove}
+          onEndDragMove={handlers.endDragMove}
           onSetDragMoveTargetFolder={handlers.setDragMoveTargetFolder}
           onCanDropOnFolder={handlers.canDropOnFolder}
-          onDropOnFolder={handlers.dropOnFolder}
+          onMoveItemsToFolder={handlers.moveItemsToFolder}
           resolveDisplayName={resolveDisplayName}
         />
 

@@ -58,6 +58,7 @@ export interface HomePageSelectionState {
   moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
   dragMoveActive: boolean
+  dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
 }
 
@@ -118,6 +119,7 @@ export interface HomePageHandlers {
   setDragMoveTargetFolder: (folderId: NodeId | null) => void
   canDropOnFolder: (folderId: NodeId) => boolean
   dropOnFolder: (folderId: NodeId) => void
+  moveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
   toggleSort: (field: 'name' | 'type' | 'updated') => void
   dismissFeedback: (id: number) => void
   selectDataRoom: (dataRoomId: NodeId) => void
