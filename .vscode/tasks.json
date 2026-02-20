@@ -60,6 +60,16 @@
     },
     {
       "type": "npm",
+      "script": "hooks:install",
+      "label": "npm: hooks:install"
+    },
+    {
+      "type": "npm",
+      "script": "hooks:pre-push",
+      "label": "npm: hooks:pre-push"
+    },
+    {
+      "type": "npm",
       "script": "i18n:extract:keys",
       "label": "npm: i18n:extract:keys"
     },
@@ -70,6 +80,11 @@
     },
     {
       "type": "npm",
+      "script": "i18n:prune-unused",
+      "label": "npm: i18n:prune-unused"
+    },
+    {
+      "type": "npm",
       "script": "i18n:gettext:compile",
       "label": "npm: i18n:gettext:compile"
     },
@@ -77,6 +92,16 @@
       "type": "npm",
       "script": "i18n:sync",
       "label": "npm: i18n:sync"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:verify-sync",
+      "label": "npm: i18n:verify-sync"
+    },
+    {
+      "type": "npm",
+      "script": "i18n:check",
+      "label": "npm: i18n:check"
     }
   ]
 }

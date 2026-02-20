@@ -17,16 +17,8 @@ msgstr ""
 msgid "aboutTitle"
 msgstr "About this starter"
 
-msgid "autoFormattingTitle"
-msgstr "Automatic locale formatting"
-
 msgid "brand"
 msgstr "Polyglot UI"
-
-msgid "cartItems"
-msgstr ""
-"{count, plural, =0 {Your cart is empty.} one {You have # item in your "
-"cart.} other {You have # items in your cart.}}"
 
 msgid "dataroomActionCancel"
 msgstr "Cancel"
@@ -52,12 +44,6 @@ msgstr "Delete data room"
 msgid "dataroomActionDeleteFile"
 msgstr "Delete"
 
-msgid "dataroomActionDeleteFolder"
-msgstr "Delete folder"
-
-msgid "dataroomActionOpenFolder"
-msgstr "Open"
-
 msgid "dataroomActionRename"
 msgstr "Rename"
 
@@ -67,14 +53,8 @@ msgstr "Rename data room"
 msgid "dataroomActionRenameFile"
 msgstr "Rename"
 
-msgid "dataroomActionRenameFolder"
-msgstr "Rename folder"
-
 msgid "dataroomActionUploadPdf"
 msgstr "Upload PDF"
-
-msgid "dataroomActionViewFile"
-msgstr "View"
 
 msgid "dataroomAriaDeleteFile"
 msgstr "Delete file {name}"
@@ -256,9 +236,6 @@ msgstr "Acme Due Diligence Room"
 msgid "dataroomSeedDefaultRootFolderName"
 msgstr "Data Room"
 
-msgid "dataroomSelectLabel"
-msgstr "Select Data Room"
-
 msgid "dataroomSidebarTitle"
 msgstr "Data Rooms"
 
@@ -271,52 +248,11 @@ msgstr "Sort by type"
 msgid "dataroomSortByUpdatedAria"
 msgstr "Sort by updated date"
 
-msgid "dataroomSortLabel"
-msgstr "Sort contents"
-
-msgid "dataroomSortNameAsc"
-msgstr "Name (A-Z)"
-
-msgid "dataroomSortNameDesc"
-msgstr "Name (Z-A)"
-
-msgid "dataroomSortType"
-msgstr "Type (folders first)"
-
-msgid "dataroomSortUpdatedAsc"
-msgstr "Modified (oldest)"
-
-msgid "dataroomSortUpdatedDesc"
-msgstr "Modified (newest)"
-
 msgid "dataroomStructureIncomplete"
 msgstr "Data Room structure is incomplete"
 
-msgid "featureOneBody"
-msgstr "Vite, React, and strict TypeScript configured for fast iteration."
-
-msgid "featureOneTitle"
-msgstr "Modern stack"
-
-msgid "featureThreeBody"
-msgstr ""
-"Custom typography, rounded components, and atmospheric gradients out of the "
-"box."
-
-msgid "featureThreeTitle"
-msgstr "Intentional visual design"
-
-msgid "featureTwoBody"
-msgstr "i18next with language detection and runtime language switching."
-
-msgid "featureTwoTitle"
-msgstr "Internationalization ready"
-
 msgid "language"
 msgstr "Language"
-
-msgid "monthlyRevenue"
-msgstr "Monthly revenue: {value, number}"
 
 msgid "navAbout"
 msgstr "About"
@@ -326,20 +262,3 @@ msgstr "Home"
 
 msgid "navigationLabel"
 msgstr "Main navigation"
-
-msgid "primaryAction"
-msgstr "Get Started"
-
-msgid "secondaryAction"
-msgstr "View Documentation"
-
-msgid "sectionTitle"
-msgstr "What this starter includes"
-
-msgid "subtitle"
-msgstr ""
-"A minimal React + TypeScript starter with i18next and a polished Material "
-"UI theme."
-
-msgid "title"
-msgstr "Build products that speak every language"

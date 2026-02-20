@@ -15,13 +15,7 @@ msgstr ""
 msgid "aboutTitle"
 msgstr ""
 
-msgid "autoFormattingTitle"
-msgstr ""
-
 msgid "brand"
-msgstr ""
-
-msgid "cartItems"
 msgstr ""
 
 msgid "dataroomActionCancel"
@@ -48,12 +42,6 @@ msgstr ""
 msgid "dataroomActionDeleteFile"
 msgstr ""
 
-msgid "dataroomActionDeleteFolder"
-msgstr ""
-
-msgid "dataroomActionOpenFolder"
-msgstr ""
-
 msgid "dataroomActionRename"
 msgstr ""
 
@@ -63,13 +51,7 @@ msgstr ""
 msgid "dataroomActionRenameFile"
 msgstr ""
 
-msgid "dataroomActionRenameFolder"
-msgstr ""
-
 msgid "dataroomActionUploadPdf"
-msgstr ""
-
-msgid "dataroomActionViewFile"
 msgstr ""
 
 msgid "dataroomAriaDeleteFile"
@@ -252,9 +234,6 @@ msgstr ""
 msgid "dataroomSeedDefaultRootFolderName"
 msgstr ""
 
-msgid "dataroomSelectLabel"
-msgstr ""
-
 msgid "dataroomSidebarTitle"
 msgstr ""
 
@@ -267,49 +246,10 @@ msgstr ""
 msgid "dataroomSortByUpdatedAria"
 msgstr ""
 
-msgid "dataroomSortLabel"
-msgstr ""
-
-msgid "dataroomSortNameAsc"
-msgstr ""
-
-msgid "dataroomSortNameDesc"
-msgstr ""
-
-msgid "dataroomSortType"
-msgstr ""
-
-msgid "dataroomSortUpdatedAsc"
-msgstr ""
-
-msgid "dataroomSortUpdatedDesc"
-msgstr ""
-
 msgid "dataroomStructureIncomplete"
 msgstr ""
 
-msgid "featureOneBody"
-msgstr ""
-
-msgid "featureOneTitle"
-msgstr ""
-
-msgid "featureThreeBody"
-msgstr ""
-
-msgid "featureThreeTitle"
-msgstr ""
-
-msgid "featureTwoBody"
-msgstr ""
-
-msgid "featureTwoTitle"
-msgstr ""
-
 msgid "language"
-msgstr ""
-
-msgid "monthlyRevenue"
 msgstr ""
 
 msgid "navAbout"
@@ -319,19 +259,4 @@ msgid "navHome"
 msgstr ""
 
 msgid "navigationLabel"
-msgstr ""
-
-msgid "primaryAction"
-msgstr ""
-
-msgid "secondaryAction"
-msgstr ""
-
-msgid "sectionTitle"
-msgstr ""
-
-msgid "subtitle"
-msgstr ""
-
-msgid "title"
 msgstr ""

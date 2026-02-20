@@ -11,10 +11,16 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage --testTimeout=15000",
+    "prepare": "node scripts/install-git-hooks.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
+    "hooks:pre-push": "node scripts/verify-pre-push.mjs",
     "i18n:extract:keys": "i18next \"src/**/*.{ts,tsx}\" --config i18next-parser.config.cjs",
-    "i18n:extract": "npm run i18n:extract:keys && node scripts/i18n/extract-gettext.mjs",
+    "i18n:prune-unused": "node scripts/i18n/prune-unused.mjs",
+    "i18n:extract": "npm run i18n:extract:keys && npm run i18n:prune-unused && node scripts/i18n/extract-gettext.mjs",
     "i18n:gettext:compile": "node scripts/i18n/compile-gettext.mjs",
-    "i18n:sync": "npm run i18n:extract && npm run i18n:gettext:compile"
+    "i18n:sync": "npm run i18n:extract && npm run i18n:gettext:compile",
+    "i18n:verify-sync": "node scripts/i18n/verify-sync.mjs",
+    "i18n:check": "npm run i18n:sync && npm run i18n:verify-sync && git diff --exit-code -- gettext src/i18n/locales"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

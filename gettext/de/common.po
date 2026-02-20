@@ -17,16 +17,8 @@ msgstr ""
 msgid "aboutTitle"
 msgstr "Uber dieses Starterprojekt"
 
-msgid "autoFormattingTitle"
-msgstr "Automatische Lokalisierung"
-
 msgid "brand"
 msgstr "Polyglot UI"
-
-msgid "cartItems"
-msgstr ""
-"{count, plural, =0 {Dein Warenkorb ist leer.} one {Du hast # Artikel im "
-"Warenkorb.} other {Du hast # Artikel im Warenkorb.}}"
 
 msgid "dataroomActionCancel"
 msgstr "Abbrechen"
@@ -52,12 +44,6 @@ msgstr "Datenraum loschen"
 msgid "dataroomActionDeleteFile"
 msgstr "Loschen"
 
-msgid "dataroomActionDeleteFolder"
-msgstr "Ordner loschen"
-
-msgid "dataroomActionOpenFolder"
-msgstr "Offnen"
-
 msgid "dataroomActionRename"
 msgstr "Umbenennen"
 
@@ -67,14 +53,8 @@ msgstr "Datenraum umbenennen"
 msgid "dataroomActionRenameFile"
 msgstr "Umbenennen"
 
-msgid "dataroomActionRenameFolder"
-msgstr "Ordner umbenennen"
-
 msgid "dataroomActionUploadPdf"
 msgstr "PDF hochladen"
-
-msgid "dataroomActionViewFile"
-msgstr "Ansehen"
 
 msgid "dataroomAriaDeleteFile"
 msgstr "Datei {name} loschen"
@@ -258,9 +238,6 @@ msgstr "Acme Due Diligence Raum"
 msgid "dataroomSeedDefaultRootFolderName"
 msgstr "Datenraum"
 
-msgid "dataroomSelectLabel"
-msgstr "Datenraum auswahlen"
-
 msgid "dataroomSidebarTitle"
 msgstr "Datenraume"
 
@@ -273,52 +250,11 @@ msgstr "Nach Typ sortieren"
 msgid "dataroomSortByUpdatedAria"
 msgstr "Nach Anderungsdatum sortieren"
 
-msgid "dataroomSortLabel"
-msgstr "Inhalt sortieren"
-
-msgid "dataroomSortNameAsc"
-msgstr "Name (A-Z)"
-
-msgid "dataroomSortNameDesc"
-msgstr "Name (Z-A)"
-
-msgid "dataroomSortType"
-msgstr "Typ (Ordner zuerst)"
-
-msgid "dataroomSortUpdatedAsc"
-msgstr "Geandert (alteste)"
-
-msgid "dataroomSortUpdatedDesc"
-msgstr "Geandert (neueste)"
-
 msgid "dataroomStructureIncomplete"
 msgstr "Die Datenraum-Struktur ist unvollstandig"
 
-msgid "featureOneBody"
-msgstr "Vite, React und striktes TypeScript fur schnelle Iteration."
-
-msgid "featureOneTitle"
-msgstr "Moderner Stack"
-
-msgid "featureThreeBody"
-msgstr ""
-"Eigene Typografie, abgerundete Komponenten und atmospharische Verlaufe von "
-"Anfang an."
-
-msgid "featureThreeTitle"
-msgstr "Bewusstes visuelles Design"
-
-msgid "featureTwoBody"
-msgstr "i18next mit Spracherkennung und Laufzeit-Umschaltung der Sprache."
-
-msgid "featureTwoTitle"
-msgstr "Internationalisierung inklusive"
-
 msgid "language"
 msgstr "Sprache"
-
-msgid "monthlyRevenue"
-msgstr "Monatsumsatz: {value, number}"
 
 msgid "navAbout"
 msgstr "Info"
@@ -328,20 +264,3 @@ msgstr "Start"
 
 msgid "navigationLabel"
 msgstr "Hauptnavigation"
-
-msgid "primaryAction"
-msgstr "Jetzt starten"
-
-msgid "secondaryAction"
-msgstr "Dokumentation ansehen"
-
-msgid "sectionTitle"
-msgstr "Was dieses Starterprojekt enthalt"
-
-msgid "subtitle"
-msgstr ""
-"Ein minimales React + TypeScript Starterprojekt mit i18next und einem "
-"hochwertigen Material UI Theme."
-
-msgid "title"
-msgstr "Baue Produkte, die jede Sprache sprechen"

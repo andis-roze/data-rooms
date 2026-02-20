@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+staged_before_count="$(git diff --cached --name-only | wc -l | tr -d ' ')"
+
+echo "[pre-commit] Running i18n sync..."
+npm run i18n:sync
+
+echo "[pre-commit] Verifying i18n sync..."
+npm run i18n:verify-sync
+
+changed_i18n_files="$(git diff --name-only -- gettext src/i18n/locales || true)"
+if [[ -n "${changed_i18n_files}" ]]; then
+  echo "[pre-commit] i18n files changed during hook; staging updates."
+  git add gettext src/i18n/locales
+
+  if [[ "${staged_before_count}" == "0" ]] && git rev-parse --verify HEAD >/dev/null 2>&1; then
+    echo "[pre-commit] No staged changes before hook. Amending latest commit with i18n updates."
+    git commit --amend --no-edit --no-verify
+    echo "[pre-commit] Latest commit amended."
+    exit 0
+  fi
+fi

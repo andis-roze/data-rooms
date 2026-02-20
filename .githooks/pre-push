@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[pre-push] Running tests and coverage gate..."
+npm run hooks:pre-push
