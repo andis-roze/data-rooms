@@ -65,6 +65,9 @@ export function HomePageContainer() {
     return <IncompleteStructureState title={t('dataroomStructureIncomplete')} />
   }
 
+  const activeDataRoomName = resolveDisplayName(activeDataRoom.name)
+  const activeFolderName = resolveDisplayName(activeFolder.name)
+
   return (
     <Container component="main" maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
       <Paper
@@ -95,7 +98,7 @@ export function HomePageContainer() {
         />
 
         <HomeContentSection
-          activeDataRoomName={resolveDisplayName(activeDataRoom.name)}
+          activeDataRoomName={activeDataRoomName}
           activeFolderId={activeFolder.id}
           breadcrumbs={breadcrumbs}
           visibleContentItems={visibleContentItems}
@@ -119,8 +122,8 @@ export function HomePageContainer() {
       <HomePageDialogsContainer
         dialogs={dialogs}
         forms={forms}
-        activeDataRoomName={resolveDisplayName(activeDataRoom.name)}
-        activeFolderName={resolveDisplayName(activeFolder.name)}
+        activeDataRoomName={activeDataRoomName}
+        activeFolderName={activeFolderName}
         targetFolder={targetFolder}
         activeFile={activeFile}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
