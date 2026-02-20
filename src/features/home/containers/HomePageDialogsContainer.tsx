@@ -1,56 +1,44 @@
-import type { FileNode, Folder } from '../../dataroom/model'
+import type {
+  HomePageHandlers,
+  HomePageSelectionState,
+  HomePageUiState,
+} from '../model/homePageViewModel'
 import { HomeDialogs } from '../HomeDialogs'
 
 // Maps controller state/handlers into the flattened HomeDialogs props.
 interface HomePageDialogsContainerProps {
-  dialogs: {
-    isCreateDataRoomDialogOpen: boolean
-    isRenameDataRoomDialogOpen: boolean
-    isDeleteDataRoomDialogOpen: boolean
-    isCreateFolderDialogOpen: boolean
-    isRenameFolderDialogOpen: boolean
-    isDeleteFolderDialogOpen: boolean
-    isRenameFileDialogOpen: boolean
-    isDeleteFileDialogOpen: boolean
-    isViewFileDialogOpen: boolean
-  }
-  forms: {
-    dataRoomNameDraft: string
-    dataRoomNameError: string | null
-    folderNameDraft: string
-    folderNameError: string | null
-    fileNameDraft: string
-    fileNameError: string | null
-  }
+  dialogs: HomePageUiState['dialogs']
+  forms: HomePageUiState['forms']
   activeDataRoomName: string
   activeFolderName: string
-  targetFolder: Folder | null
-  activeFile: FileNode | null
-  dataRoomDeleteSummary: { folderCount: number; fileCount: number }
-  folderDeleteSummary: { folderCount: number; fileCount: number }
+  targetFolder: HomePageSelectionState['targetFolder']
+  activeFile: HomePageSelectionState['activeFile']
+  dataRoomDeleteSummary: HomePageSelectionState['dataRoomDeleteSummary']
+  folderDeleteSummary: HomePageSelectionState['folderDeleteSummary']
   resolveDisplayName: (value: string) => string
-  handlers: {
-    closeCreateDataRoomDialog: () => void
-    handleDataRoomNameDraftChange: (value: string) => void
-    handleCreateDataRoom: () => void
-    closeRenameDataRoomDialog: () => void
-    handleRenameDataRoom: () => void
-    closeDeleteDataRoomDialog: () => void
-    handleDeleteDataRoom: () => void
-    closeCreateFolderDialog: () => void
-    handleFolderNameDraftChange: (value: string) => void
-    handleCreateFolder: () => void
-    closeRenameFolderDialog: () => void
-    handleRenameFolder: () => void
-    closeDeleteFolderDialog: () => void
-    handleDeleteFolder: () => void
-    closeRenameFileDialog: () => void
-    handleFileNameDraftChange: (value: string) => void
-    handleRenameFile: () => void
-    closeDeleteFileDialog: () => void
-    handleDeleteFile: () => void
-    closeViewFileDialog: () => void
-  }
+  handlers: Pick<
+    HomePageHandlers,
+    | 'closeCreateDataRoomDialog'
+    | 'handleDataRoomNameDraftChange'
+    | 'handleCreateDataRoom'
+    | 'closeRenameDataRoomDialog'
+    | 'handleRenameDataRoom'
+    | 'closeDeleteDataRoomDialog'
+    | 'handleDeleteDataRoom'
+    | 'closeCreateFolderDialog'
+    | 'handleFolderNameDraftChange'
+    | 'handleCreateFolder'
+    | 'closeRenameFolderDialog'
+    | 'handleRenameFolder'
+    | 'closeDeleteFolderDialog'
+    | 'handleDeleteFolder'
+    | 'closeRenameFileDialog'
+    | 'handleFileNameDraftChange'
+    | 'handleRenameFile'
+    | 'closeDeleteFileDialog'
+    | 'handleDeleteFile'
+    | 'closeViewFileDialog'
+  >
 }
 
 export function HomePageDialogsContainer({
