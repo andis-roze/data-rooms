@@ -385,8 +385,7 @@ export function deleteFile(state: DataRoomState, input: DeleteFileInput): DataRo
     return state
   }
 
-  const nextFilesById = { ...state.filesById }
-  delete nextFilesById[fileId]
+  const nextFilesById = omitFilesById(state.filesById, [fileId])
 
   return {
     ...state,
