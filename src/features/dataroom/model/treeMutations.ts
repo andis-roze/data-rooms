@@ -62,6 +62,16 @@ export interface DeleteFolderCascadeResult {
   deletedFileCount: number
 }
 
+function createDeleteFolderCascadeNoopResult(state: DataRoomState): DeleteFolderCascadeResult {
+  return {
+    nextState: state,
+    deleted: false,
+    fallbackFolderId: null,
+    deletedFolderCount: 0,
+    deletedFileCount: 0,
+  }
+}
+
 export interface CreateFileInput {
   parentFolderId: NodeId
   fileId: NodeId
@@ -390,37 +400,19 @@ export function deleteFolderCascade(
   const folder = state.foldersById[folderId]
 
   if (!folder) {
-    return {
-      nextState: state,
-      deleted: false,
-      fallbackFolderId: null,
-      deletedFolderCount: 0,
-      deletedFileCount: 0,
-    }
+    return createDeleteFolderCascadeNoopResult(state)
   }
 
   const dataRoom = state.dataRoomsById[folder.dataRoomId]
 
   if (!dataRoom || dataRoom.rootFolderId === folderId || !folder.parentFolderId) {
-    return {
-      nextState: state,
-      deleted: false,
-      fallbackFolderId: null,
-      deletedFolderCount: 0,
-      deletedFileCount: 0,
-    }
+    return createDeleteFolderCascadeNoopResult(state)
   }
 
   const parentFolder = state.foldersById[folder.parentFolderId]
 
   if (!parentFolder) {
-    return {
-      nextState: state,
-      deleted: false,
-      fallbackFolderId: null,
-      deletedFolderCount: 0,
-      deletedFileCount: 0,
-    }
+    return createDeleteFolderCascadeNoopResult(state)
   }
 
   const collectResult = collectFolderAndFileIds(state, folderId)
