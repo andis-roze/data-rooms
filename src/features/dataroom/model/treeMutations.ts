@@ -35,6 +35,14 @@ export interface DeleteDataRoomResult {
   fallbackDataRoomId: NodeId | null
 }
 
+function createDeleteDataRoomNoopResult(state: DataRoomState): DeleteDataRoomResult {
+  return {
+    nextState: state,
+    deleted: false,
+    fallbackDataRoomId: null,
+  }
+}
+
 export interface CreateFolderInput {
   dataRoomId: NodeId
   parentFolderId: NodeId
@@ -458,11 +466,7 @@ export function deleteDataRoom(state: DataRoomState, input: DeleteDataRoomInput)
   const dataRoom = state.dataRoomsById[dataRoomId]
 
   if (!dataRoom) {
-    return {
-      nextState: state,
-      deleted: false,
-      fallbackDataRoomId: null,
-    }
+    return createDeleteDataRoomNoopResult(state)
   }
 
   const collectResult = collectFolderAndFileIds(state, dataRoom.rootFolderId)
