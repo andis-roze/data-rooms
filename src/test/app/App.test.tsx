@@ -484,6 +484,34 @@ describe('App routing and localization', () => {
     expect(financeListCheckbox).toHaveAttribute('data-indeterminate', 'false')
   }, 30000)
 
+  it('shows delete impact counts based on fully checked hierarchy state', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await createFolder(user, 'Invoices')
+    await goToBreadcrumb(user, 'Finance')
+    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
+    await uploadPdf(user, 'invoice.pdf')
+    await goToBreadcrumb(user, 'Finance')
+    await uploadPdf(user, 'summary.pdf')
+    await user.click(screen.getByRole('checkbox', { name: 'Select item summary.pdf' }))
+    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Select item invoice.pdf' }))
+    await goToBreadcrumb(user, 'Data Room')
+
+    const tree = screen.getByRole('list', { name: 'Folder tree' })
+    expect(within(tree).getByRole('checkbox', { name: 'Select item Finance' })).toBeChecked()
+
+    await user.click(screen.getByRole('button', { name: 'Delete selected' }))
+    const deleteDialog = screen.getByRole('dialog', { name: 'Delete selected items?' })
+    expect(
+      within(deleteDialog).getByText('This will delete 2 file(s) and 2 folder(s). Folder contents will also be deleted.'),
+    ).toBeInTheDocument()
+  }, 40000)
+
   it('dragging an unselected file moves only that file even if another file is selected', async () => {
     const user = userEvent.setup()
     renderRoute('/')

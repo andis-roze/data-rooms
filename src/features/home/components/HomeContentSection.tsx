@@ -30,8 +30,9 @@ interface HomeContentSectionProps {
   resolveDisplayName: (value: string) => string
   checkedContentItemIds: NodeId[]
   selectedContentItemCount: number
-  selectedFileCount: number
-  selectedFolderCount: number
+  deleteSelectedContentItemCount: number
+  deleteSelectedFileCount: number
+  deleteSelectedFolderCount: number
   selectedContentItemNames: string[]
   indeterminateFolderIds: NodeId[]
   moveContentDialogOpen: boolean
@@ -83,8 +84,9 @@ export function HomeContentSection({
   resolveDisplayName,
   checkedContentItemIds,
   selectedContentItemCount,
-  selectedFileCount,
-  selectedFolderCount,
+  deleteSelectedContentItemCount,
+  deleteSelectedFileCount,
+  deleteSelectedFolderCount,
   selectedContentItemNames,
   indeterminateFolderIds,
   moveContentDialogOpen,
@@ -304,9 +306,9 @@ export function HomeContentSection({
       <Dialog open={deleteSelectedContentDialogOpen} onClose={onCloseDeleteSelectedContentDialog} fullWidth maxWidth="xs">
         <DialogTitle>{t('dataroomDialogDeleteSelectedTitle')}</DialogTitle>
         <DialogContent>
-          <Typography>{t('dataroomDeleteSelectedQuestion', { count: selectedContentItemCount })}</Typography>
+          <Typography>{t('dataroomDeleteSelectedQuestion', { count: deleteSelectedContentItemCount })}</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
-            {t('dataroomDeleteSelectedImpact', { fileCount: selectedFileCount, folderCount: selectedFolderCount })}
+            {t('dataroomDeleteSelectedImpact', { fileCount: deleteSelectedFileCount, folderCount: deleteSelectedFolderCount })}
           </Typography>
           {selectedContentItemNames.slice(0, 3).map((name, index) => (
             <DialogEntityName key={`${name}-${index}`} name={name} maxLength={44} />

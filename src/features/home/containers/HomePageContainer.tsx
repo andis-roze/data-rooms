@@ -33,8 +33,9 @@ export function HomePageContainer() {
     selectedContentItemIds,
     checkedContentItemIds,
     selectedContentItemCount,
-    selectedFileCount,
-    selectedFolderCount,
+    deleteSelectedContentItemCount,
+    deleteSelectedFileCount,
+    deleteSelectedFolderCount,
     selectedContentItemNames,
     indeterminateFolderIds,
     moveItemCount,
@@ -135,8 +136,9 @@ export function HomePageContainer() {
           resolveDisplayName={resolveDisplayName}
           checkedContentItemIds={checkedContentItemIds}
           selectedContentItemCount={selectedContentItemCount}
-          selectedFileCount={selectedFileCount}
-          selectedFolderCount={selectedFolderCount}
+          deleteSelectedContentItemCount={deleteSelectedContentItemCount}
+          deleteSelectedFileCount={deleteSelectedFileCount}
+          deleteSelectedFolderCount={deleteSelectedFolderCount}
           selectedContentItemNames={selectedContentItemNames}
           indeterminateFolderIds={indeterminateFolderIds}
           moveContentDialogOpen={dialogs.isMoveContentDialogOpen}

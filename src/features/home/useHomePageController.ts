@@ -144,6 +144,10 @@ export function useHomePageController(): HomePageViewModel {
     const folder = entities.foldersById[folderId]
     return Boolean(folder && activeDataRoom && folder.dataRoomId === activeDataRoom.id)
   }
+  const isActionableFolder = (folderId: NodeId) => {
+    const folder = entities.foldersById[folderId]
+    return Boolean(folder && folder.parentFolderId && isFolderInActiveDataRoom(folder.id))
+  }
   const isFileInActiveDataRoom = (fileId: NodeId) => {
     const file = entities.filesById[fileId]
     if (!file || !activeDataRoom) {
@@ -235,7 +239,7 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectedFolderIds = Object.values(entities.foldersById)
-    .filter((folder) => isFolderInActiveDataRoom(folder.id))
+    .filter((folder) => isActionableFolder(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => isContentItemSelected(folderId))
   const selectedFileIds = Object.values(entities.filesById)
@@ -266,7 +270,7 @@ export function useHomePageController(): HomePageViewModel {
     const folders = uniqueItemIds
       .map((itemId) => entities.foldersById[itemId])
       .filter((folder): folder is NonNullable<typeof folder> => Boolean(folder))
-      .filter((folder) => isFolderInActiveDataRoom(folder.id))
+      .filter((folder) => isActionableFolder(folder.id))
     const files = uniqueItemIds
       .map((itemId) => entities.filesById[itemId])
       .filter((file): file is NonNullable<typeof file> => Boolean(file))
@@ -300,8 +304,6 @@ export function useHomePageController(): HomePageViewModel {
     }
   }
 
-  const { topLevelFolderIds: topLevelSelectedFolderIds, standaloneFileIds: selectedStandaloneFileIds } =
-    getNormalizedSelectionTargets(selectedContentItemIds)
   const selectedContentItemNames = [
     ...selectedFolders.map((folder) => resolveDisplayName(folder.name)),
     ...selectedFiles.map((file) => file.name),
@@ -414,10 +416,25 @@ export function useHomePageController(): HomePageViewModel {
   const moveTargets = getMoveTargets(moveItemIds)
   const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
   const checkedFolderIds = Object.values(entities.foldersById)
-    .filter((folder) => isFolderInActiveDataRoom(folder.id))
+    .filter((folder) => isActionableFolder(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => getFolderSelectionMode(folderId) === 'full')
   const checkedContentItemIds = [...checkedFolderIds, ...selectedFileIds]
+  const deleteSelectionItemIds = checkedContentItemIds
+  const deleteSelectionTargets = getNormalizedSelectionTargets(deleteSelectionItemIds)
+  const deleteSelectionSummary = deleteSelectionTargets.topLevelFolderIds.reduce(
+    (summary, folderId) => {
+      const folderSummary = getFolderDeleteSummary(entities, folderId)
+      return {
+        folderCount: summary.folderCount + folderSummary.folderCount,
+        fileCount: summary.fileCount + folderSummary.fileCount,
+      }
+    },
+    {
+      folderCount: 0,
+      fileCount: deleteSelectionTargets.standaloneFileIds.length,
+    },
+  )
   const isContentItemChecked = (itemId: NodeId) => {
     const folder = entities.foldersById[itemId]
     if (folder) {
@@ -732,7 +749,7 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const openDeleteSelectedContentDialog = () => {
-    if (selectedContentItemIds.length > 0) {
+    if (deleteSelectionItemIds.length > 0) {
       setIsDeleteSelectedContentDialogOpen(true)
     }
   }
@@ -742,19 +759,19 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const handleDeleteSelectedContent = async () => {
-    if (selectedContentItemIds.length === 0) {
+    if (deleteSelectionItemIds.length === 0) {
       return
     }
-    for (const fileId of selectedStandaloneFileIds) {
+    for (const fileId of deleteSelectionTargets.standaloneFileIds) {
       dispatch({ type: 'dataroom/deleteFile', payload: { fileId } })
     }
 
-    for (const folderId of topLevelSelectedFolderIds) {
+    for (const folderId of deleteSelectionTargets.topLevelFolderIds) {
       dispatch({ type: 'dataroom/deleteFolder', payload: { folderId } })
     }
 
-    const fileIdsForCleanup = new Set<NodeId>(selectedStandaloneFileIds)
-    for (const folderId of topLevelSelectedFolderIds) {
+    const fileIdsForCleanup = new Set<NodeId>(deleteSelectionTargets.standaloneFileIds)
+    for (const folderId of deleteSelectionTargets.topLevelFolderIds) {
       const nestedFileIds = getFileIdsForFolderCascadeDelete(entities, folderId)
       for (const fileId of nestedFileIds) {
         fileIdsForCleanup.add(fileId)
@@ -850,6 +867,9 @@ export function useHomePageController(): HomePageViewModel {
       selectedContentItemCount: selectedContentItemIds.length,
       selectedFileCount: selectedFiles.length,
       selectedFolderCount: selectedFolders.length,
+      deleteSelectedContentItemCount: deleteSelectionItemIds.length,
+      deleteSelectedFileCount: deleteSelectionSummary.fileCount,
+      deleteSelectedFolderCount: deleteSelectionSummary.folderCount,
       selectedContentItemNames,
       indeterminateFolderIds,
       moveItemCount,

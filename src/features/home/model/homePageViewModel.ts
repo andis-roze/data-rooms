@@ -51,6 +51,9 @@ export interface HomePageSelectionState {
   selectedContentItemCount: number
   selectedFileCount: number
   selectedFolderCount: number
+  deleteSelectedContentItemCount: number
+  deleteSelectedFileCount: number
+  deleteSelectedFolderCount: number
   selectedContentItemNames: string[]
   indeterminateFolderIds: NodeId[]
   moveItemCount: number
