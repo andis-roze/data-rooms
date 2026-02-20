@@ -31,6 +31,8 @@ interface UseFileActionsParams {
   setIsViewFileDialogOpen: Dispatch<SetStateAction<boolean>>
 }
 
+type FileNameValidationResult = { ok: true } | { ok: false; message: string }
+
 export function useFileActions({
   t,
   entities,
@@ -67,7 +69,7 @@ export function useFileActions({
   const validateFileName = (
     fileName: string,
     options?: { parentFolderId: NodeId; excludeFileId?: NodeId },
-  ): { ok: boolean; message: string | null } => {
+  ): FileNameValidationResult => {
     const validationError = getFileNameValidationError(fileName)
     if (validationError) {
       return { ok: false, message: getFileNameValidationMessage(t, validationError) }
@@ -77,7 +79,7 @@ export function useFileActions({
       return { ok: false, message: t('dataroomErrorFileNameDuplicate') }
     }
 
-    return { ok: true, message: null }
+    return { ok: true }
   }
 
   const handleFileNameDraftChange = (value: string) => {
@@ -136,7 +138,7 @@ export function useFileActions({
     const preparedUpload = preparePdfUpload(selectedFile)
     const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: activeFolder.id })
     if (!uploadNameValidation.ok) {
-      enqueueFeedback(uploadNameValidation.message ?? t('dataroomErrorFileNameReserved'), 'error')
+      enqueueFeedback(uploadNameValidation.message, 'error')
       clearUploadInput(event)
       return
     }
