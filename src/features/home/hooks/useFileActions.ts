@@ -46,6 +46,10 @@ export function useFileActions({
   setIsDeleteFileDialogOpen,
   setIsViewFileDialogOpen,
 }: UseFileActionsParams) {
+  const clearUploadInput = (event: ChangeEvent<HTMLInputElement>) => {
+    event.target.value = ''
+  }
+
   const handleFileNameDraftChange = (value: string) => {
     setFileNameDraft(value)
     setFileNameError(null)
@@ -95,7 +99,7 @@ export function useFileActions({
 
     if (uploadError) {
       enqueueFeedback(uploadError === 'invalidPdf' ? t('dataroomErrorPdfOnly') : t('dataroomErrorPdfOnly'), 'error')
-      event.target.value = ''
+      clearUploadInput(event)
       return
     }
 
@@ -104,13 +108,13 @@ export function useFileActions({
 
     if (nameError) {
       enqueueFeedback(getFileNameValidationMessage(t, nameError), 'error')
-      event.target.value = ''
+      clearUploadInput(event)
       return
     }
 
     if (hasDuplicateFileName(entities, activeFolder.id, preparedUpload.fileName)) {
       enqueueFeedback(t('dataroomErrorFileNameDuplicate'), 'error')
-      event.target.value = ''
+      clearUploadInput(event)
       return
     }
 
@@ -120,7 +124,7 @@ export function useFileActions({
       await putFileBlob(fileId, selectedFile)
     } catch {
       enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
-      event.target.value = ''
+      clearUploadInput(event)
       return
     }
 
@@ -136,7 +140,7 @@ export function useFileActions({
     })
 
     enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
-    event.target.value = ''
+    clearUploadInput(event)
   }
 
   const handleRenameFile = () => {
