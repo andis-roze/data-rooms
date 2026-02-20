@@ -190,7 +190,7 @@ export function useFileActions({
       },
     })
 
-    closeFileDialog(setIsRenameFileDialogOpen)
+    closeRenameFileDialog()
     enqueueFeedback(t('dataroomFeedbackFileRenamed'), 'success')
   }
 
@@ -208,7 +208,7 @@ export function useFileActions({
       },
     })
 
-    closeFileDialog(setIsDeleteFileDialogOpen)
+    closeDeleteFileDialog()
     enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
 
     try {
