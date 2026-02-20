@@ -80,6 +80,20 @@ function createDeleteFolderCascadeNoopResult(state: DataRoomState): DeleteFolder
   }
 }
 
+function withUpdatedDataRoomTimestamp(
+  state: DataRoomState,
+  dataRoomId: NodeId,
+  now: UnixMs,
+): DataRoomState['dataRoomsById'] {
+  return {
+    ...state.dataRoomsById,
+    [dataRoomId]: {
+      ...state.dataRoomsById[dataRoomId],
+      updatedAt: now,
+    },
+  }
+}
+
 export interface CreateFileInput {
   parentFolderId: NodeId
   fileId: NodeId
@@ -211,13 +225,7 @@ export function createFolder(state: DataRoomState, input: CreateFolderInput): Da
 
   return {
     ...state,
-    dataRoomsById: {
-      ...state.dataRoomsById,
-      [dataRoomId]: {
-        ...dataRoom,
-        updatedAt: now,
-      },
-    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, dataRoomId, now),
     foldersById: {
       ...state.foldersById,
       [parentFolderId]: {
@@ -259,13 +267,7 @@ export function renameFolder(state: DataRoomState, input: RenameFolderInput): Da
         updatedAt: now,
       },
     },
-    dataRoomsById: {
-      ...state.dataRoomsById,
-      [folder.dataRoomId]: {
-        ...state.dataRoomsById[folder.dataRoomId],
-        updatedAt: now,
-      },
-    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, folder.dataRoomId, now),
   }
 }
 
@@ -307,13 +309,7 @@ export function createFile(state: DataRoomState, input: CreateFileInput): DataRo
         updatedAt: now,
       },
     },
-    dataRoomsById: {
-      ...state.dataRoomsById,
-      [parent.dataRoomId]: {
-        ...state.dataRoomsById[parent.dataRoomId],
-        updatedAt: now,
-      },
-    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, parent.dataRoomId, now),
   }
 }
 
@@ -352,13 +348,7 @@ export function renameFile(state: DataRoomState, input: RenameFileInput): DataRo
         updatedAt: now,
       },
     },
-    dataRoomsById: {
-      ...state.dataRoomsById,
-      [parent.dataRoomId]: {
-        ...state.dataRoomsById[parent.dataRoomId],
-        updatedAt: now,
-      },
-    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, parent.dataRoomId, now),
   }
 }
 
@@ -390,13 +380,7 @@ export function deleteFile(state: DataRoomState, input: DeleteFileInput): DataRo
         updatedAt: now,
       },
     },
-    dataRoomsById: {
-      ...state.dataRoomsById,
-      [parent.dataRoomId]: {
-        ...state.dataRoomsById[parent.dataRoomId],
-        updatedAt: now,
-      },
-    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, parent.dataRoomId, now),
   }
 }
 
