@@ -31,9 +31,9 @@ import {
   isNodeInsideFolder,
 } from './model/selectionOps'
 import { useHomePageActions } from './hooks/useHomePageActions'
-import { loadFeedbackTimeoutMs } from './services/feedback'
+import { useFeedbackQueue } from './hooks/useFeedbackQueue'
 import { loadSortModePreference } from './services/sortPreference'
-import type { FeedbackState, SortState } from './types'
+import type { SortState } from './types'
 
 const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
 
@@ -43,7 +43,6 @@ export function useHomePageController(): HomePageViewModel {
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
-  const feedbackIdRef = useRef(0)
   const dragMoveItemIdsRef = useRef<NodeId[]>([])
 
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false)
@@ -74,22 +73,13 @@ export function useHomePageController(): HomePageViewModel {
   const [fileNameDraft, setFileNameDraft] = useState('')
   const [fileNameError, setFileNameError] = useState<string | null>(null)
 
-  const [feedbackQueue, setFeedbackQueue] = useState<FeedbackState[]>([])
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
-  const feedbackTimeoutMs = loadFeedbackTimeoutMs()
+  const { feedbackQueue, feedbackTimeoutMs, enqueueFeedback, dismissFeedback } = useFeedbackQueue()
 
   const i18nTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
   const translate = (key: string, options?: Record<string, unknown>): string => i18nTranslate(key, options)
 
   const resolveDisplayName = (value: string) => (value.startsWith('i18n:') ? translate(value.slice(5)) : value)
-
-  const enqueueFeedback = (message: string, severity: FeedbackState['severity']) => {
-    setFeedbackQueue((previous) => [...previous, { id: feedbackIdRef.current++, message, severity }])
-  }
-
-  const dismissFeedback = (id: number) => {
-    setFeedbackQueue((previous) => previous.filter((item) => item.id !== id))
-  }
 
   const hasDuplicateDataRoomDisplayName = (candidateName: string, excludeDataRoomId?: NodeId) => {
     const normalizedCandidate = normalizeNodeName(candidateName)
