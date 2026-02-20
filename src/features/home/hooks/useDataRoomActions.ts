@@ -75,15 +75,28 @@ export function useDataRoomActions({
   }
 
   const closeCreateDataRoomDialog = () => {
-    setIsCreateDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsCreateDataRoomDialogOpen)
+  }
+
+  const closeDataRoomDialog = (
+    setIsOpen: Dispatch<SetStateAction<boolean>>,
+    options?: { clearDraft?: boolean; clearError?: boolean },
+  ) => {
+    setIsOpen(false)
+    if (options?.clearDraft) {
+      setDataRoomNameDraft('')
+    }
+    if (options?.clearError) {
+      setDataRoomNameError(null)
+    }
   }
 
   const closeRenameDataRoomDialog = () => {
-    setIsRenameDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsRenameDataRoomDialogOpen, { clearError: true })
   }
 
   const closeDeleteDataRoomDialog = () => {
-    setIsDeleteDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsDeleteDataRoomDialogOpen)
   }
 
   const handleDataRoomNameDraftChange = (value: string) => {
