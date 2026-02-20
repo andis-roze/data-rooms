@@ -21,6 +21,7 @@ interface HomeSidebarProps {
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
   selectedContentItemIds: NodeId[]
+  indeterminateFolderIds: NodeId[]
   canDeleteActiveDataRoom: boolean
   onCreateDataRoom: () => void
   onRenameDataRoom: (dataRoom?: DataRoom) => void
@@ -40,6 +41,7 @@ export function HomeSidebar({
   selectedDataRoomId,
   selectedFolderId,
   selectedContentItemIds,
+  indeterminateFolderIds,
   canDeleteActiveDataRoom,
   onCreateDataRoom,
   onRenameDataRoom,
@@ -238,6 +240,7 @@ export function HomeSidebar({
             onOpenRenameFolder={onOpenRenameFolder}
             onOpenDeleteFolder={onOpenDeleteFolder}
             selectedContentItemIds={selectedContentItemIds}
+            indeterminateFolderIds={indeterminateFolderIds}
             onToggleContentItemSelection={onToggleContentItemSelection}
             renderFolderName={resolveDisplayName}
             collapsedNodeIds={collapsedNodeIds}

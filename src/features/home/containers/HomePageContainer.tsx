@@ -35,6 +35,7 @@ export function HomePageContainer() {
     selectedFileCount,
     selectedFolderCount,
     selectedContentItemNames,
+    indeterminateFolderIds,
     moveItemCount,
     moveItemNames,
     moveDestinationFolderId,
@@ -97,6 +98,7 @@ export function HomePageContainer() {
           selectedDataRoomId={selectedDataRoomId}
           selectedFolderId={selectedFolderId}
           selectedContentItemIds={selectedContentItemIds}
+          indeterminateFolderIds={indeterminateFolderIds}
           canDeleteActiveDataRoom={canDeleteActiveDataRoom}
           onCreateDataRoom={handlers.openCreateDataRoomDialog}
           onRenameDataRoom={handlers.openRenameDataRoomDialog}
@@ -123,6 +125,7 @@ export function HomePageContainer() {
           selectedFileCount={selectedFileCount}
           selectedFolderCount={selectedFolderCount}
           selectedContentItemNames={selectedContentItemNames}
+          indeterminateFolderIds={indeterminateFolderIds}
           moveContentDialogOpen={dialogs.isMoveContentDialogOpen}
           moveItemCount={moveItemCount}
           moveItemNames={moveItemNames}

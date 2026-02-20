@@ -303,6 +303,54 @@ export function useHomePageController(): HomePageViewModel {
     ...selectedFolders.map((folder) => resolveDisplayName(folder.name)),
     ...selectedFiles.map((file) => file.name),
   ]
+  const folderSelectionModeMemo = new Map<NodeId, 'none' | 'partial' | 'full'>()
+  const getFolderSelectionMode = (folderId: NodeId): 'none' | 'partial' | 'full' => {
+    const memoizedValue = folderSelectionModeMemo.get(folderId)
+    if (memoizedValue) {
+      return memoizedValue
+    }
+
+    const folder = entities.foldersById[folderId]
+    if (!folder || !isFolderInActiveDataRoom(folderId)) {
+      folderSelectionModeMemo.set(folderId, 'none')
+      return 'none'
+    }
+
+    const selfSelected = isContentItemSelected(folderId)
+    let hasAnySelected = selfSelected
+    let allDescendantsFullySelected = true
+
+    for (const childFileId of folder.fileIds) {
+      const isChildFileSelected = isContentItemSelected(childFileId)
+      if (isChildFileSelected) {
+        hasAnySelected = true
+      } else {
+        allDescendantsFullySelected = false
+      }
+    }
+
+    for (const childFolderId of folder.childFolderIds) {
+      const childMode = getFolderSelectionMode(childFolderId)
+      if (childMode !== 'none') {
+        hasAnySelected = true
+      }
+      if (childMode !== 'full') {
+        allDescendantsFullySelected = false
+      }
+    }
+
+    const nextMode: 'none' | 'partial' | 'full' = hasAnySelected
+      ? selfSelected && allDescendantsFullySelected
+        ? 'full'
+        : 'partial'
+      : 'none'
+    folderSelectionModeMemo.set(folderId, nextMode)
+    return nextMode
+  }
+  const indeterminateFolderIds = Object.values(entities.foldersById)
+    .filter((folder) => isFolderInActiveDataRoom(folder.id))
+    .map((folder) => folder.id)
+    .filter((folderId) => getFolderSelectionMode(folderId) === 'partial')
   const moveTargets = getNormalizedSelectionTargets(moveItemIds)
   const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
 
@@ -331,7 +379,7 @@ export function useHomePageController(): HomePageViewModel {
       return []
     }
 
-    const options: Array<{ id: NodeId; name: string; depth: number; path: string }> = []
+    const options: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }> = []
     const pushFolderOption = (folderId: NodeId, depth: number, pathSegments: string[]) => {
       const folder = entities.foldersById[folderId]
       if (!folder || folder.dataRoomId !== activeDataRoom.id) {
@@ -345,6 +393,7 @@ export function useHomePageController(): HomePageViewModel {
         name: folderDisplayName,
         depth,
         path: nextPathSegments.join(' / '),
+        parentPath: pathSegments.length > 0 ? pathSegments.join(' / ') : null,
       })
 
       for (const childFolderId of folder.childFolderIds) {
@@ -732,6 +781,7 @@ export function useHomePageController(): HomePageViewModel {
       selectedFileCount: selectedFiles.length,
       selectedFolderCount: selectedFolders.length,
       selectedContentItemNames,
+      indeterminateFolderIds,
       moveItemCount,
       moveItemNames: moveTargets.itemNames,
       moveDestinationFolderId,

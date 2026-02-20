@@ -17,6 +17,7 @@ interface FolderContentTableProps {
   locale: string
   resolveDisplayName: (value: string) => string
   selectedItemIds: NodeId[]
+  indeterminateFolderIds: NodeId[]
   onToggleItemSelection: (itemId: NodeId) => void
   onToggleAllItemSelection: () => void
   onSelectFolder: (folderId: NodeId) => void
@@ -47,6 +48,7 @@ export function FolderContentTable({
   locale,
   resolveDisplayName,
   selectedItemIds,
+  indeterminateFolderIds,
   onToggleItemSelection,
   onToggleAllItemSelection,
   onSelectFolder,
@@ -198,6 +200,7 @@ export function FolderContentTable({
                 locale={locale}
                 resolveDisplayName={resolveDisplayName}
                 selected={selectedItemIdSet.has(item.id)}
+                indeterminate={indeterminateFolderIds.includes(item.id)}
                 onToggleSelect={onToggleItemSelection}
                 onSelectFolder={onSelectFolder}
                 onOpenRenameFolder={onOpenRenameFolder}

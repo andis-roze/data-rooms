@@ -22,6 +22,7 @@ interface FolderRowProps {
   locale: string
   resolveDisplayName: (value: string) => string
   selected: boolean
+  indeterminate: boolean
   onToggleSelect: (itemId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
@@ -45,6 +46,7 @@ export function FolderRow({
   locale,
   resolveDisplayName,
   selected,
+  indeterminate,
   onToggleSelect,
   onSelectFolder,
   onOpenRenameFolder,
@@ -69,6 +71,12 @@ export function FolderRow({
             <Checkbox
               size="small"
               checked={selected}
+              indeterminate={indeterminate}
+              sx={{
+                '&.MuiCheckbox-indeterminate': {
+                  color: 'text.disabled',
+                },
+              }}
               inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: resolveDisplayName(folder.name) }) }}
               onChange={() => onToggleSelect(folder.id)}
             />
@@ -89,7 +97,9 @@ export function FolderRow({
           onClick={() => onSelectFolder(folder.id)}
           title={displayName ?? resolveDisplayName(folder.name)}
         >
-          <Typography noWrap>{formatPathForDisplay(displayName ?? resolveDisplayName(folder.name))}</Typography>
+          <Typography noWrap color={indeterminate ? 'text.secondary' : 'inherit'}>
+            {formatPathForDisplay(displayName ?? resolveDisplayName(folder.name))}
+          </Typography>
         </Button>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           {formatUpdatedAt(folder.updatedAt, locale)}

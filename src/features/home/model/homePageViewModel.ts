@@ -51,10 +51,11 @@ export interface HomePageSelectionState {
   selectedFileCount: number
   selectedFolderCount: number
   selectedContentItemNames: string[]
+  indeterminateFolderIds: NodeId[]
   moveItemCount: number
   moveItemNames: string[]
   moveDestinationFolderId: NodeId | null
-  moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string }>
+  moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
 }
 

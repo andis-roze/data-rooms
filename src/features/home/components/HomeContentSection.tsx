@@ -33,11 +33,12 @@ interface HomeContentSectionProps {
   selectedFileCount: number
   selectedFolderCount: number
   selectedContentItemNames: string[]
+  indeterminateFolderIds: NodeId[]
   moveContentDialogOpen: boolean
   moveItemCount: number
   moveItemNames: string[]
   moveDestinationFolderId: NodeId | null
-  moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string }>
+  moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
@@ -78,6 +79,7 @@ export function HomeContentSection({
   selectedFileCount,
   selectedFolderCount,
   selectedContentItemNames,
+  indeterminateFolderIds,
   moveContentDialogOpen,
   moveItemCount,
   moveItemNames,
@@ -202,6 +204,7 @@ export function HomeContentSection({
           locale={locale}
           resolveDisplayName={resolveDisplayName}
           selectedItemIds={selectedContentItemIds}
+          indeterminateFolderIds={indeterminateFolderIds}
           onToggleItemSelection={onToggleContentItemSelection}
           onToggleAllItemSelection={onToggleAllContentItemSelection}
           onSelectFolder={onSelectFolder}
@@ -232,7 +235,10 @@ export function HomeContentSection({
             <List dense disablePadding aria-label={t('dataroomFieldDestinationFolder')}>
               {moveDestinationFolderOptions.map((folderOption) => {
                 const displayLabel = formatMoveOptionLabel(folderOption.name)
-                const isTruncated = displayLabel !== folderOption.name
+                const displayParentPath = folderOption.parentPath ? truncateMiddle(folderOption.parentPath, 72) : null
+                const isTruncated =
+                  displayLabel !== folderOption.name ||
+                  (folderOption.parentPath ? displayParentPath !== folderOption.parentPath : false)
                 return (
                   <ListItemButton
                     key={folderOption.id}
@@ -244,8 +250,14 @@ export function HomeContentSection({
                     <Tooltip title={folderOption.path} disableHoverListener={!isTruncated}>
                       <ListItemText
                         primary={displayLabel}
+                        secondary={displayParentPath}
                         primaryTypographyProps={{
                           noWrap: true,
+                          fontWeight: 500,
+                        }}
+                        secondaryTypographyProps={{
+                          noWrap: true,
+                          color: 'text.secondary',
                         }}
                       />
                     </Tooltip>

@@ -367,4 +367,26 @@ describe('App routing and localization', () => {
     expect(within(moveDialog).getByText('Finance cannot be moved into its own subfolder.')).toBeInTheDocument()
     expect(within(moveDialog).getByRole('button', { name: 'Move' })).toBeDisabled()
   }, 15000)
+
+  it('marks tree and list parent as indeterminate when only a descendant file is selected', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await uploadPdf(user, 'leaf.pdf')
+    await user.click(screen.getByRole('checkbox', { name: 'Select item leaf.pdf' }))
+    await goToBreadcrumb(user, 'Data Room')
+
+    const tree = screen.getByRole('list', { name: 'Folder tree' })
+    const financeCheckbox = within(tree).getByRole('checkbox', { name: 'Select item Finance' })
+    expect(financeCheckbox).not.toBeChecked()
+    expect(financeCheckbox).toHaveAttribute('data-indeterminate', 'true')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    const financeListCheckbox = within(list).getByRole('checkbox', { name: 'Select item Finance' })
+    expect(financeListCheckbox).not.toBeChecked()
+    expect(financeListCheckbox).toHaveAttribute('data-indeterminate', 'true')
+  }, 15000)
 })
