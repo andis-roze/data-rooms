@@ -54,6 +54,22 @@ export function useFileActions({
     setActiveFileId(file.id)
   }
 
+  const validateFileName = (
+    fileName: string,
+    options?: { parentFolderId: NodeId; excludeFileId?: NodeId },
+  ): { ok: boolean; message: string | null } => {
+    const validationError = getFileNameValidationError(fileName)
+    if (validationError) {
+      return { ok: false, message: getFileNameValidationMessage(t, validationError) }
+    }
+
+    if (options && hasDuplicateFileName(entities, options.parentFolderId, fileName, options.excludeFileId)) {
+      return { ok: false, message: t('dataroomErrorFileNameDuplicate') }
+    }
+
+    return { ok: true, message: null }
+  }
+
   const handleFileNameDraftChange = (value: string) => {
     setFileNameDraft(value)
     setFileNameError(null)
@@ -108,16 +124,9 @@ export function useFileActions({
     }
 
     const preparedUpload = preparePdfUpload(selectedFile)
-    const nameError = getFileNameValidationError(preparedUpload.fileName)
-
-    if (nameError) {
-      enqueueFeedback(getFileNameValidationMessage(t, nameError), 'error')
-      clearUploadInput(event)
-      return
-    }
-
-    if (hasDuplicateFileName(entities, activeFolder.id, preparedUpload.fileName)) {
-      enqueueFeedback(t('dataroomErrorFileNameDuplicate'), 'error')
+    const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: activeFolder.id })
+    if (!uploadNameValidation.ok) {
+      enqueueFeedback(uploadNameValidation.message ?? t('dataroomErrorFileNameReserved'), 'error')
       clearUploadInput(event)
       return
     }
@@ -152,15 +161,12 @@ export function useFileActions({
       return
     }
 
-    const validationError = getFileNameValidationError(fileNameDraft)
-
-    if (validationError) {
-      setFileNameError(getFileNameValidationMessage(t, validationError))
-      return
-    }
-
-    if (hasDuplicateFileName(entities, activeFile.parentFolderId, fileNameDraft, activeFile.id)) {
-      setFileNameError(t('dataroomErrorFileNameDuplicate'))
+    const renameValidation = validateFileName(fileNameDraft, {
+      parentFolderId: activeFile.parentFolderId,
+      excludeFileId: activeFile.id,
+    })
+    if (!renameValidation.ok) {
+      setFileNameError(renameValidation.message)
       return
     }
 
