@@ -52,6 +52,19 @@ export function useFolderActions({
     setTargetFolderId(null)
   }
 
+  const closeFolderDialog = (
+    setIsOpen: Dispatch<SetStateAction<boolean>>,
+    options?: { clearTarget?: boolean; clearError?: boolean },
+  ) => {
+    setIsOpen(false)
+    if (options?.clearTarget) {
+      clearTargetFolder()
+    }
+    if (options?.clearError) {
+      setFolderNameError(null)
+    }
+  }
+
   const handleFolderNameDraftChange = (value: string) => {
     setFolderNameDraft(value)
     setFolderNameError(null)
@@ -64,7 +77,7 @@ export function useFolderActions({
   }
 
   const closeCreateFolderDialog = () => {
-    setIsCreateFolderDialogOpen(false)
+    closeFolderDialog(setIsCreateFolderDialogOpen)
   }
 
   const openRenameFolderDialog = (folder: Folder) => {
@@ -75,9 +88,7 @@ export function useFolderActions({
   }
 
   const closeRenameFolderDialog = () => {
-    setIsRenameFolderDialogOpen(false)
-    clearTargetFolder()
-    setFolderNameError(null)
+    closeFolderDialog(setIsRenameFolderDialogOpen, { clearTarget: true, clearError: true })
   }
 
   const openDeleteFolderDialog = (folder: Folder) => {
@@ -86,8 +97,7 @@ export function useFolderActions({
   }
 
   const closeDeleteFolderDialog = () => {
-    setIsDeleteFolderDialogOpen(false)
-    clearTargetFolder()
+    closeFolderDialog(setIsDeleteFolderDialogOpen, { clearTarget: true })
   }
 
   const handleCreateFolder = () => {
@@ -146,8 +156,7 @@ export function useFolderActions({
       },
     })
 
-    setIsRenameFolderDialogOpen(false)
-    clearTargetFolder()
+    closeFolderDialog(setIsRenameFolderDialogOpen, { clearTarget: true })
     enqueueFeedback(t('dataroomFeedbackFolderRenamed'), 'success')
   }
 
@@ -163,8 +172,7 @@ export function useFolderActions({
       payload: { folderId: targetFolder.id },
     })
 
-    setIsDeleteFolderDialogOpen(false)
-    clearTargetFolder()
+    closeFolderDialog(setIsDeleteFolderDialogOpen, { clearTarget: true })
     enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
 
     try {
