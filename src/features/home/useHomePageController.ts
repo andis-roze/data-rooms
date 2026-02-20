@@ -98,11 +98,14 @@ export function useHomePageController(): HomePageViewModel {
     ? getDataRoomDeleteSummary(entities, activeDataRoom.id)
     : EMPTY_DELETE_SUMMARY
 
-  const targetFolder = targetFolderId ? entities.foldersById[targetFolderId] : null
+  const getFolderById = (folderId: NodeId | null) => (folderId ? entities.foldersById[folderId] ?? null : null)
+  const getFileById = (fileId: NodeId | null) => (fileId ? entities.filesById[fileId] ?? null : null)
+
+  const targetFolder = getFolderById(targetFolderId)
   const folderDeleteSummary = activeFolder
     ? getFolderDeleteSummary(entities, targetFolder?.id ?? activeFolder.id)
     : EMPTY_DELETE_SUMMARY
-  const activeFile = activeFileId ? entities.filesById[activeFileId] : null
+  const activeFile = getFileById(activeFileId)
 
   const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
     if (type === 'dataRoom') {
