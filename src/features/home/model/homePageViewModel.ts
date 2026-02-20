@@ -47,6 +47,7 @@ export interface HomePageSelectionState {
   dataRoomDeleteSummary: HomeDeleteSummary
   folderDeleteSummary: HomeDeleteSummary
   selectedContentItemIds: NodeId[]
+  checkedContentItemIds: NodeId[]
   selectedContentItemCount: number
   selectedFileCount: number
   selectedFolderCount: number

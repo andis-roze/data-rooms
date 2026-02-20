@@ -97,7 +97,7 @@ interface FolderTreeNodeProps {
   dragMoveTargetFolderId: NodeId | null
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
-  onDropOnFolder: (folderId: NodeId) => void
+  onDropOnFolder: (folderId: NodeId, draggedItemId?: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -192,7 +192,8 @@ function FolderTreeNode({
           onDragOver={handleDragOver}
           onDrop={(event) => {
             event.preventDefault()
-            onDropOnFolder(folder.id)
+            const draggedItemId = event.dataTransfer.getData('text/plain') || undefined
+            onDropOnFolder(folder.id, draggedItemId)
           }}
           onClick={() => onSelectFolder(folder.id)}
           sx={{
@@ -335,7 +336,7 @@ interface DataRoomTreeNodeProps {
   dragMoveTargetFolderId: NodeId | null
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
-  onDropOnFolder: (folderId: NodeId) => void
+  onDropOnFolder: (folderId: NodeId, draggedItemId?: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void

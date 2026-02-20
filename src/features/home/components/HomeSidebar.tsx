@@ -26,6 +26,7 @@ interface HomeSidebarProps {
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
   selectedContentItemIds: NodeId[]
+  checkedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   dragMoveActive: boolean
   dragMoveItemIds: NodeId[]
@@ -54,6 +55,7 @@ export function HomeSidebar({
   selectedDataRoomId,
   selectedFolderId,
   selectedContentItemIds,
+  checkedContentItemIds,
   indeterminateFolderIds,
   dragMoveActive,
   dragMoveItemIds,
@@ -188,14 +190,20 @@ export function HomeSidebar({
     })
   }
 
-  const openMoveConfirmDialog = (destinationFolderId: NodeId) => {
-    if (!onCanDropOnFolder(destinationFolderId)) {
+  const openMoveConfirmDialog = (destinationFolderId: NodeId, draggedItemId?: NodeId) => {
+    const pendingIds =
+      dragMoveItemIds.length > 0
+        ? dragMoveItemIds
+        : selectedContentItemIds.length > 0
+          ? selectedContentItemIds
+          : draggedItemId
+            ? [draggedItemId]
+            : []
+
+    if (pendingIds.length === 0 || !onCanDropOnFolder(destinationFolderId)) {
       return
     }
-    const pendingIds = dragMoveItemIds.length > 0 ? dragMoveItemIds : selectedContentItemIds
-    if (pendingIds.length === 0) {
-      return
-    }
+
     setMoveConfirmState({
       open: true,
       itemIds: pendingIds,
@@ -304,7 +312,7 @@ export function HomeSidebar({
             onOpenMoveFolder={onOpenMoveFolder}
             onOpenRenameFolder={onOpenRenameFolder}
             onOpenDeleteFolder={onOpenDeleteFolder}
-            selectedContentItemIds={selectedContentItemIds}
+            selectedContentItemIds={checkedContentItemIds}
             indeterminateFolderIds={indeterminateFolderIds}
             onToggleContentItemSelection={onToggleContentItemSelection}
             onStartDragMove={onStartDragMove}

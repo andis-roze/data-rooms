@@ -31,6 +31,7 @@ export function HomePageContainer() {
     dataRoomDeleteSummary,
     folderDeleteSummary,
     selectedContentItemIds,
+    checkedContentItemIds,
     selectedContentItemCount,
     selectedFileCount,
     selectedFolderCount,
@@ -101,6 +102,7 @@ export function HomePageContainer() {
           selectedDataRoomId={selectedDataRoomId}
           selectedFolderId={selectedFolderId}
           selectedContentItemIds={selectedContentItemIds}
+          checkedContentItemIds={checkedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
           dragMoveActive={dragMoveActive}
           dragMoveItemIds={dragMoveItemIds}
@@ -131,7 +133,7 @@ export function HomePageContainer() {
           sortState={sortState}
           locale={locale}
           resolveDisplayName={resolveDisplayName}
-          selectedContentItemIds={selectedContentItemIds}
+          checkedContentItemIds={checkedContentItemIds}
           selectedContentItemCount={selectedContentItemCount}
           selectedFileCount={selectedFileCount}
           selectedFolderCount={selectedFolderCount}

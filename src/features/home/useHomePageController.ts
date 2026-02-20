@@ -343,7 +343,7 @@ export function useHomePageController(): HomePageViewModel {
     }
 
     const nextMode: 'none' | 'partial' | 'full' = hasAnySelected
-      ? selfSelected && allDescendantsFullySelected
+      ? allDescendantsFullySelected
         ? 'full'
         : 'partial'
       : 'none'
@@ -413,6 +413,22 @@ export function useHomePageController(): HomePageViewModel {
   }
   const moveTargets = getMoveTargets(moveItemIds)
   const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
+  const checkedFolderIds = Object.values(entities.foldersById)
+    .filter((folder) => isFolderInActiveDataRoom(folder.id))
+    .map((folder) => folder.id)
+    .filter((folderId) => getFolderSelectionMode(folderId) === 'full')
+  const checkedContentItemIds = [...checkedFolderIds, ...selectedFileIds]
+  const isContentItemChecked = (itemId: NodeId) => {
+    const folder = entities.foldersById[itemId]
+    if (folder) {
+      return getFolderSelectionMode(folder.id) === 'full'
+    }
+    const file = entities.filesById[itemId]
+    if (!file) {
+      return false
+    }
+    return isFileSelectedByMarks(file.id)
+  }
 
   const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
     if (type === 'dataRoom') {
@@ -598,7 +614,7 @@ export function useHomePageController(): HomePageViewModel {
     if (!entities.foldersById[itemId] && !entities.filesById[itemId]) {
       return
     }
-    const nextMark = isContentItemSelected(itemId) ? 'exclude' : 'include'
+    const nextMark = isContentItemChecked(itemId) ? 'exclude' : 'include'
     const isNodeInsideFolder = (nodeId: NodeId, folderId: NodeId) => {
       const folder = entities.foldersById[nodeId]
       if (folder) {
@@ -682,7 +698,7 @@ export function useHomePageController(): HomePageViewModel {
     if (allItemIds.length === 0) {
       return
     }
-    const selectedIdSet = new Set(selectableContentItems.map((item) => item.id).filter((itemId) => isContentItemSelected(itemId)))
+    const selectedIdSet = new Set(selectableContentItems.map((item) => item.id).filter((itemId) => isContentItemChecked(itemId)))
     const areAllVisibleItemsSelected = allItemIds.every((itemId) => selectedIdSet.has(itemId))
     const mark = areAllVisibleItemsSelected ? 'exclude' : 'include'
 
@@ -830,6 +846,7 @@ export function useHomePageController(): HomePageViewModel {
       dataRoomDeleteSummary,
       folderDeleteSummary,
       selectedContentItemIds,
+      checkedContentItemIds,
       selectedContentItemCount: selectedContentItemIds.length,
       selectedFileCount: selectedFiles.length,
       selectedFolderCount: selectedFolders.length,

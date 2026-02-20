@@ -28,7 +28,7 @@ interface HomeContentSectionProps {
   sortState: SortState
   locale: string
   resolveDisplayName: (value: string) => string
-  selectedContentItemIds: NodeId[]
+  checkedContentItemIds: NodeId[]
   selectedContentItemCount: number
   selectedFileCount: number
   selectedFolderCount: number
@@ -81,7 +81,7 @@ export function HomeContentSection({
   sortState,
   locale,
   resolveDisplayName,
-  selectedContentItemIds,
+  checkedContentItemIds,
   selectedContentItemCount,
   selectedFileCount,
   selectedFolderCount,
@@ -217,7 +217,7 @@ export function HomeContentSection({
           onToggleSort={onToggleSort}
           locale={locale}
           resolveDisplayName={resolveDisplayName}
-          selectedItemIds={selectedContentItemIds}
+          selectedItemIds={checkedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
           dragMoveActive={dragMoveActive}
           dragMoveTargetFolderId={dragMoveTargetFolderId}
