@@ -20,7 +20,7 @@ import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/mod
 import { DataRoomTreeNode } from '../FolderTree'
 import { truncateMiddle } from '../services/formatters'
 
-interface HomeSidebarProps {
+interface HomeSidebarStateProps {
   entities: DataRoomState
   dataRooms: DataRoom[]
   selectedDataRoomId: NodeId | null
@@ -32,6 +32,10 @@ interface HomeSidebarProps {
   dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
   canDeleteActiveDataRoom: boolean
+  resolveDisplayName: (value: string) => string
+}
+
+interface HomeSidebarHandlerProps {
   onCreateDataRoom: () => void
   onRenameDataRoom: (dataRoom?: DataRoom) => void
   onDeleteDataRoom: (dataRoom?: DataRoom) => void
@@ -46,10 +50,18 @@ interface HomeSidebarProps {
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
   onMoveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
-  resolveDisplayName: (value: string) => string
+}
+
+interface HomeSidebarProps {
+  state: HomeSidebarStateProps
+  handlers: HomeSidebarHandlerProps
 }
 
 export function HomeSidebar({
+  state,
+  handlers,
+}: HomeSidebarProps) {
+  const {
   entities,
   dataRooms,
   selectedDataRoomId,
@@ -61,6 +73,10 @@ export function HomeSidebar({
   dragMoveItemIds,
   dragMoveTargetFolderId,
   canDeleteActiveDataRoom,
+  resolveDisplayName,
+  } = state
+
+  const {
   onCreateDataRoom,
   onRenameDataRoom,
   onDeleteDataRoom,
@@ -75,8 +91,8 @@ export function HomeSidebar({
   onSetDragMoveTargetFolder,
   onCanDropOnFolder,
   onMoveItemsToFolder,
-  resolveDisplayName,
-}: HomeSidebarProps) {
+  } = handlers
+
   const { t } = useTranslation()
   const [collapseOverrides, setCollapseOverrides] = useState<Map<NodeId, boolean>>(new Map())
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)

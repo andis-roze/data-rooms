@@ -98,32 +98,36 @@ export function HomePageContainer() {
         }}
       >
         <HomeSidebar
-          entities={entities}
-          dataRooms={dataRooms}
-          selectedDataRoomId={selectedDataRoomId}
-          selectedFolderId={selectedFolderId}
-          selectedContentItemIds={selectedContentItemIds}
-          checkedContentItemIds={checkedContentItemIds}
-          indeterminateFolderIds={indeterminateFolderIds}
-          dragMoveActive={dragMoveActive}
-          dragMoveItemIds={dragMoveItemIds}
-          dragMoveTargetFolderId={dragMoveTargetFolderId}
-          canDeleteActiveDataRoom={canDeleteActiveDataRoom}
-          onCreateDataRoom={handlers.openCreateDataRoomDialog}
-          onRenameDataRoom={handlers.openRenameDataRoomDialog}
-          onDeleteDataRoom={handlers.openDeleteDataRoomDialog}
-          onSelectDataRoom={handlers.selectDataRoom}
-          onSelectFolder={handlers.selectFolder}
-          onOpenMoveFolder={handlers.openMoveFolderDialog}
-          onOpenRenameFolder={handlers.openRenameFolderDialog}
-          onOpenDeleteFolder={handlers.openDeleteFolderDialog}
-          onToggleContentItemSelection={handlers.toggleContentItemSelection}
-          onStartDragMove={handlers.startDragMove}
-          onEndDragMove={handlers.endDragMove}
-          onSetDragMoveTargetFolder={handlers.setDragMoveTargetFolder}
-          onCanDropOnFolder={handlers.canDropOnFolder}
-          onMoveItemsToFolder={handlers.moveItemsToFolder}
-          resolveDisplayName={resolveDisplayName}
+          state={{
+            entities,
+            dataRooms,
+            selectedDataRoomId,
+            selectedFolderId,
+            selectedContentItemIds,
+            checkedContentItemIds,
+            indeterminateFolderIds,
+            dragMoveActive,
+            dragMoveItemIds,
+            dragMoveTargetFolderId,
+            canDeleteActiveDataRoom,
+            resolveDisplayName,
+          }}
+          handlers={{
+            onCreateDataRoom: handlers.openCreateDataRoomDialog,
+            onRenameDataRoom: handlers.openRenameDataRoomDialog,
+            onDeleteDataRoom: handlers.openDeleteDataRoomDialog,
+            onSelectDataRoom: handlers.selectDataRoom,
+            onSelectFolder: handlers.selectFolder,
+            onOpenMoveFolder: handlers.openMoveFolderDialog,
+            onOpenRenameFolder: handlers.openRenameFolderDialog,
+            onOpenDeleteFolder: handlers.openDeleteFolderDialog,
+            onToggleContentItemSelection: handlers.toggleContentItemSelection,
+            onStartDragMove: handlers.startDragMove,
+            onEndDragMove: handlers.endDragMove,
+            onSetDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
+            onCanDropOnFolder: handlers.canDropOnFolder,
+            onMoveItemsToFolder: handlers.moveItemsToFolder,
+          }}
         />
 
         <HomeContentSection
