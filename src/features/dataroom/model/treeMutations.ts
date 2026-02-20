@@ -94,6 +94,25 @@ function withUpdatedDataRoomTimestamp(
   }
 }
 
+function omitFoldersById(
+  source: DataRoomState['foldersById'],
+  folderIds: Iterable<NodeId>,
+): DataRoomState['foldersById'] {
+  const nextFoldersById = { ...source }
+  for (const id of folderIds) {
+    delete nextFoldersById[id]
+  }
+  return nextFoldersById
+}
+
+function omitFilesById(source: DataRoomState['filesById'], fileIds: Iterable<NodeId>): DataRoomState['filesById'] {
+  const nextFilesById = { ...source }
+  for (const id of fileIds) {
+    delete nextFilesById[id]
+  }
+  return nextFilesById
+}
+
 export interface CreateFileInput {
   parentFolderId: NodeId
   fileId: NodeId
@@ -408,16 +427,8 @@ export function deleteFolderCascade(
   }
 
   const collectResult = collectFolderAndFileIds(state, folderId)
-  const nextFoldersById = { ...state.foldersById }
-  const nextFilesById = { ...state.filesById }
-
-  collectResult.folderIds.forEach((id) => {
-    delete nextFoldersById[id]
-  })
-
-  collectResult.fileIds.forEach((id) => {
-    delete nextFilesById[id]
-  })
+  const nextFoldersById = omitFoldersById(state.foldersById, collectResult.folderIds)
+  const nextFilesById = omitFilesById(state.filesById, collectResult.fileIds)
 
   nextFoldersById[parentFolder.id] = {
     ...parentFolder,
@@ -455,18 +466,10 @@ export function deleteDataRoom(state: DataRoomState, input: DeleteDataRoomInput)
 
   const collectResult = collectFolderAndFileIds(state, dataRoom.rootFolderId)
   const nextDataRoomsById = { ...state.dataRoomsById }
-  const nextFoldersById = { ...state.foldersById }
-  const nextFilesById = { ...state.filesById }
+  const nextFoldersById = omitFoldersById(state.foldersById, collectResult.folderIds)
+  const nextFilesById = omitFilesById(state.filesById, collectResult.fileIds)
 
   delete nextDataRoomsById[dataRoomId]
-
-  collectResult.folderIds.forEach((id) => {
-    delete nextFoldersById[id]
-  })
-
-  collectResult.fileIds.forEach((id) => {
-    delete nextFilesById[id]
-  })
 
   const nextDataRoomOrder = state.dataRoomOrder.filter((id) => id !== dataRoomId)
 
