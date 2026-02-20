@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -41,28 +41,16 @@ export function HomeSidebar({
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
-  const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<NodeId>>(new Set())
+  const [collapseOverrides, setCollapseOverrides] = useState<Map<NodeId, boolean>>(new Map())
 
-  const toggleNode = (nodeId: NodeId) => {
-    setCollapsedNodeIds((previous) => {
-      const next = new Set(previous)
-      if (next.has(nodeId)) {
-        next.delete(nodeId)
-      } else {
-        next.add(nodeId)
-      }
-      return next
-    })
-  }
-
-  useEffect(() => {
+  const autoCollapsedNodeIds = useMemo(() => {
     if (!selectedDataRoomId || !selectedFolderId) {
-      return
+      return new Set<NodeId>()
     }
 
     const selectedFolder = entities.foldersById[selectedFolderId]
     if (!selectedFolder) {
-      return
+      return new Set<NodeId>()
     }
 
     const requiredOpenNodeIds = new Set<NodeId>([selectedDataRoomId])
@@ -92,20 +80,29 @@ export function HomeSidebar({
       }
     }
 
-    setCollapsedNodeIds((previous) => {
-      if (previous.size !== nextCollapsedNodeIds.size) {
-        return nextCollapsedNodeIds
-      }
-
-      for (const id of previous) {
-        if (!nextCollapsedNodeIds.has(id)) {
-          return nextCollapsedNodeIds
-        }
-      }
-
-      return previous
-    })
+    return nextCollapsedNodeIds
   }, [dataRooms, entities.foldersById, selectedDataRoomId, selectedFolderId])
+
+  const collapsedNodeIds = useMemo(() => {
+    const next = new Set(autoCollapsedNodeIds)
+    for (const [nodeId, isCollapsed] of collapseOverrides) {
+      if (isCollapsed) {
+        next.add(nodeId)
+      } else {
+        next.delete(nodeId)
+      }
+    }
+    return next
+  }, [autoCollapsedNodeIds, collapseOverrides])
+
+  const toggleNode = (nodeId: NodeId) => {
+    setCollapseOverrides((previous) => {
+      const next = new Map(previous)
+      const isCollapsed = previous.has(nodeId) ? previous.get(nodeId) === true : autoCollapsedNodeIds.has(nodeId)
+      next.set(nodeId, !isCollapsed)
+      return next
+    })
+  }
 
   return (
     <Box component="aside" sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}>
