@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -40,6 +41,71 @@ export function HomeSidebar({
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
+  const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<NodeId>>(new Set())
+
+  const toggleNode = (nodeId: NodeId) => {
+    setCollapsedNodeIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(nodeId)) {
+        next.delete(nodeId)
+      } else {
+        next.add(nodeId)
+      }
+      return next
+    })
+  }
+
+  useEffect(() => {
+    if (!selectedDataRoomId || !selectedFolderId) {
+      return
+    }
+
+    const selectedFolder = entities.foldersById[selectedFolderId]
+    if (!selectedFolder) {
+      return
+    }
+
+    const requiredOpenNodeIds = new Set<NodeId>([selectedDataRoomId])
+    let currentFolder = selectedFolder
+
+    while (currentFolder.parentFolderId) {
+      requiredOpenNodeIds.add(currentFolder.parentFolderId)
+      const parentFolder = entities.foldersById[currentFolder.parentFolderId]
+      if (!parentFolder) {
+        break
+      }
+      currentFolder = parentFolder
+    }
+
+    const nextCollapsedNodeIds = new Set<NodeId>()
+
+    for (const dataRoom of dataRooms) {
+      const rootFolder = entities.foldersById[dataRoom.rootFolderId]
+      if (rootFolder && rootFolder.childFolderIds.length > 0 && !requiredOpenNodeIds.has(dataRoom.id)) {
+        nextCollapsedNodeIds.add(dataRoom.id)
+      }
+    }
+
+    for (const folder of Object.values(entities.foldersById)) {
+      if (folder.childFolderIds.length > 0 && !requiredOpenNodeIds.has(folder.id)) {
+        nextCollapsedNodeIds.add(folder.id)
+      }
+    }
+
+    setCollapsedNodeIds((previous) => {
+      if (previous.size !== nextCollapsedNodeIds.size) {
+        return nextCollapsedNodeIds
+      }
+
+      for (const id of previous) {
+        if (!nextCollapsedNodeIds.has(id)) {
+          return nextCollapsedNodeIds
+        }
+      }
+
+      return previous
+    })
+  }, [dataRooms, entities.foldersById, selectedDataRoomId, selectedFolderId])
 
   return (
     <Box component="aside" sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}>
@@ -86,6 +152,8 @@ export function HomeSidebar({
             onOpenDeleteFolder={onOpenDeleteFolder}
             renderDataRoomName={resolveDisplayName}
             renderFolderName={resolveDisplayName}
+            collapsedNodeIds={collapsedNodeIds}
+            onToggleNode={toggleNode}
           />
         ))}
       </List>
