@@ -16,10 +16,10 @@ import {
   selectVisibleContentItems,
 } from './selectors/homeSelectors'
 import type { HomePageViewModel } from './model/homePageViewModel'
+import { useHomePageActions } from './hooks/useHomePageActions'
 import { loadFeedbackTimeoutMs } from './services/feedback'
 import { loadSortModePreference } from './services/sortPreference'
 import type { FeedbackState, SortState } from './types'
-import { useHomePageHandlers } from './useHomePageHandlers'
 
 // Main coordinator for home page state, derived view data, and user interaction handlers.
 export function useHomePageController(): HomePageViewModel {
@@ -110,7 +110,7 @@ export function useHomePageController(): HomePageViewModel {
     dispatch({ type: 'dataroom/selectFolder', payload: { folderId } })
   }
 
-  const actions = useHomePageHandlers({
+  const actions = useHomePageActions({
     dataRoom: {
       t: translate,
       entities,
