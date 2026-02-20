@@ -65,6 +65,12 @@ export function useFolderActions({
     }
   }
 
+  const openFolderDialog = (setIsOpen: Dispatch<SetStateAction<boolean>>, draftName: string) => {
+    setFolderNameDraft(draftName)
+    setFolderNameError(null)
+    setIsOpen(true)
+  }
+
   const validateFolderName = (parentFolderId: NodeId | null, excludeFolderId?: NodeId): boolean => {
     const validationError = getFolderNameValidationError(folderNameDraft)
     if (validationError) {
@@ -86,9 +92,7 @@ export function useFolderActions({
   }
 
   const openCreateFolderDialog = () => {
-    setFolderNameDraft('')
-    setFolderNameError(null)
-    setIsCreateFolderDialogOpen(true)
+    openFolderDialog(setIsCreateFolderDialogOpen, '')
   }
 
   const closeCreateFolderDialog = () => {
@@ -97,9 +101,7 @@ export function useFolderActions({
 
   const openRenameFolderDialog = (folder: Folder) => {
     setTargetFolderId(folder.id)
-    setFolderNameDraft(resolveDisplayName(folder.name))
-    setFolderNameError(null)
-    setIsRenameFolderDialogOpen(true)
+    openFolderDialog(setIsRenameFolderDialogOpen, resolveDisplayName(folder.name))
   }
 
   const closeRenameFolderDialog = () => {
