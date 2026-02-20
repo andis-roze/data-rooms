@@ -1,4 +1,4 @@
-import { type MouseEvent, useMemo, useState } from 'react'
+import { type MouseEvent, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
@@ -18,6 +18,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { useTranslation } from 'react-i18next'
 import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/model'
 import { DataRoomTreeNode } from '../FolderTree'
+import { useSidebarMoveConfirm } from '../hooks/useSidebarMoveConfirm'
+import { useSidebarTreeCollapse } from '../hooks/useSidebarTreeCollapse'
 import { truncateMiddle } from '../services/formatters'
 
 interface HomeSidebarStateProps {
@@ -94,77 +96,34 @@ export function HomeSidebar({
   } = handlers
 
   const { t } = useTranslation()
-  const [collapseOverrides, setCollapseOverrides] = useState<Map<NodeId, boolean>>(new Map())
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
   const [menuAnchorReference, setMenuAnchorReference] = useState<'anchorEl' | 'anchorPosition'>('anchorEl')
   const [menuAnchorPosition, setMenuAnchorPosition] = useState<{ top: number; left: number } | undefined>(undefined)
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false)
-  const [moveConfirmState, setMoveConfirmState] = useState<{
-    open: boolean
-    itemIds: NodeId[]
-    destinationFolderId: NodeId | null
-  }>({
-    open: false,
-    itemIds: [],
-    destinationFolderId: null,
+
+  const { collapsedNodeIds, toggleNode } = useSidebarTreeCollapse({
+    entities,
+    selectedDataRoomId,
+    selectedFolderId,
   })
+
+  const {
+    moveConfirmState,
+    closeMoveConfirmDialog,
+    openMoveConfirmDialog,
+    confirmMove,
+    getPendingDestinationFolderName,
+  } = useSidebarMoveConfirm({
+    entities,
+    selectedContentItemIds,
+    dragMoveItemIds,
+    onCanDropOnFolder,
+    onMoveItemsToFolder,
+  })
+
   const activeDataRoom =
     (selectedDataRoomId ? dataRooms.find((dataRoom) => dataRoom.id === selectedDataRoomId) : undefined) ?? dataRooms[0]
   const visibleDataRooms = activeDataRoom ? [activeDataRoom] : []
-
-  const autoCollapsedNodeIds = useMemo(() => {
-    if (!selectedDataRoomId || !selectedFolderId) {
-      return new Set<NodeId>()
-    }
-
-    const selectedFolder = entities.foldersById[selectedFolderId]
-    if (!selectedFolder) {
-      return new Set<NodeId>()
-    }
-
-    const requiredOpenNodeIds = new Set<NodeId>()
-    let currentFolder = selectedFolder
-
-    while (currentFolder.parentFolderId) {
-      requiredOpenNodeIds.add(currentFolder.parentFolderId)
-      const parentFolder = entities.foldersById[currentFolder.parentFolderId]
-      if (!parentFolder) {
-        break
-      }
-      currentFolder = parentFolder
-    }
-
-    const nextCollapsedNodeIds = new Set<NodeId>()
-
-    for (const folder of Object.values(entities.foldersById)) {
-      if (folder.childFolderIds.length > 0 && !requiredOpenNodeIds.has(folder.id)) {
-        nextCollapsedNodeIds.add(folder.id)
-      }
-    }
-
-    return nextCollapsedNodeIds
-  }, [entities.foldersById, selectedDataRoomId, selectedFolderId])
-
-  const collapsedNodeIds = useMemo(() => {
-    const next = new Set(autoCollapsedNodeIds)
-    for (const [nodeId, isCollapsed] of collapseOverrides) {
-      if (isCollapsed) {
-        next.add(nodeId)
-      } else {
-        next.delete(nodeId)
-      }
-    }
-    return next
-  }, [autoCollapsedNodeIds, collapseOverrides])
-
-  const toggleNode = (nodeId: NodeId) => {
-    setCollapseOverrides((previous) => {
-      const next = new Map(previous)
-      const isCollapsed = previous.has(nodeId) ? previous.get(nodeId) === true : autoCollapsedNodeIds.has(nodeId)
-      next.set(nodeId, !isCollapsed)
-      return next
-    })
-  }
 
   const openActionsMenu = (event: MouseEvent<HTMLElement>) => {
     const anchorElement = event.currentTarget
@@ -198,46 +157,7 @@ export function HomeSidebar({
     }
   }
 
-  const closeMoveConfirmDialog = () => {
-    setMoveConfirmState({
-      open: false,
-      itemIds: [],
-      destinationFolderId: null,
-    })
-  }
-
-  const openMoveConfirmDialog = (destinationFolderId: NodeId, draggedItemId?: NodeId) => {
-    const pendingIds =
-      dragMoveItemIds.length > 0
-        ? dragMoveItemIds
-        : selectedContentItemIds.length > 0
-          ? selectedContentItemIds
-          : draggedItemId
-            ? [draggedItemId]
-            : []
-
-    if (pendingIds.length === 0 || !onCanDropOnFolder(destinationFolderId)) {
-      return
-    }
-
-    setMoveConfirmState({
-      open: true,
-      itemIds: pendingIds,
-      destinationFolderId,
-    })
-  }
-
-  const confirmMove = () => {
-    if (!moveConfirmState.destinationFolderId || moveConfirmState.itemIds.length === 0) {
-      return
-    }
-    onMoveItemsToFolder(moveConfirmState.itemIds, moveConfirmState.destinationFolderId)
-    closeMoveConfirmDialog()
-  }
-
-  const pendingDestinationFolderName = moveConfirmState.destinationFolderId
-    ? resolveDisplayName(entities.foldersById[moveConfirmState.destinationFolderId]?.name ?? '')
-    : ''
+  const pendingDestinationFolderName = getPendingDestinationFolderName(resolveDisplayName)
 
   return (
     <Box component="aside" sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}>
