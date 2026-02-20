@@ -50,13 +50,17 @@ export function useFileActions({
     event.target.value = ''
   }
 
+  const selectActiveFile = (file: FileNode) => {
+    setActiveFileId(file.id)
+  }
+
   const handleFileNameDraftChange = (value: string) => {
     setFileNameDraft(value)
     setFileNameError(null)
   }
 
   const openRenameFileDialog = (file: FileNode) => {
-    setActiveFileId(file.id)
+    selectActiveFile(file)
     setFileNameDraft(file.name)
     setFileNameError(null)
     setIsRenameFileDialogOpen(true)
@@ -67,7 +71,7 @@ export function useFileActions({
   }
 
   const openDeleteFileDialog = (file: FileNode) => {
-    setActiveFileId(file.id)
+    selectActiveFile(file)
     setIsDeleteFileDialogOpen(true)
   }
 
@@ -76,7 +80,7 @@ export function useFileActions({
   }
 
   const openViewFileDialog = (file: FileNode) => {
-    setActiveFileId(file.id)
+    selectActiveFile(file)
     setIsViewFileDialogOpen(true)
   }
 
