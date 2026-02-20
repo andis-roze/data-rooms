@@ -127,57 +127,61 @@ export function HomePageContainer() {
         />
 
         <HomeContentSection
-          activeDataRoomName={activeDataRoomName}
-          activeFolderId={activeFolder.id}
-          breadcrumbs={breadcrumbs}
-          visibleContentItems={visibleContentItems}
-          sortState={sortState}
-          locale={locale}
-          resolveDisplayName={resolveDisplayName}
-          checkedContentItemIds={checkedContentItemIds}
-          selectedContentItemCount={selectedContentItemCount}
-          deleteSelectedContentItemCount={deleteSelectedContentItemCount}
-          deleteSelectedFileCount={deleteSelectedFileCount}
-          deleteSelectedFolderCount={deleteSelectedFolderCount}
-          selectedContentItemNames={selectedContentItemNames}
-          indeterminateFolderIds={indeterminateFolderIds}
-          moveContentDialogOpen={dialogs.isMoveContentDialogOpen}
-          moveItemCount={moveItemCount}
-          moveItemNames={moveItemNames}
-          moveDestinationFolderId={moveDestinationFolderId}
-          moveDestinationFolderOptions={moveDestinationFolderOptions}
-          moveValidationError={moveValidationError}
-          dragMoveActive={dragMoveActive}
-          dragMoveTargetFolderId={dragMoveTargetFolderId}
-          deleteSelectedContentDialogOpen={dialogs.isDeleteSelectedContentDialogOpen}
-          uploadInputRef={uploadInputRef}
-          onCreateFolder={handlers.openCreateFolderDialog}
-          onUploadPdf={() => uploadInputRef.current?.click()}
-          onUploadInputChange={handlers.handleUploadInputChange}
-          onToggleSort={handlers.toggleSort}
-          onToggleContentItemSelection={handlers.toggleContentItemSelection}
-          onToggleAllContentItemSelection={handlers.toggleAllContentItemSelection}
-          onClearContentItemSelection={handlers.clearContentItemSelection}
-          onOpenDeleteSelectedContentDialog={handlers.openDeleteSelectedContentDialog}
-          onCloseDeleteSelectedContentDialog={handlers.closeDeleteSelectedContentDialog}
-          onDeleteSelectedContent={handlers.handleDeleteSelectedContent}
-          onOpenMoveSelectedContentDialog={handlers.openMoveSelectedContentDialog}
-          onCloseMoveContentDialog={handlers.closeMoveContentDialog}
-          onMoveDestinationFolderChange={handlers.handleMoveDestinationFolderChange}
-          onMoveSelectedContent={handlers.handleMoveSelectedContent}
-          onStartDragMove={handlers.startDragMove}
-          onEndDragMove={handlers.endDragMove}
-          onSetDragMoveTargetFolder={handlers.setDragMoveTargetFolder}
-          onCanDropOnFolder={handlers.canDropOnFolder}
-          onDropOnFolder={handlers.dropOnFolder}
-          onSelectFolder={handlers.selectFolder}
-          onOpenRenameFolder={handlers.openRenameFolderDialog}
-          onOpenDeleteFolder={handlers.openDeleteFolderDialog}
-          onOpenMoveFolder={handlers.openMoveFolderDialog}
-          onOpenViewFile={handlers.openViewFileDialog}
-          onOpenRenameFile={handlers.openRenameFileDialog}
-          onOpenDeleteFile={handlers.openDeleteFileDialog}
-          onOpenMoveFile={handlers.openMoveFileDialog}
+          state={{
+            activeDataRoomName,
+            activeFolderId: activeFolder.id,
+            breadcrumbs,
+            visibleContentItems,
+            sortState,
+            locale,
+            resolveDisplayName,
+            checkedContentItemIds,
+            selectedContentItemCount,
+            deleteSelectedContentItemCount,
+            deleteSelectedFileCount,
+            deleteSelectedFolderCount,
+            selectedContentItemNames,
+            indeterminateFolderIds,
+            moveContentDialogOpen: dialogs.isMoveContentDialogOpen,
+            moveItemCount,
+            moveItemNames,
+            moveDestinationFolderId,
+            moveDestinationFolderOptions,
+            moveValidationError,
+            dragMoveActive,
+            dragMoveTargetFolderId,
+            deleteSelectedContentDialogOpen: dialogs.isDeleteSelectedContentDialogOpen,
+            uploadInputRef,
+          }}
+          handlers={{
+            onCreateFolder: handlers.openCreateFolderDialog,
+            onUploadPdf: () => uploadInputRef.current?.click(),
+            onUploadInputChange: handlers.handleUploadInputChange,
+            onToggleSort: handlers.toggleSort,
+            onToggleContentItemSelection: handlers.toggleContentItemSelection,
+            onToggleAllContentItemSelection: handlers.toggleAllContentItemSelection,
+            onClearContentItemSelection: handlers.clearContentItemSelection,
+            onOpenDeleteSelectedContentDialog: handlers.openDeleteSelectedContentDialog,
+            onCloseDeleteSelectedContentDialog: handlers.closeDeleteSelectedContentDialog,
+            onDeleteSelectedContent: handlers.handleDeleteSelectedContent,
+            onOpenMoveSelectedContentDialog: handlers.openMoveSelectedContentDialog,
+            onCloseMoveContentDialog: handlers.closeMoveContentDialog,
+            onMoveDestinationFolderChange: handlers.handleMoveDestinationFolderChange,
+            onMoveSelectedContent: handlers.handleMoveSelectedContent,
+            onStartDragMove: handlers.startDragMove,
+            onEndDragMove: handlers.endDragMove,
+            onSetDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
+            onCanDropOnFolder: handlers.canDropOnFolder,
+            onDropOnFolder: handlers.dropOnFolder,
+            onSelectFolder: handlers.selectFolder,
+            onOpenRenameFolder: handlers.openRenameFolderDialog,
+            onOpenDeleteFolder: handlers.openDeleteFolderDialog,
+            onOpenMoveFolder: handlers.openMoveFolderDialog,
+            onOpenViewFile: handlers.openViewFileDialog,
+            onOpenRenameFile: handlers.openRenameFileDialog,
+            onOpenDeleteFile: handlers.openDeleteFileDialog,
+            onOpenMoveFile: handlers.openMoveFileDialog,
+          }}
         />
       </Paper>
 

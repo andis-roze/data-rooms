@@ -20,7 +20,7 @@ import { formatPathForDisplay, truncateMiddle } from '../services/formatters'
 import { FolderContentTable } from '../FolderContentTable'
 import type { FileItem, FolderContentItem, SortState } from '../types'
 
-interface HomeContentSectionProps {
+interface HomeContentSectionStateProps {
   activeDataRoomName: string
   activeFolderId: NodeId
   breadcrumbs: Folder[]
@@ -45,6 +45,9 @@ interface HomeContentSectionProps {
   dragMoveTargetFolderId: NodeId | null
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
+}
+
+interface HomeContentSectionHandlerProps {
   onCreateFolder: () => void
   onUploadPdf: () => void
   onUploadInputChange: (event: ChangeEvent<HTMLInputElement>) => void
@@ -74,7 +77,16 @@ interface HomeContentSectionProps {
   onOpenMoveFile: (file: FileItem['file']) => void
 }
 
+interface HomeContentSectionProps {
+  state: HomeContentSectionStateProps
+  handlers: HomeContentSectionHandlerProps
+}
+
 export function HomeContentSection({
+  state,
+  handlers,
+}: HomeContentSectionProps) {
+  const {
   activeDataRoomName,
   activeFolderId,
   breadcrumbs,
@@ -99,6 +111,9 @@ export function HomeContentSection({
   dragMoveTargetFolderId,
   deleteSelectedContentDialogOpen,
   uploadInputRef,
+  } = state
+
+  const {
   onCreateFolder,
   onUploadPdf,
   onUploadInputChange,
@@ -126,7 +141,8 @@ export function HomeContentSection({
   onOpenRenameFile,
   onOpenDeleteFile,
   onOpenMoveFile,
-}: HomeContentSectionProps) {
+  } = handlers
+
   const { t } = useTranslation()
   const activeDataRoomDisplayName = formatPathForDisplay(activeDataRoomName)
   const formatMoveOptionLabel = (name: string) => truncateMiddle(name, 56)
