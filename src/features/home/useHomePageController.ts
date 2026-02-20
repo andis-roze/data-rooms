@@ -22,6 +22,14 @@ import {
   selectVisibleContentItems,
 } from './selectors/homeSelectors'
 import type { HomePageViewModel } from './model/homePageViewModel'
+import {
+  getNormalizedSelectionTargets,
+  isActionableFolder,
+  isFileInDataRoom,
+  isFolderDescendantOf,
+  isFolderInDataRoom,
+  isNodeInsideFolder,
+} from './model/selectionOps'
 import { useHomePageActions } from './hooks/useHomePageActions'
 import { loadFeedbackTimeoutMs } from './services/feedback'
 import { loadSortModePreference } from './services/sortPreference'
@@ -106,6 +114,7 @@ export function useHomePageController(): HomePageViewModel {
   const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
   const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
   const visibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
+  const activeDataRoomId = activeDataRoom?.id ?? null
   const locale = i18n.resolvedLanguage ?? i18n.language
   const selectableContentItems = visibleContentItems.filter(
     (item) => !(item.kind === 'folder' && item.isParentNavigation),
@@ -140,23 +149,12 @@ export function useHomePageController(): HomePageViewModel {
     }
     return null
   }
-  const isFolderInActiveDataRoom = (folderId: NodeId) => {
-    const folder = entities.foldersById[folderId]
-    return Boolean(folder && activeDataRoom && folder.dataRoomId === activeDataRoom.id)
-  }
-  const isActionableFolder = (folderId: NodeId) => {
-    const folder = entities.foldersById[folderId]
-    return Boolean(folder && folder.parentFolderId && isFolderInActiveDataRoom(folder.id))
-  }
-  const isFileInActiveDataRoom = (fileId: NodeId) => {
-    const file = entities.filesById[fileId]
-    if (!file || !activeDataRoom) {
-      return false
-    }
-
-    const parentFolder = entities.foldersById[file.parentFolderId]
-    return parentFolder?.dataRoomId === activeDataRoom.id
-  }
+  const isFolderInActiveDataRoom = (folderId: NodeId) =>
+    Boolean(activeDataRoomId && isFolderInDataRoom(entities, folderId, activeDataRoomId))
+  const isActionableFolderInActiveDataRoom = (folderId: NodeId) =>
+    Boolean(activeDataRoomId && isActionableFolder(entities, folderId, activeDataRoomId))
+  const isFileInActiveDataRoom = (fileId: NodeId) =>
+    Boolean(activeDataRoomId && isFileInDataRoom(entities, fileId, activeDataRoomId))
   const isFileSelectedByMarks = (fileId: NodeId) => {
     const file = entities.filesById[fileId]
     if (!file) {
@@ -239,7 +237,7 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectedFolderIds = Object.values(entities.foldersById)
-    .filter((folder) => isActionableFolder(folder.id))
+    .filter((folder) => isActionableFolderInActiveDataRoom(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => isContentItemSelected(folderId))
   const selectedFileIds = Object.values(entities.filesById)
@@ -255,54 +253,8 @@ export function useHomePageController(): HomePageViewModel {
   const selectedFolders = selectedFolderIds
     .map((itemId) => entities.foldersById[itemId])
     .filter((folder): folder is NonNullable<typeof folder> => Boolean(folder))
-  const hasSelectedFolderAncestor = (folderId: NodeId, selectedFolderIdSet: Set<NodeId>) => {
-    let currentFolder = entities.foldersById[folderId]
-    while (currentFolder?.parentFolderId) {
-      if (selectedFolderIdSet.has(currentFolder.parentFolderId)) {
-        return true
-      }
-      currentFolder = entities.foldersById[currentFolder.parentFolderId]
-    }
-    return false
-  }
-  const getNormalizedSelectionTargets = (itemIds: NodeId[]) => {
-    const uniqueItemIds = [...new Set(itemIds)]
-    const folders = uniqueItemIds
-      .map((itemId) => entities.foldersById[itemId])
-      .filter((folder): folder is NonNullable<typeof folder> => Boolean(folder))
-      .filter((folder) => isActionableFolder(folder.id))
-    const files = uniqueItemIds
-      .map((itemId) => entities.filesById[itemId])
-      .filter((file): file is NonNullable<typeof file> => Boolean(file))
-      .filter((file) => isFileInActiveDataRoom(file.id))
-
-    const selectedFolderIdSet = new Set(folders.map((folder) => folder.id))
-    const topLevelFolderIds = folders
-      .map((folder) => folder.id)
-      .filter((folderId) => !hasSelectedFolderAncestor(folderId, selectedFolderIdSet))
-    const topLevelFolderIdSet = new Set(topLevelFolderIds)
-    const standaloneFileIds = files
-      .filter((file) => {
-        let currentFolderId: NodeId | null = file.parentFolderId
-        while (currentFolderId) {
-          if (topLevelFolderIdSet.has(currentFolderId)) {
-            return false
-          }
-          currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
-        }
-        return true
-      })
-      .map((file) => file.id)
-
-    return {
-      topLevelFolderIds,
-      standaloneFileIds,
-      itemNames: [
-        ...topLevelFolderIds.map((folderId) => resolveDisplayName(entities.foldersById[folderId]?.name ?? folderId)),
-        ...standaloneFileIds.map((fileId) => entities.filesById[fileId]?.name ?? fileId),
-      ],
-    }
-  }
+  const getSelectionTargets = (itemIds: NodeId[]) =>
+    activeDataRoomId ? getNormalizedSelectionTargets(entities, itemIds, activeDataRoomId, resolveDisplayName) : null
 
   const selectedContentItemNames = [
     ...selectedFolders.map((folder) => resolveDisplayName(folder.name)),
@@ -356,7 +308,10 @@ export function useHomePageController(): HomePageViewModel {
     .filter((folder) => isFolderInActiveDataRoom(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => getFolderSelectionMode(folderId) === 'partial')
-  const getMoveTargets = (itemIds: NodeId[]) => getNormalizedSelectionTargets(itemIds)
+  const getMoveTargets = (itemIds: NodeId[]) =>
+    activeDataRoomId
+      ? getNormalizedSelectionTargets(entities, itemIds, activeDataRoomId, resolveDisplayName)
+      : { topLevelFolderIds: [], standaloneFileIds: [], itemNames: [] }
   const getMoveValidationError = (itemIds: NodeId[], destinationId: NodeId | null): string | null => {
     if (!destinationId) {
       return t('dataroomMoveNoDestination')
@@ -387,7 +342,7 @@ export function useHomePageController(): HomePageViewModel {
         return t('dataroomMoveInvalidSameParent')
       }
 
-      if (isFolderDescendantOf(destinationFolder.id, folder.id)) {
+      if (isFolderDescendantOf(entities, destinationFolder.id, folder.id)) {
         return t('dataroomMoveInvalidDescendant', { name: resolveDisplayName(folder.name) })
       }
 
@@ -416,12 +371,13 @@ export function useHomePageController(): HomePageViewModel {
   const moveTargets = getMoveTargets(moveItemIds)
   const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
   const checkedFolderIds = Object.values(entities.foldersById)
-    .filter((folder) => isActionableFolder(folder.id))
+    .filter((folder) => isActionableFolderInActiveDataRoom(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => getFolderSelectionMode(folderId) === 'full')
   const checkedContentItemIds = [...checkedFolderIds, ...selectedFileIds]
   const deleteSelectionItemIds = checkedContentItemIds
-  const deleteSelectionTargets = getNormalizedSelectionTargets(deleteSelectionItemIds)
+  const deleteSelectionTargets =
+    getSelectionTargets(deleteSelectionItemIds) ?? { topLevelFolderIds: [], standaloneFileIds: [], itemNames: [] }
   const deleteSelectionSummary = deleteSelectionTargets.topLevelFolderIds.reduce(
     (summary, folderId) => {
       const folderSummary = getFolderDeleteSummary(entities, folderId)
@@ -498,17 +454,6 @@ export function useHomePageController(): HomePageViewModel {
     pushFolderOption(activeDataRoom.rootFolderId, 0, [])
     return options
   })()
-
-  const isFolderDescendantOf = (folderId: NodeId, possibleAncestorId: NodeId): boolean => {
-    let currentFolderId: NodeId | null = folderId
-    while (currentFolderId) {
-      if (currentFolderId === possibleAncestorId) {
-        return true
-      }
-      currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
-    }
-    return false
-  }
 
   const moveValidationError = getMoveValidationError(moveItemIds, moveDestinationFolderId)
 
@@ -632,34 +577,6 @@ export function useHomePageController(): HomePageViewModel {
       return
     }
     const nextMark = isContentItemChecked(itemId) ? 'exclude' : 'include'
-    const isNodeInsideFolder = (nodeId: NodeId, folderId: NodeId) => {
-      const folder = entities.foldersById[nodeId]
-      if (folder) {
-        let currentFolder: NodeId | null = folder.id
-        while (currentFolder) {
-          if (currentFolder === folderId) {
-            return true
-          }
-          currentFolder = entities.foldersById[currentFolder]?.parentFolderId ?? null
-        }
-        return false
-      }
-
-      const file = entities.filesById[nodeId]
-      if (!file) {
-        return false
-      }
-
-      let currentFolderId: NodeId | null = file.parentFolderId
-      while (currentFolderId) {
-        if (currentFolderId === folderId) {
-          return true
-        }
-        currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
-      }
-
-      return false
-    }
     const isFolderToggle = Boolean(entities.foldersById[itemId])
 
     setIncludedContentItemIds((previous) => {
@@ -667,7 +584,7 @@ export function useHomePageController(): HomePageViewModel {
       if (nextMark === 'include') {
         if (isFolderToggle) {
           for (const markedId of [...next]) {
-            if (markedId !== itemId && isNodeInsideFolder(markedId, itemId)) {
+            if (markedId !== itemId && isNodeInsideFolder(entities, markedId, itemId)) {
               next.delete(markedId)
             }
           }
@@ -677,7 +594,7 @@ export function useHomePageController(): HomePageViewModel {
         next.delete(itemId)
         if (isFolderToggle) {
           for (const markedId of [...next]) {
-            if (isNodeInsideFolder(markedId, itemId)) {
+            if (isNodeInsideFolder(entities, markedId, itemId)) {
               next.delete(markedId)
             }
           }
@@ -690,7 +607,7 @@ export function useHomePageController(): HomePageViewModel {
       if (nextMark === 'exclude') {
         if (isFolderToggle) {
           for (const markedId of [...next]) {
-            if (markedId !== itemId && isNodeInsideFolder(markedId, itemId)) {
+            if (markedId !== itemId && isNodeInsideFolder(entities, markedId, itemId)) {
               next.delete(markedId)
             }
           }
@@ -700,7 +617,7 @@ export function useHomePageController(): HomePageViewModel {
         next.delete(itemId)
         if (isFolderToggle) {
           for (const markedId of [...next]) {
-            if (isNodeInsideFolder(markedId, itemId)) {
+            if (isNodeInsideFolder(entities, markedId, itemId)) {
               next.delete(markedId)
             }
           }
