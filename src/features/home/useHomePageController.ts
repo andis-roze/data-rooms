@@ -104,12 +104,21 @@ export function useHomePageController(): HomePageViewModel {
     : EMPTY_DELETE_SUMMARY
   const activeFile = activeFileId ? entities.filesById[activeFileId] : null
 
+  const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
+    if (type === 'dataRoom') {
+      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: id } })
+      return
+    }
+
+    dispatch({ type: 'dataroom/selectFolder', payload: { folderId: id } })
+  }
+
   const selectDataRoom = (dataRoomId: NodeId) => {
-    dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId } })
+    selectNode('dataRoom', dataRoomId)
   }
 
   const selectFolder = (folderId: NodeId) => {
-    dispatch({ type: 'dataroom/selectFolder', payload: { folderId } })
+    selectNode('folder', folderId)
   }
 
   const actions = useHomePageActions({
