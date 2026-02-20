@@ -68,9 +68,7 @@ export function useDataRoomActions({
   }
 
   const openCreateDataRoomDialog = () => {
-    setDataRoomNameDraft('')
-    setDataRoomNameError(null)
-    setIsCreateDataRoomDialogOpen(true)
+    openDataRoomDialog(setIsCreateDataRoomDialogOpen, '')
   }
 
   const openRenameDataRoomDialog = (targetDataRoom?: DataRoom) => {
@@ -81,9 +79,7 @@ export function useDataRoomActions({
 
     selectTargetDataRoom(targetDataRoom)
 
-    setDataRoomNameDraft(resolveDisplayName(dataRoom.name))
-    setDataRoomNameError(null)
-    setIsRenameDataRoomDialogOpen(true)
+    openDataRoomDialog(setIsRenameDataRoomDialogOpen, resolveDisplayName(dataRoom.name))
   }
 
   const openDeleteDataRoomDialog = (targetDataRoom?: DataRoom) => {
@@ -94,6 +90,12 @@ export function useDataRoomActions({
 
   const closeCreateDataRoomDialog = () => {
     closeDataRoomDialog(setIsCreateDataRoomDialogOpen)
+  }
+
+  const openDataRoomDialog = (setIsOpen: Dispatch<SetStateAction<boolean>>, draftName: string) => {
+    setDataRoomNameDraft(draftName)
+    setDataRoomNameError(null)
+    setIsOpen(true)
   }
 
   const closeDataRoomDialog = (
