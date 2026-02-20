@@ -1,20 +1,22 @@
 import type {
+  HomeDeleteSummary,
+  HomeDialogState,
+  HomeFormState,
   HomePageHandlers,
   HomePageSelectionState,
-  HomePageUiState,
 } from '../model/homePageViewModel'
 import { HomeDialogs } from '../HomeDialogs'
 
 // Maps controller state/handlers into the flattened HomeDialogs props.
 interface HomePageDialogsContainerProps {
-  dialogs: HomePageUiState['dialogs']
-  forms: HomePageUiState['forms']
+  dialogs: HomeDialogState
+  forms: HomeFormState
   activeDataRoomName: string
   activeFolderName: string
   targetFolder: HomePageSelectionState['targetFolder']
   activeFile: HomePageSelectionState['activeFile']
-  dataRoomDeleteSummary: HomePageSelectionState['dataRoomDeleteSummary']
-  folderDeleteSummary: HomePageSelectionState['folderDeleteSummary']
+  dataRoomDeleteSummary: HomeDeleteSummary
+  folderDeleteSummary: HomeDeleteSummary
   resolveDisplayName: (value: string) => string
   handlers: Pick<
     HomePageHandlers,

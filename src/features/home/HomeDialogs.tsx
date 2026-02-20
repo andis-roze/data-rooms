@@ -1,8 +1,9 @@
 import type { NodeId } from '../dataroom/model'
 import type {
+  HomeDeleteSummary,
+  HomeDialogState,
+  HomeFormState,
   HomePageHandlers,
-  HomePageSelectionState,
-  HomePageUiState,
 } from './model/homePageViewModel'
 import { DataRoomDialogs } from './dialogs/DataRoomDialogs'
 import { FileDialogs } from './dialogs/FileDialogs'
@@ -13,15 +14,15 @@ export { FeedbackStack } from './dialogs/FeedbackStack'
 
 // Composes all home-page dialogs behind a single prop surface for container usage.
 interface HomeDialogsProps {
-  dialogs: HomePageUiState['dialogs']
-  forms: HomePageUiState['forms']
+  dialogs: HomeDialogState
+  forms: HomeFormState
   activeDataRoomName: string
   activeFolderName: string
   targetFolderName: string | null
   activeFileId: NodeId | null
   activeFileName: string | null
-  dataRoomDeleteSummary: HomePageSelectionState['dataRoomDeleteSummary']
-  folderDeleteSummary: HomePageSelectionState['folderDeleteSummary']
+  dataRoomDeleteSummary: HomeDeleteSummary
+  folderDeleteSummary: HomeDeleteSummary
   handlers: Pick<
     HomePageHandlers,
     | 'closeCreateDataRoomDialog'

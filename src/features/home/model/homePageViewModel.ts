@@ -3,6 +3,32 @@ import type { TFunction } from 'i18next'
 import type { DataRoom, DataRoomState, FileNode, Folder, NodeId } from '../../dataroom/model'
 import type { FeedbackState, FolderContentItem, SortState } from './homeViewTypes'
 
+export interface HomeDeleteSummary {
+  folderCount: number
+  fileCount: number
+}
+
+export interface HomeDialogState {
+  isCreateDataRoomDialogOpen: boolean
+  isRenameDataRoomDialogOpen: boolean
+  isDeleteDataRoomDialogOpen: boolean
+  isCreateFolderDialogOpen: boolean
+  isRenameFolderDialogOpen: boolean
+  isDeleteFolderDialogOpen: boolean
+  isRenameFileDialogOpen: boolean
+  isDeleteFileDialogOpen: boolean
+  isViewFileDialogOpen: boolean
+}
+
+export interface HomeFormState {
+  dataRoomNameDraft: string
+  dataRoomNameError: string | null
+  folderNameDraft: string
+  folderNameError: string | null
+  fileNameDraft: string
+  fileNameError: string | null
+}
+
 export interface HomePageSelectionState {
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
@@ -16,8 +42,8 @@ export interface HomePageSelectionState {
   targetFolder: Folder | null
   activeFile: FileNode | null
   canDeleteActiveDataRoom: boolean
-  dataRoomDeleteSummary: { folderCount: number; fileCount: number }
-  folderDeleteSummary: { folderCount: number; fileCount: number }
+  dataRoomDeleteSummary: HomeDeleteSummary
+  folderDeleteSummary: HomeDeleteSummary
 }
 
 export interface HomePageUiState {
@@ -25,25 +51,8 @@ export interface HomePageUiState {
   sortState: SortState
   feedbackTimeoutMs: number
   feedbackQueue: FeedbackState[]
-  dialogs: {
-    isCreateDataRoomDialogOpen: boolean
-    isRenameDataRoomDialogOpen: boolean
-    isDeleteDataRoomDialogOpen: boolean
-    isCreateFolderDialogOpen: boolean
-    isRenameFolderDialogOpen: boolean
-    isDeleteFolderDialogOpen: boolean
-    isRenameFileDialogOpen: boolean
-    isDeleteFileDialogOpen: boolean
-    isViewFileDialogOpen: boolean
-  }
-  forms: {
-    dataRoomNameDraft: string
-    dataRoomNameError: string | null
-    folderNameDraft: string
-    folderNameError: string | null
-    fileNameDraft: string
-    fileNameError: string | null
-  }
+  dialogs: HomeDialogState
+  forms: HomeFormState
 }
 
 export interface HomePageHandlers {
