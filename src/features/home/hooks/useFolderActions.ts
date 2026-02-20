@@ -48,6 +48,10 @@ export function useFolderActions({
   setIsRenameFolderDialogOpen,
   setIsDeleteFolderDialogOpen,
 }: UseFolderActionsParams) {
+  const clearTargetFolder = () => {
+    setTargetFolderId(null)
+  }
+
   const handleFolderNameDraftChange = (value: string) => {
     setFolderNameDraft(value)
     setFolderNameError(null)
@@ -72,7 +76,7 @@ export function useFolderActions({
 
   const closeRenameFolderDialog = () => {
     setIsRenameFolderDialogOpen(false)
-    setTargetFolderId(null)
+    clearTargetFolder()
     setFolderNameError(null)
   }
 
@@ -83,7 +87,7 @@ export function useFolderActions({
 
   const closeDeleteFolderDialog = () => {
     setIsDeleteFolderDialogOpen(false)
-    setTargetFolderId(null)
+    clearTargetFolder()
   }
 
   const handleCreateFolder = () => {
@@ -143,7 +147,7 @@ export function useFolderActions({
     })
 
     setIsRenameFolderDialogOpen(false)
-    setTargetFolderId(null)
+    clearTargetFolder()
     enqueueFeedback(t('dataroomFeedbackFolderRenamed'), 'success')
   }
 
@@ -160,7 +164,7 @@ export function useFolderActions({
     })
 
     setIsDeleteFolderDialogOpen(false)
-    setTargetFolderId(null)
+    clearTargetFolder()
     enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
 
     try {
