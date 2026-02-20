@@ -128,7 +128,7 @@ export function useFileActions({
     const uploadError = getPdfUploadValidationError(selectedFile)
 
     if (uploadError) {
-      enqueueFeedback(uploadError === 'invalidPdf' ? t('dataroomErrorPdfOnly') : t('dataroomErrorPdfOnly'), 'error')
+      enqueueFeedback(t('dataroomErrorPdfOnly'), 'error')
       clearUploadInput(event)
       return
     }
