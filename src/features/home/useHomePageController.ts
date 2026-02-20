@@ -21,6 +21,8 @@ import { loadFeedbackTimeoutMs } from './services/feedback'
 import { loadSortModePreference } from './services/sortPreference'
 import type { FeedbackState, SortState } from './types'
 
+const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
+
 // Main coordinator for home page state, derived view data, and user interaction handlers.
 export function useHomePageController(): HomePageViewModel {
   const { t, i18n } = useTranslation()
@@ -94,12 +96,12 @@ export function useHomePageController(): HomePageViewModel {
   const canDeleteActiveDataRoom = Boolean(activeDataRoom)
   const dataRoomDeleteSummary = activeDataRoom
     ? getDataRoomDeleteSummary(entities, activeDataRoom.id)
-    : { folderCount: 0, fileCount: 0 }
+    : EMPTY_DELETE_SUMMARY
 
   const targetFolder = targetFolderId ? entities.foldersById[targetFolderId] : null
   const folderDeleteSummary = activeFolder
     ? getFolderDeleteSummary(entities, targetFolder?.id ?? activeFolder.id)
-    : { folderCount: 0, fileCount: 0 }
+    : EMPTY_DELETE_SUMMARY
   const activeFile = activeFileId ? entities.filesById[activeFileId] : null
 
   const selectDataRoom = (dataRoomId: NodeId) => {
