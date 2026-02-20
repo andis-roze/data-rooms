@@ -20,6 +20,7 @@ interface HomeSidebarProps {
   dataRooms: DataRoom[]
   selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
+  selectedContentItemIds: NodeId[]
   canDeleteActiveDataRoom: boolean
   onCreateDataRoom: () => void
   onRenameDataRoom: (dataRoom?: DataRoom) => void
@@ -28,6 +29,7 @@ interface HomeSidebarProps {
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
+  onToggleContentItemSelection: (itemId: NodeId) => void
   resolveDisplayName: (value: string) => string
 }
 
@@ -36,6 +38,7 @@ export function HomeSidebar({
   dataRooms,
   selectedDataRoomId,
   selectedFolderId,
+  selectedContentItemIds,
   canDeleteActiveDataRoom,
   onCreateDataRoom,
   onRenameDataRoom,
@@ -44,12 +47,15 @@ export function HomeSidebar({
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
+  onToggleContentItemSelection,
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
   const [collapseOverrides, setCollapseOverrides] = useState<Map<NodeId, boolean>>(new Map())
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
-  const isActionsMenuOpen = Boolean(menuAnchorEl)
+  const [menuAnchorReference, setMenuAnchorReference] = useState<'anchorEl' | 'anchorPosition'>('anchorEl')
+  const [menuAnchorPosition, setMenuAnchorPosition] = useState<{ top: number; left: number } | undefined>(undefined)
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false)
   const activeDataRoom =
     (selectedDataRoomId ? dataRooms.find((dataRoom) => dataRoom.id === selectedDataRoomId) : undefined) ?? dataRooms[0]
   const visibleDataRooms = activeDataRoom ? [activeDataRoom] : []
@@ -109,11 +115,28 @@ export function HomeSidebar({
   }
 
   const openActionsMenu = (event: MouseEvent<HTMLElement>) => {
-    setMenuAnchorEl(event.currentTarget)
+    const anchorElement = event.currentTarget
+    const rect = anchorElement.getBoundingClientRect()
+    const hasLayoutBox = rect.width > 0 || rect.height > 0
+
+    if (hasLayoutBox) {
+      setMenuAnchorEl(anchorElement)
+      setMenuAnchorReference('anchorEl')
+      setMenuAnchorPosition(undefined)
+    } else {
+      setMenuAnchorEl(null)
+      setMenuAnchorReference('anchorPosition')
+      setMenuAnchorPosition({
+        top: Math.max(event.clientY, 0),
+        left: Math.max(event.clientX, 0),
+      })
+    }
+
+    setIsActionsMenuOpen(true)
   }
 
   const closeActionsMenu = () => {
-    setMenuAnchorEl(null)
+    setIsActionsMenuOpen(false)
   }
 
   const selectWorkingDataRoom = (event: SelectChangeEvent<NodeId>) => {
@@ -137,7 +160,13 @@ export function HomeSidebar({
         >
           <MoreVertIcon fontSize="small" />
         </IconButton>
-        <Menu anchorEl={menuAnchorEl} open={isActionsMenuOpen} onClose={closeActionsMenu}>
+        <Menu
+          anchorEl={menuAnchorEl}
+          anchorReference={menuAnchorReference}
+          anchorPosition={menuAnchorPosition}
+          open={isActionsMenuOpen}
+          onClose={closeActionsMenu}
+        >
           <MenuItem
             onClick={() => {
               closeActionsMenu()
@@ -205,6 +234,8 @@ export function HomeSidebar({
             onSelectFolder={onSelectFolder}
             onOpenRenameFolder={onOpenRenameFolder}
             onOpenDeleteFolder={onOpenDeleteFolder}
+            selectedContentItemIds={selectedContentItemIds}
+            onToggleContentItemSelection={onToggleContentItemSelection}
             renderFolderName={resolveDisplayName}
             collapsedNodeIds={collapsedNodeIds}
             onToggleNode={toggleNode}

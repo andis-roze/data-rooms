@@ -7,8 +7,10 @@ import type { MouseEvent } from 'react'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
+import { useTranslation } from 'react-i18next'
 import type { DataRoom, DataRoomState, Folder, NodeId } from '../dataroom/model'
 import { formatPathForDisplay } from './services/formatters'
 import { getFolderChildren } from './utils'
@@ -64,6 +66,8 @@ interface FolderTreeNodeProps {
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
+  selectedContentItemIds: NodeId[]
+  onToggleContentItemSelection: (itemId: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -78,12 +82,16 @@ function FolderTreeNode({
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
+  selectedContentItemIds,
+  onToggleContentItemSelection,
   renderFolderName,
   collapsedNodeIds,
   onToggleNode,
   depth = 0,
   visited = new Set<NodeId>(),
 }: FolderTreeNodeProps) {
+  const { t } = useTranslation()
+
   if (visited.has(folderId)) {
     return null
   }
@@ -100,6 +108,7 @@ function FolderTreeNode({
   const hasChildren = children.length > 0
   const isExpanded = !collapsedNodeIds.has(folder.id)
   const folderDisplayName = renderFolderName(folder.name)
+  const isSelected = selectedContentItemIds.includes(folder.id)
 
   return (
     <>
@@ -123,6 +132,15 @@ function FolderTreeNode({
           <ListItemText
             primary={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+                <Checkbox
+                  size="small"
+                  checked={isSelected}
+                  inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: folderDisplayName }) }}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                  }}
+                  onChange={() => onToggleContentItemSelection(folder.id)}
+                />
                 <FolderOutlinedIcon fontSize="small" />
                 <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {formatPathForDisplay(folderDisplayName)}
@@ -155,6 +173,8 @@ function FolderTreeNode({
               onSelectFolder={onSelectFolder}
               onOpenRenameFolder={onOpenRenameFolder}
               onOpenDeleteFolder={onOpenDeleteFolder}
+              selectedContentItemIds={selectedContentItemIds}
+              onToggleContentItemSelection={onToggleContentItemSelection}
               renderFolderName={renderFolderName}
               collapsedNodeIds={collapsedNodeIds}
               onToggleNode={onToggleNode}
@@ -174,6 +194,8 @@ interface DataRoomTreeNodeProps {
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
+  selectedContentItemIds: NodeId[]
+  onToggleContentItemSelection: (itemId: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -186,6 +208,8 @@ export function DataRoomTreeNode({
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
+  selectedContentItemIds,
+  onToggleContentItemSelection,
   renderFolderName,
   collapsedNodeIds,
   onToggleNode,
@@ -204,6 +228,8 @@ export function DataRoomTreeNode({
           onSelectFolder={onSelectFolder}
           onOpenRenameFolder={onOpenRenameFolder}
           onOpenDeleteFolder={onOpenDeleteFolder}
+          selectedContentItemIds={selectedContentItemIds}
+          onToggleContentItemSelection={onToggleContentItemSelection}
           renderFolderName={renderFolderName}
           collapsedNodeIds={collapsedNodeIds}
           onToggleNode={onToggleNode}

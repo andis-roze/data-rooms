@@ -91,6 +91,7 @@ export function HomePageContainer() {
           dataRooms={dataRooms}
           selectedDataRoomId={selectedDataRoomId}
           selectedFolderId={selectedFolderId}
+          selectedContentItemIds={selectedContentItemIds}
           canDeleteActiveDataRoom={canDeleteActiveDataRoom}
           onCreateDataRoom={handlers.openCreateDataRoomDialog}
           onRenameDataRoom={handlers.openRenameDataRoomDialog}
@@ -99,6 +100,7 @@ export function HomePageContainer() {
           onSelectFolder={handlers.selectFolder}
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
+          onToggleContentItemSelection={handlers.toggleContentItemSelection}
           resolveDisplayName={resolveDisplayName}
         />
 

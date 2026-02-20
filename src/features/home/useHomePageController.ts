@@ -46,7 +46,8 @@ export function useHomePageController(): HomePageViewModel {
 
   const [targetFolderId, setTargetFolderId] = useState<NodeId | null>(null)
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
-  const [selectedContentItemIds, setSelectedContentItemIds] = useState<NodeId[]>([])
+  const [includedContentItemIds, setIncludedContentItemIds] = useState<NodeId[]>([])
+  const [excludedContentItemIds, setExcludedContentItemIds] = useState<NodeId[]>([])
 
   const [folderNameDraft, setFolderNameDraft] = useState('')
   const [folderNameError, setFolderNameError] = useState<string | null>(null)
@@ -99,7 +100,6 @@ export function useHomePageController(): HomePageViewModel {
   const selectableContentItems = visibleContentItems.filter(
     (item) => !(item.kind === 'folder' && item.isParentNavigation),
   )
-  const selectableContentItemIdSet = new Set(selectableContentItems.map((item) => item.id))
 
   const canDeleteActiveDataRoom = Boolean(activeDataRoom)
   const dataRoomDeleteSummary = activeDataRoom
@@ -114,13 +114,152 @@ export function useHomePageController(): HomePageViewModel {
     ? getFolderDeleteSummary(entities, targetFolder?.id ?? activeFolder.id)
     : EMPTY_DELETE_SUMMARY
   const activeFile = getFileById(activeFileId)
-  const selectedContentItemIdSet = new Set(selectedContentItemIds)
-  const selectedContentItems = selectableContentItems.filter((item) => selectedContentItemIdSet.has(item.id))
-  const selectedFileItems = selectedContentItems.filter((item) => item.kind === 'file')
-  const selectedFolderItems = selectedContentItems.filter((item) => item.kind === 'folder')
-  const selectedContentItemNames = selectedContentItems.map((item) =>
-    item.kind === 'folder' ? resolveDisplayName(item.folder.name) : item.file.name,
-  )
+
+  const includedIdSet = new Set(includedContentItemIds)
+  const excludedIdSet = new Set(excludedContentItemIds)
+  const markForFolder = (folderId: NodeId): 'include' | 'exclude' | null => {
+    let currentFolderId: NodeId | null = folderId
+    while (currentFolderId) {
+      if (includedIdSet.has(currentFolderId)) {
+        return 'include'
+      }
+      if (excludedIdSet.has(currentFolderId)) {
+        return 'exclude'
+      }
+      currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
+    }
+    return null
+  }
+  const isFolderInActiveDataRoom = (folderId: NodeId) => {
+    const folder = entities.foldersById[folderId]
+    return Boolean(folder && activeDataRoom && folder.dataRoomId === activeDataRoom.id)
+  }
+  const isFileInActiveDataRoom = (fileId: NodeId) => {
+    const file = entities.filesById[fileId]
+    if (!file || !activeDataRoom) {
+      return false
+    }
+
+    const parentFolder = entities.foldersById[file.parentFolderId]
+    return parentFolder?.dataRoomId === activeDataRoom.id
+  }
+  const isFileSelectedByMarks = (fileId: NodeId) => {
+    const file = entities.filesById[fileId]
+    if (!file) {
+      return false
+    }
+
+    if (includedIdSet.has(file.id)) {
+      return true
+    }
+    if (excludedIdSet.has(file.id)) {
+      return false
+    }
+
+    return markForFolder(file.parentFolderId) === 'include'
+  }
+  const folderSelectedMemo = new Map<NodeId, boolean>()
+  const folderHasSelectedDescendantsMemo = new Map<NodeId, boolean>()
+  const hasSelectedDescendants = (folderId: NodeId): boolean => {
+    const memoizedValue = folderHasSelectedDescendantsMemo.get(folderId)
+    if (memoizedValue !== undefined) {
+      return memoizedValue
+    }
+
+    const folder = entities.foldersById[folderId]
+    if (!folder) {
+      folderHasSelectedDescendantsMemo.set(folderId, false)
+      return false
+    }
+
+    const hasSelectedChildFile = folder.fileIds.some((fileId) => isFileSelectedByMarks(fileId))
+    if (hasSelectedChildFile) {
+      folderHasSelectedDescendantsMemo.set(folderId, true)
+      return true
+    }
+
+    const hasSelectedInChildSubtree = folder.childFolderIds.some((childFolderId) => {
+      if (isFolderSelectedByMarks(childFolderId)) {
+        return true
+      }
+      return hasSelectedDescendants(childFolderId)
+    })
+
+    folderHasSelectedDescendantsMemo.set(folderId, hasSelectedInChildSubtree)
+    return hasSelectedInChildSubtree
+  }
+  const isFolderSelectedByMarks = (folderId: NodeId): boolean => {
+    const memoizedValue = folderSelectedMemo.get(folderId)
+    if (memoizedValue !== undefined) {
+      return memoizedValue
+    }
+
+    const folder = entities.foldersById[folderId]
+    if (!folder || markForFolder(folder.id) !== 'include') {
+      folderSelectedMemo.set(folderId, false)
+      return false
+    }
+
+    const hasChildren = folder.childFolderIds.length > 0 || folder.fileIds.length > 0
+    if (!hasChildren) {
+      folderSelectedMemo.set(folderId, true)
+      return true
+    }
+
+    const nextValue = hasSelectedDescendants(folder.id)
+    folderSelectedMemo.set(folderId, nextValue)
+    return nextValue
+  }
+  const isContentItemSelected = (itemId: NodeId) => {
+    const folder = entities.foldersById[itemId]
+    if (folder) {
+      return isFolderSelectedByMarks(folder.id)
+    }
+
+    const file = entities.filesById[itemId]
+    if (!file) {
+      return false
+    }
+
+    return isFileSelectedByMarks(file.id)
+  }
+
+  const selectedFolderIds = Object.values(entities.foldersById)
+    .filter((folder) => isFolderInActiveDataRoom(folder.id))
+    .map((folder) => folder.id)
+    .filter((folderId) => isContentItemSelected(folderId))
+  const selectedFileIds = Object.values(entities.filesById)
+    .filter((file) => isFileInActiveDataRoom(file.id))
+    .map((file) => file.id)
+    .filter((fileId) => isContentItemSelected(fileId))
+
+  const selectedContentItemIds = [...selectedFolderIds, ...selectedFileIds]
+
+  const selectedFiles = selectedFileIds
+    .map((itemId) => entities.filesById[itemId])
+    .filter((file): file is NonNullable<typeof file> => Boolean(file))
+  const selectedFolders = selectedFolderIds
+    .map((itemId) => entities.foldersById[itemId])
+    .filter((folder): folder is NonNullable<typeof folder> => Boolean(folder))
+  const hasSelectedFolderAncestor = (folderId: NodeId, selectedFolderIdSet: Set<NodeId>) => {
+    let currentFolder = entities.foldersById[folderId]
+    while (currentFolder?.parentFolderId) {
+      if (selectedFolderIdSet.has(currentFolder.parentFolderId)) {
+        return true
+      }
+      currentFolder = entities.foldersById[currentFolder.parentFolderId]
+    }
+    return false
+  }
+  const explicitSelectedFolderIdSet = new Set(selectedFolders.map((folder) => folder.id))
+  const topLevelSelectedFolderIds = selectedFolders
+    .map((folder) => folder.id)
+    .filter((folderId) => !hasSelectedFolderAncestor(folderId, explicitSelectedFolderIdSet))
+  const topLevelSelectedFolderIdSet = new Set(topLevelSelectedFolderIds)
+  const selectedContentItemNames = [
+    ...selectedFolders.map((folder) => resolveDisplayName(folder.name)),
+    ...selectedFiles.map((file) => file.name),
+  ]
 
   const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
     if (type === 'dataRoom') {
@@ -132,23 +271,96 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectDataRoom = (dataRoomId: NodeId) => {
-    setSelectedContentItemIds([])
+    setIncludedContentItemIds([])
+    setExcludedContentItemIds([])
     selectNode('dataRoom', dataRoomId)
   }
 
   const selectFolder = (folderId: NodeId) => {
-    setSelectedContentItemIds([])
     selectNode('folder', folderId)
   }
 
   const toggleContentItemSelection = (itemId: NodeId) => {
-    if (!selectableContentItemIdSet.has(itemId)) {
+    if (!entities.foldersById[itemId] && !entities.filesById[itemId]) {
       return
     }
+    const nextMark = isContentItemSelected(itemId) ? 'exclude' : 'include'
+    const isNodeInsideFolder = (nodeId: NodeId, folderId: NodeId) => {
+      const folder = entities.foldersById[nodeId]
+      if (folder) {
+        let currentFolder: NodeId | null = folder.id
+        while (currentFolder) {
+          if (currentFolder === folderId) {
+            return true
+          }
+          currentFolder = entities.foldersById[currentFolder]?.parentFolderId ?? null
+        }
+        return false
+      }
 
-    setSelectedContentItemIds((previous) =>
-      previous.includes(itemId) ? previous.filter((id) => id !== itemId) : [...previous, itemId],
-    )
+      const file = entities.filesById[nodeId]
+      if (!file) {
+        return false
+      }
+
+      let currentFolderId: NodeId | null = file.parentFolderId
+      while (currentFolderId) {
+        if (currentFolderId === folderId) {
+          return true
+        }
+        currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
+      }
+
+      return false
+    }
+    const isFolderToggle = Boolean(entities.foldersById[itemId])
+
+    setIncludedContentItemIds((previous) => {
+      const next = new Set(previous)
+      if (nextMark === 'include') {
+        if (isFolderToggle) {
+          for (const markedId of [...next]) {
+            if (markedId !== itemId && isNodeInsideFolder(markedId, itemId)) {
+              next.delete(markedId)
+            }
+          }
+        }
+        next.add(itemId)
+      } else {
+        next.delete(itemId)
+        if (isFolderToggle) {
+          for (const markedId of [...next]) {
+            if (isNodeInsideFolder(markedId, itemId)) {
+              next.delete(markedId)
+            }
+          }
+        }
+      }
+      return [...next]
+    })
+    setExcludedContentItemIds((previous) => {
+      const next = new Set(previous)
+      if (nextMark === 'exclude') {
+        if (isFolderToggle) {
+          for (const markedId of [...next]) {
+            if (markedId !== itemId && isNodeInsideFolder(markedId, itemId)) {
+              next.delete(markedId)
+            }
+          }
+        }
+        next.add(itemId)
+      } else {
+        next.delete(itemId)
+        if (isFolderToggle) {
+          for (const markedId of [...next]) {
+            if (isNodeInsideFolder(markedId, itemId)) {
+              next.delete(markedId)
+            }
+          }
+        }
+      }
+      return [...next]
+    })
   }
 
   const toggleAllContentItemSelection = () => {
@@ -156,20 +368,41 @@ export function useHomePageController(): HomePageViewModel {
     if (allItemIds.length === 0) {
       return
     }
+    const selectedIdSet = new Set(selectableContentItems.map((item) => item.id).filter((itemId) => isContentItemSelected(itemId)))
+    const areAllVisibleItemsSelected = allItemIds.every((itemId) => selectedIdSet.has(itemId))
+    const mark = areAllVisibleItemsSelected ? 'exclude' : 'include'
 
-    setSelectedContentItemIds((previous) =>
-      previous.length === allItemIds.length && allItemIds.every((itemId) => previous.includes(itemId))
-        ? []
-        : allItemIds,
-    )
+    setIncludedContentItemIds((previous) => {
+      const next = new Set(previous)
+      for (const itemId of allItemIds) {
+        if (mark === 'include') {
+          next.add(itemId)
+        } else {
+          next.delete(itemId)
+        }
+      }
+      return [...next]
+    })
+    setExcludedContentItemIds((previous) => {
+      const next = new Set(previous)
+      for (const itemId of allItemIds) {
+        if (mark === 'exclude') {
+          next.add(itemId)
+        } else {
+          next.delete(itemId)
+        }
+      }
+      return [...next]
+    })
   }
 
   const clearContentItemSelection = () => {
-    setSelectedContentItemIds([])
+    setIncludedContentItemIds([])
+    setExcludedContentItemIds([])
   }
 
   const openDeleteSelectedContentDialog = () => {
-    if (selectedContentItems.length > 0) {
+    if (selectedContentItemIds.length > 0) {
       setIsDeleteSelectedContentDialogOpen(true)
     }
   }
@@ -179,26 +412,9 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const handleDeleteSelectedContent = async () => {
-    if (selectedContentItems.length === 0) {
+    if (selectedContentItemIds.length === 0) {
       return
     }
-
-    const selectedFolderIdSet = new Set(selectedFolderItems.map((item) => item.folder.id))
-    const hasSelectedAncestorFolder = (folderId: NodeId) => {
-      let currentFolder = entities.foldersById[folderId]
-      while (currentFolder?.parentFolderId) {
-        if (selectedFolderIdSet.has(currentFolder.parentFolderId)) {
-          return true
-        }
-        currentFolder = entities.foldersById[currentFolder.parentFolderId]
-      }
-      return false
-    }
-
-    const topLevelSelectedFolderIds = selectedFolderItems
-      .map((item) => item.folder.id)
-      .filter((folderId) => !hasSelectedAncestorFolder(folderId))
-    const topLevelSelectedFolderIdSet = new Set(topLevelSelectedFolderIds)
     const isFileInsideSelectedFolder = (folderId: NodeId) => {
       let currentFolder: NodeId | null = folderId
       while (currentFolder) {
@@ -210,8 +426,8 @@ export function useHomePageController(): HomePageViewModel {
       return false
     }
 
-    const selectedStandaloneFileIds = selectedFileItems
-      .map((item) => item.file)
+    const selectedStandaloneFileIds = selectedFiles
+      .map((file) => file)
       .filter((file) => !isFileInsideSelectedFolder(file.parentFolderId))
       .map((file) => file.id)
 
@@ -232,7 +448,8 @@ export function useHomePageController(): HomePageViewModel {
     }
 
     setIsDeleteSelectedContentDialogOpen(false)
-    setSelectedContentItemIds([])
+    setIncludedContentItemIds([])
+    setExcludedContentItemIds([])
     enqueueFeedback(t('dataroomFeedbackSelectedItemsDeleted'), 'success')
 
     try {
@@ -315,9 +532,9 @@ export function useHomePageController(): HomePageViewModel {
       dataRoomDeleteSummary,
       folderDeleteSummary,
       selectedContentItemIds,
-      selectedContentItemCount: selectedContentItems.length,
-      selectedFileCount: selectedFileItems.length,
-      selectedFolderCount: selectedFolderItems.length,
+      selectedContentItemCount: selectedContentItemIds.length,
+      selectedFileCount: selectedFiles.length,
+      selectedFolderCount: selectedFolders.length,
       selectedContentItemNames,
     },
     viewHelpers: {

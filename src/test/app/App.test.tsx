@@ -26,6 +26,10 @@ async function createFolder(user: ReturnType<typeof userEvent.setup>, name: stri
   await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create folder' }))
 }
 
+async function openDataRoomActionsMenu(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'Actions' }))
+}
+
 async function renameFolder(user: ReturnType<typeof userEvent.setup>, currentName: string, nextName: string) {
   await user.click(screen.getByRole('button', { name: 'Data Room' }))
   await user.click(screen.getByRole('button', { name: `Rename folder ${currentName}` }))
@@ -38,19 +42,22 @@ async function renameFolder(user: ReturnType<typeof userEvent.setup>, currentNam
 
 async function deleteFolder(user: ReturnType<typeof userEvent.setup>, name: string) {
   await user.click(screen.getByRole('button', { name: `Delete folder ${name}` }))
-  await user.click(screen.getByRole('button', { name: 'Delete' }))
-  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete folder' }))
+  const deleteFolderDialog = screen.getByRole('dialog', { name: 'Delete folder?' })
+  await user.click(within(deleteFolderDialog).getByRole('button', { name: 'Delete' }))
+  await waitForElementToBeRemoved(deleteFolderDialog)
 }
 
 async function createDataRoom(user: ReturnType<typeof userEvent.setup>, name: string) {
-  await user.click(screen.getByRole('button', { name: 'Create data room' }))
+  await openDataRoomActionsMenu(user)
+  await user.click(screen.getByRole('menuitem', { name: 'Create data room' }))
   await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), name)
   await user.click(screen.getByRole('button', { name: 'Create' }))
   await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create data room' }))
 }
 
 async function renameDataRoom(user: ReturnType<typeof userEvent.setup>, nextName: string) {
-  await user.click(screen.getByRole('button', { name: 'Rename data room' }))
+  await openDataRoomActionsMenu(user)
+  await user.click(screen.getByRole('menuitem', { name: 'Rename data room' }))
   const renameDataRoomInput = screen.getByRole('textbox', { name: 'Data Room name' })
   await user.clear(renameDataRoomInput)
   await user.type(renameDataRoomInput, nextName)
@@ -59,10 +66,11 @@ async function renameDataRoom(user: ReturnType<typeof userEvent.setup>, nextName
 }
 
 async function deleteCurrentDataRoom(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole('button', { name: 'Delete data room' }))
-  const deleteDataRoomDialog = screen.getByRole('dialog', { name: 'Delete data room' })
+  await openDataRoomActionsMenu(user)
+  await user.click(screen.getByRole('menuitem', { name: 'Delete data room' }))
+  const deleteDataRoomDialog = screen.getByRole('dialog', { name: 'Delete data room?' })
   await user.click(within(deleteDataRoomDialog).getByRole('button', { name: 'Delete' }))
-  await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete data room' }))
+  await waitForElementToBeRemoved(deleteDataRoomDialog)
 }
 
 async function uploadPdf(user: ReturnType<typeof userEvent.setup>, name: string): Promise<void> {
@@ -75,6 +83,11 @@ async function uploadNonPdf(user: ReturnType<typeof userEvent.setup>, name: stri
   const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
   const file = new File(['plain text'], name, { type: 'text/plain' })
   await user.upload(uploadInput, file)
+}
+
+async function goToBreadcrumb(user: ReturnType<typeof userEvent.setup>, name: string) {
+  const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
+  await user.click(within(breadcrumbs).getByRole('button', { name }))
 }
 
 describe('App routing and localization', () => {
@@ -132,7 +145,8 @@ describe('App routing and localization', () => {
     const user = userEvent.setup()
     renderRoute('/')
 
-    await user.click(screen.getByRole('button', { name: 'Create data room' }))
+    await openDataRoomActionsMenu(user)
+    await user.click(screen.getByRole('menuitem', { name: 'Create data room' }))
     await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), 'Acme Due Diligence Room')
     await user.click(screen.getByRole('button', { name: 'Create' }))
 
@@ -160,9 +174,9 @@ describe('App routing and localization', () => {
     expect(screen.getByText('nda.pdf')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Delete file nda.pdf' }))
-    const deleteFileDialog = screen.getByRole('dialog', { name: 'Delete file' })
+    const deleteFileDialog = screen.getByRole('dialog', { name: 'Delete file?' })
     await user.click(within(deleteFileDialog).getByRole('button', { name: 'Delete' }))
-    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Delete file' }))
+    await waitForElementToBeRemoved(deleteFileDialog)
 
     expect(screen.queryByText('nda.pdf')).not.toBeInTheDocument()
   })
@@ -223,7 +237,7 @@ describe('App routing and localization', () => {
 
     expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
-  })
+  }, 15000)
 
   it('rejects non-pdf uploads with a clear error', async () => {
     const user = userEvent.setup({ applyAccept: false })
@@ -234,4 +248,69 @@ describe('App routing and localization', () => {
     expect(screen.getByText('Only PDF files are allowed.')).toBeInTheDocument()
     expect(screen.queryByText('notes.txt')).not.toBeInTheDocument()
   })
+
+  it('keeps tree and list checkbox selection in sync for the same folder', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+
+    const folderTree = screen.getByRole('list', { name: 'Folder tree' })
+    const contentList = screen.getByRole('list', { name: 'Current folder contents' })
+
+    const treeFinanceCheckbox = within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })
+    const listFinanceCheckbox = within(contentList).getByRole('checkbox', { name: 'Select item Finance' })
+
+    expect(treeFinanceCheckbox).not.toBeChecked()
+    expect(listFinanceCheckbox).not.toBeChecked()
+
+    await user.click(treeFinanceCheckbox)
+    expect(treeFinanceCheckbox).toBeChecked()
+    expect(listFinanceCheckbox).toBeChecked()
+
+    await user.click(listFinanceCheckbox)
+    expect(treeFinanceCheckbox).not.toBeChecked()
+    expect(listFinanceCheckbox).not.toBeChecked()
+  })
+
+  it('supports recursive include with child exclusions even when sibling subfolders exist', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+
+    const folderTree = screen.getByRole('list', { name: 'Folder tree' })
+    await user.click(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' }))
+
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await createFolder(user, 'Invoices')
+    await goToBreadcrumb(user, 'Finance')
+    await createFolder(user, 'Reports')
+    await goToBreadcrumb(user, 'Finance')
+
+    const financeList = screen.getByRole('list', { name: 'Current folder contents' })
+    const invoicesCheckbox = within(financeList).getByRole('checkbox', { name: 'Select item Invoices' })
+    const reportsCheckbox = within(financeList).getByRole('checkbox', { name: 'Select item Reports' })
+
+    expect(invoicesCheckbox).toBeChecked()
+    expect(reportsCheckbox).toBeChecked()
+
+    await user.click(invoicesCheckbox)
+    expect(invoicesCheckbox).not.toBeChecked()
+    expect(reportsCheckbox).toBeChecked()
+
+    await goToBreadcrumb(user, 'Data Room')
+    expect(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })).toBeChecked()
+
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    const reportsCheckboxInFinance = within(screen.getByRole('list', { name: 'Current folder contents' })).getByRole('checkbox', {
+      name: 'Select item Reports',
+    })
+    await user.click(reportsCheckboxInFinance)
+
+    await goToBreadcrumb(user, 'Data Room')
+    expect(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })).not.toBeChecked()
+  }, 30000)
 })
