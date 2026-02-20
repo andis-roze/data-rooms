@@ -3,6 +3,7 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import Tooltip from '@mui/material/Tooltip'
@@ -19,12 +20,14 @@ interface FolderRowProps {
   rowGridTemplate: string
   locale: string
   resolveDisplayName: (value: string) => string
+  selected: boolean
+  onToggleSelect: (itemId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
 }
 
-const mobileGridTemplate = 'minmax(0,1fr) auto'
+const mobileGridTemplate = '36px minmax(0,1fr) auto'
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
@@ -39,6 +42,8 @@ export function FolderRow({
   rowGridTemplate,
   locale,
   resolveDisplayName,
+  selected,
+  onToggleSelect,
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
@@ -56,6 +61,16 @@ export function FolderRow({
           alignItems: 'center',
         }}
       >
+        <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+          {!isParentNavigation ? (
+            <Checkbox
+              size="small"
+              checked={selected}
+              inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: resolveDisplayName(folder.name) }) }}
+              onChange={() => onToggleSelect(folder.id)}
+            />
+          ) : null}
+        </Box>
         <Box
           sx={{ display: { xs: 'none', md: 'inline-flex' }, alignItems: 'center' }}
           title={t('dataroomFolderItemType')}

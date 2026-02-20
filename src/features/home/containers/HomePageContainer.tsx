@@ -30,6 +30,11 @@ export function HomePageContainer() {
     canDeleteActiveDataRoom,
     dataRoomDeleteSummary,
     folderDeleteSummary,
+    selectedContentItemIds,
+    selectedContentItemCount,
+    selectedFileCount,
+    selectedFolderCount,
+    selectedContentItemNames,
   } = selection
 
   const { resolveDisplayName } = viewHelpers
@@ -105,11 +110,23 @@ export function HomePageContainer() {
           sortState={sortState}
           locale={locale}
           resolveDisplayName={resolveDisplayName}
+          selectedContentItemIds={selectedContentItemIds}
+          selectedContentItemCount={selectedContentItemCount}
+          selectedFileCount={selectedFileCount}
+          selectedFolderCount={selectedFolderCount}
+          selectedContentItemNames={selectedContentItemNames}
+          deleteSelectedContentDialogOpen={dialogs.isDeleteSelectedContentDialogOpen}
           uploadInputRef={uploadInputRef}
           onCreateFolder={handlers.openCreateFolderDialog}
           onUploadPdf={() => uploadInputRef.current?.click()}
           onUploadInputChange={handlers.handleUploadInputChange}
           onToggleSort={handlers.toggleSort}
+          onToggleContentItemSelection={handlers.toggleContentItemSelection}
+          onToggleAllContentItemSelection={handlers.toggleAllContentItemSelection}
+          onClearContentItemSelection={handlers.clearContentItemSelection}
+          onOpenDeleteSelectedContentDialog={handlers.openDeleteSelectedContentDialog}
+          onCloseDeleteSelectedContentDialog={handlers.closeDeleteSelectedContentDialog}
+          onDeleteSelectedContent={handlers.handleDeleteSelectedContent}
           onSelectFolder={handlers.selectFolder}
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}

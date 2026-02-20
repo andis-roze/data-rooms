@@ -3,12 +3,13 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
-import type { FileNode } from '../../dataroom/model'
+import type { FileNode, NodeId } from '../../dataroom/model'
 import { formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 
 interface FileRowProps {
@@ -16,12 +17,14 @@ interface FileRowProps {
   file: FileNode
   rowGridTemplate: string
   locale: string
+  selected: boolean
+  onToggleSelect: (itemId: NodeId) => void
   onOpenViewFile: (file: FileNode) => void
   onOpenRenameFile: (file: FileNode) => void
   onOpenDeleteFile: (file: FileNode) => void
 }
 
-const mobileGridTemplate = 'minmax(0,1fr) auto'
+const mobileGridTemplate = '36px minmax(0,1fr) auto'
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
@@ -33,6 +36,8 @@ export function FileRow({
   file,
   rowGridTemplate,
   locale,
+  selected,
+  onToggleSelect,
   onOpenViewFile,
   onOpenRenameFile,
   onOpenDeleteFile,
@@ -50,6 +55,14 @@ export function FileRow({
           alignItems: 'center',
         }}
       >
+        <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+          <Checkbox
+            size="small"
+            checked={selected}
+            inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: file.name }) }}
+            onChange={() => onToggleSelect(file.id)}
+          />
+        </Box>
         <Box
           sx={{ display: { xs: 'none', md: 'inline-flex' }, alignItems: 'center' }}
           title={t('dataroomFileItemType')}

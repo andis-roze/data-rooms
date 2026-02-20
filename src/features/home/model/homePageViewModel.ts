@@ -18,6 +18,7 @@ export interface HomeDialogState {
   isRenameFileDialogOpen: boolean
   isDeleteFileDialogOpen: boolean
   isViewFileDialogOpen: boolean
+  isDeleteSelectedContentDialogOpen: boolean
 }
 
 export interface HomeFormState {
@@ -44,6 +45,11 @@ export interface HomePageSelectionState {
   canDeleteActiveDataRoom: boolean
   dataRoomDeleteSummary: HomeDeleteSummary
   folderDeleteSummary: HomeDeleteSummary
+  selectedContentItemIds: NodeId[]
+  selectedContentItemCount: number
+  selectedFileCount: number
+  selectedFolderCount: number
+  selectedContentItemNames: string[]
 }
 
 export interface HomePageUiState {
@@ -86,6 +92,12 @@ export interface HomePageHandlers {
   handleUploadInputChange: (event: ChangeEvent<HTMLInputElement>) => Promise<void>
   handleRenameFile: () => void
   handleDeleteFile: () => Promise<void>
+  toggleContentItemSelection: (itemId: NodeId) => void
+  toggleAllContentItemSelection: () => void
+  clearContentItemSelection: () => void
+  openDeleteSelectedContentDialog: () => void
+  closeDeleteSelectedContentDialog: () => void
+  handleDeleteSelectedContent: () => Promise<void>
   toggleSort: (field: 'name' | 'type' | 'updated') => void
   dismissFeedback: (id: number) => void
   selectDataRoom: (dataRoomId: NodeId) => void

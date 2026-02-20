@@ -21,6 +21,9 @@ msgstr ""
 msgid "dataroomActionCancel"
 msgstr ""
 
+msgid "dataroomActionClearSelection"
+msgstr ""
+
 msgid "dataroomActionClose"
 msgstr ""
 
@@ -40,6 +43,9 @@ msgid "dataroomActionDeleteDataRoom"
 msgstr ""
 
 msgid "dataroomActionDeleteFile"
+msgstr ""
+
+msgid "dataroomActionDeleteSelected"
 msgstr ""
 
 msgid "dataroomActionRename"
@@ -108,6 +114,12 @@ msgstr ""
 msgid "dataroomDeleteFolderQuestionConfirmWithoutName"
 msgstr ""
 
+msgid "dataroomDeleteSelectedImpact"
+msgstr ""
+
+msgid "dataroomDeleteSelectedQuestion"
+msgstr ""
+
 msgid "dataroomDialogCreateDataRoomTitle"
 msgstr ""
 
@@ -121,6 +133,9 @@ msgid "dataroomDialogDeleteFileTitleConfirm"
 msgstr ""
 
 msgid "dataroomDialogDeleteFolderTitleConfirm"
+msgstr ""
+
+msgid "dataroomDialogDeleteSelectedTitle"
 msgstr ""
 
 msgid "dataroomDialogRenameDataRoomTitle"
@@ -198,6 +213,9 @@ msgstr ""
 msgid "dataroomFeedbackFolderRenamed"
 msgstr ""
 
+msgid "dataroomFeedbackSelectedItemsDeleted"
+msgstr ""
+
 msgid "dataroomFieldDataRoomName"
 msgstr ""
 
@@ -235,6 +253,18 @@ msgid "dataroomSeedDefaultDataRoomName"
 msgstr ""
 
 msgid "dataroomSeedDefaultRootFolderName"
+msgstr ""
+
+msgid "dataroomSelectionCount"
+msgstr ""
+
+msgid "dataroomSelectionMoreItems"
+msgstr ""
+
+msgid "dataroomSelectionSelectAllAria"
+msgstr ""
+
+msgid "dataroomSelectionSelectItemAria"
 msgstr ""
 
 msgid "dataroomSidebarTitle"

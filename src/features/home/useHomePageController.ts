@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  deleteManyFileBlobs,
   getDataRoomDeleteSummary,
+  getFileIdsForFolderCascadeDelete,
   getFolderDeleteSummary,
   normalizeNodeName,
   type NodeId,
@@ -40,9 +42,11 @@ export function useHomePageController(): HomePageViewModel {
   const [isRenameFileDialogOpen, setIsRenameFileDialogOpen] = useState(false)
   const [isDeleteFileDialogOpen, setIsDeleteFileDialogOpen] = useState(false)
   const [isViewFileDialogOpen, setIsViewFileDialogOpen] = useState(false)
+  const [isDeleteSelectedContentDialogOpen, setIsDeleteSelectedContentDialogOpen] = useState(false)
 
   const [targetFolderId, setTargetFolderId] = useState<NodeId | null>(null)
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
+  const [selectedContentItemIds, setSelectedContentItemIds] = useState<NodeId[]>([])
 
   const [folderNameDraft, setFolderNameDraft] = useState('')
   const [folderNameError, setFolderNameError] = useState<string | null>(null)
@@ -92,6 +96,10 @@ export function useHomePageController(): HomePageViewModel {
   const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
   const visibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
   const locale = i18n.resolvedLanguage ?? i18n.language
+  const selectableContentItems = visibleContentItems.filter(
+    (item) => !(item.kind === 'folder' && item.isParentNavigation),
+  )
+  const selectableContentItemIdSet = new Set(selectableContentItems.map((item) => item.id))
 
   const canDeleteActiveDataRoom = Boolean(activeDataRoom)
   const dataRoomDeleteSummary = activeDataRoom
@@ -106,6 +114,13 @@ export function useHomePageController(): HomePageViewModel {
     ? getFolderDeleteSummary(entities, targetFolder?.id ?? activeFolder.id)
     : EMPTY_DELETE_SUMMARY
   const activeFile = getFileById(activeFileId)
+  const selectedContentItemIdSet = new Set(selectedContentItemIds)
+  const selectedContentItems = selectableContentItems.filter((item) => selectedContentItemIdSet.has(item.id))
+  const selectedFileItems = selectedContentItems.filter((item) => item.kind === 'file')
+  const selectedFolderItems = selectedContentItems.filter((item) => item.kind === 'folder')
+  const selectedContentItemNames = selectedContentItems.map((item) =>
+    item.kind === 'folder' ? resolveDisplayName(item.folder.name) : item.file.name,
+  )
 
   const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
     if (type === 'dataRoom') {
@@ -117,11 +132,114 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectDataRoom = (dataRoomId: NodeId) => {
+    setSelectedContentItemIds([])
     selectNode('dataRoom', dataRoomId)
   }
 
   const selectFolder = (folderId: NodeId) => {
+    setSelectedContentItemIds([])
     selectNode('folder', folderId)
+  }
+
+  const toggleContentItemSelection = (itemId: NodeId) => {
+    if (!selectableContentItemIdSet.has(itemId)) {
+      return
+    }
+
+    setSelectedContentItemIds((previous) =>
+      previous.includes(itemId) ? previous.filter((id) => id !== itemId) : [...previous, itemId],
+    )
+  }
+
+  const toggleAllContentItemSelection = () => {
+    const allItemIds = selectableContentItems.map((item) => item.id)
+    if (allItemIds.length === 0) {
+      return
+    }
+
+    setSelectedContentItemIds((previous) =>
+      previous.length === allItemIds.length && allItemIds.every((itemId) => previous.includes(itemId))
+        ? []
+        : allItemIds,
+    )
+  }
+
+  const clearContentItemSelection = () => {
+    setSelectedContentItemIds([])
+  }
+
+  const openDeleteSelectedContentDialog = () => {
+    if (selectedContentItems.length > 0) {
+      setIsDeleteSelectedContentDialogOpen(true)
+    }
+  }
+
+  const closeDeleteSelectedContentDialog = () => {
+    setIsDeleteSelectedContentDialogOpen(false)
+  }
+
+  const handleDeleteSelectedContent = async () => {
+    if (selectedContentItems.length === 0) {
+      return
+    }
+
+    const selectedFolderIdSet = new Set(selectedFolderItems.map((item) => item.folder.id))
+    const hasSelectedAncestorFolder = (folderId: NodeId) => {
+      let currentFolder = entities.foldersById[folderId]
+      while (currentFolder?.parentFolderId) {
+        if (selectedFolderIdSet.has(currentFolder.parentFolderId)) {
+          return true
+        }
+        currentFolder = entities.foldersById[currentFolder.parentFolderId]
+      }
+      return false
+    }
+
+    const topLevelSelectedFolderIds = selectedFolderItems
+      .map((item) => item.folder.id)
+      .filter((folderId) => !hasSelectedAncestorFolder(folderId))
+    const topLevelSelectedFolderIdSet = new Set(topLevelSelectedFolderIds)
+    const isFileInsideSelectedFolder = (folderId: NodeId) => {
+      let currentFolder: NodeId | null = folderId
+      while (currentFolder) {
+        if (topLevelSelectedFolderIdSet.has(currentFolder)) {
+          return true
+        }
+        currentFolder = entities.foldersById[currentFolder]?.parentFolderId ?? null
+      }
+      return false
+    }
+
+    const selectedStandaloneFileIds = selectedFileItems
+      .map((item) => item.file)
+      .filter((file) => !isFileInsideSelectedFolder(file.parentFolderId))
+      .map((file) => file.id)
+
+    for (const fileId of selectedStandaloneFileIds) {
+      dispatch({ type: 'dataroom/deleteFile', payload: { fileId } })
+    }
+
+    for (const folderId of topLevelSelectedFolderIds) {
+      dispatch({ type: 'dataroom/deleteFolder', payload: { folderId } })
+    }
+
+    const fileIdsForCleanup = new Set<NodeId>(selectedStandaloneFileIds)
+    for (const folderId of topLevelSelectedFolderIds) {
+      const nestedFileIds = getFileIdsForFolderCascadeDelete(entities, folderId)
+      for (const fileId of nestedFileIds) {
+        fileIdsForCleanup.add(fileId)
+      }
+    }
+
+    setIsDeleteSelectedContentDialogOpen(false)
+    setSelectedContentItemIds([])
+    enqueueFeedback(t('dataroomFeedbackSelectedItemsDeleted'), 'success')
+
+    try {
+      await deleteManyFileBlobs([...fileIdsForCleanup])
+    } catch {
+      // Best-effort cleanup only.
+    }
   }
 
   const actions = useHomePageActions({
@@ -196,6 +314,11 @@ export function useHomePageController(): HomePageViewModel {
       canDeleteActiveDataRoom,
       dataRoomDeleteSummary,
       folderDeleteSummary,
+      selectedContentItemIds,
+      selectedContentItemCount: selectedContentItems.length,
+      selectedFileCount: selectedFileItems.length,
+      selectedFolderCount: selectedFolderItems.length,
+      selectedContentItemNames,
     },
     viewHelpers: {
       resolveDisplayName,
@@ -215,6 +338,7 @@ export function useHomePageController(): HomePageViewModel {
         isRenameFileDialogOpen,
         isDeleteFileDialogOpen,
         isViewFileDialogOpen,
+        isDeleteSelectedContentDialogOpen,
       },
       forms: {
         dataRoomNameDraft,
@@ -230,6 +354,12 @@ export function useHomePageController(): HomePageViewModel {
       dismissFeedback,
       selectDataRoom,
       selectFolder,
+      toggleContentItemSelection,
+      toggleAllContentItemSelection,
+      clearContentItemSelection,
+      openDeleteSelectedContentDialog,
+      closeDeleteSelectedContentDialog,
+      handleDeleteSelectedContent,
     },
   }
 }

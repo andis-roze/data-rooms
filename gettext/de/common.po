@@ -23,6 +23,9 @@ msgstr "Polyglot UI"
 msgid "dataroomActionCancel"
 msgstr "Abbrechen"
 
+msgid "dataroomActionClearSelection"
+msgstr "Auswahl aufheben"
+
 msgid "dataroomActionClose"
 msgstr "Schliessen"
 
@@ -43,6 +46,9 @@ msgstr "Datenraum loschen"
 
 msgid "dataroomActionDeleteFile"
 msgstr "Loschen"
+
+msgid "dataroomActionDeleteSelected"
+msgstr "Auswahl loschen"
 
 msgid "dataroomActionRename"
 msgstr "Umbenennen"
@@ -116,6 +122,16 @@ msgstr ""
 "Mochtest du diesen Ordner und alle Inhalte darin wirklich loschen? Diese "
 "Aktion kann nicht ruckgangig gemacht werden."
 
+msgid "dataroomDeleteSelectedImpact"
+msgstr ""
+"Dabei werden {fileCount} Datei(en) und {folderCount} Ordner geloscht. "
+"Inhalte von Ordnern werden ebenfalls entfernt."
+
+msgid "dataroomDeleteSelectedQuestion"
+msgstr ""
+"Mochtest du {count} ausgewahlte(s) Element(e) wirklich loschen? Diese "
+"Aktion kann nicht ruckgangig gemacht werden."
+
 msgid "dataroomDialogCreateDataRoomTitle"
 msgstr "Datenraum erstellen"
 
@@ -130,6 +146,9 @@ msgstr "Datei loschen?"
 
 msgid "dataroomDialogDeleteFolderTitleConfirm"
 msgstr "Ordner loschen?"
+
+msgid "dataroomDialogDeleteSelectedTitle"
+msgstr "Ausgewahlte Elemente loschen?"
 
 msgid "dataroomDialogRenameDataRoomTitle"
 msgstr "Datenraum umbenennen"
@@ -208,6 +227,9 @@ msgstr "Ordner geloscht."
 msgid "dataroomFeedbackFolderRenamed"
 msgstr "Ordner umbenannt."
 
+msgid "dataroomFeedbackSelectedItemsDeleted"
+msgstr "Ausgewahlte Elemente geloscht."
+
 msgid "dataroomFieldDataRoomName"
 msgstr "Datenraumname"
 
@@ -246,6 +268,18 @@ msgstr "Acme Due Diligence Raum"
 
 msgid "dataroomSeedDefaultRootFolderName"
 msgstr "Datenraum"
+
+msgid "dataroomSelectionCount"
+msgstr "{count} ausgewahlt"
+
+msgid "dataroomSelectionMoreItems"
+msgstr "+{count} weitere"
+
+msgid "dataroomSelectionSelectAllAria"
+msgstr "Alle Elemente auswahlen"
+
+msgid "dataroomSelectionSelectItemAria"
+msgstr "Element {name} auswahlen"
 
 msgid "dataroomSidebarTitle"
 msgstr "Datenraume"

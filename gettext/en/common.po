@@ -23,6 +23,9 @@ msgstr "Polyglot UI"
 msgid "dataroomActionCancel"
 msgstr "Cancel"
 
+msgid "dataroomActionClearSelection"
+msgstr "Clear selection"
+
 msgid "dataroomActionClose"
 msgstr "Close"
 
@@ -43,6 +46,9 @@ msgstr "Delete data room"
 
 msgid "dataroomActionDeleteFile"
 msgstr "Delete"
+
+msgid "dataroomActionDeleteSelected"
+msgstr "Delete selected"
 
 msgid "dataroomActionRename"
 msgstr "Rename"
@@ -114,6 +120,16 @@ msgstr ""
 "Are you sure you want to delete this folder and everything inside it? This "
 "action cannot be undone."
 
+msgid "dataroomDeleteSelectedImpact"
+msgstr ""
+"This will delete {fileCount} file(s) and {folderCount} folder(s). Folder "
+"contents will also be deleted."
+
+msgid "dataroomDeleteSelectedQuestion"
+msgstr ""
+"Are you sure you want to delete {count} selected item(s)? This action "
+"cannot be undone."
+
 msgid "dataroomDialogCreateDataRoomTitle"
 msgstr "Create data room"
 
@@ -128,6 +144,9 @@ msgstr "Delete file?"
 
 msgid "dataroomDialogDeleteFolderTitleConfirm"
 msgstr "Delete folder?"
+
+msgid "dataroomDialogDeleteSelectedTitle"
+msgstr "Delete selected items?"
 
 msgid "dataroomDialogRenameDataRoomTitle"
 msgstr "Rename data room"
@@ -204,6 +223,9 @@ msgstr "Folder deleted."
 msgid "dataroomFeedbackFolderRenamed"
 msgstr "Folder renamed."
 
+msgid "dataroomFeedbackSelectedItemsDeleted"
+msgstr "Selected items deleted."
+
 msgid "dataroomFieldDataRoomName"
 msgstr "Data Room name"
 
@@ -242,6 +264,18 @@ msgstr "Acme Due Diligence Room"
 
 msgid "dataroomSeedDefaultRootFolderName"
 msgstr "Data Room"
+
+msgid "dataroomSelectionCount"
+msgstr "{count} selected"
+
+msgid "dataroomSelectionMoreItems"
+msgstr "+{count} more"
+
+msgid "dataroomSelectionSelectAllAria"
+msgstr "Select all items"
+
+msgid "dataroomSelectionSelectItemAria"
+msgstr "Select item {name}"
 
 msgid "dataroomSidebarTitle"
 msgstr "Data Rooms"
