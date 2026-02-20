@@ -16,6 +16,7 @@ interface FolderRowProps {
   folder: Folder
   displayName?: string
   isParentNavigation?: boolean
+  rowGridTemplate: string
   locale: string
   resolveDisplayName: (value: string) => string
   onSelectFolder: (folderId: NodeId) => void
@@ -23,10 +24,7 @@ interface FolderRowProps {
   onOpenDeleteFolder: (folder: Folder) => void
 }
 
-const rowGridTemplate = {
-  xs: 'minmax(0,1fr) auto',
-  md: '120px minmax(0,1fr) 130px 104px',
-}
+const mobileGridTemplate = 'minmax(0,1fr) auto'
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
@@ -38,6 +36,7 @@ export function FolderRow({
   folder,
   displayName,
   isParentNavigation,
+  rowGridTemplate,
   locale,
   resolveDisplayName,
   onSelectFolder,
@@ -52,7 +51,7 @@ export function FolderRow({
         sx={{
           width: '100%',
           display: 'grid',
-          gridTemplateColumns: rowGridTemplate,
+          gridTemplateColumns: { xs: mobileGridTemplate, md: rowGridTemplate },
           gap: 1,
           alignItems: 'center',
         }}

@@ -14,23 +14,29 @@ import { formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 interface FileRowProps {
   itemId: string
   file: FileNode
+  rowGridTemplate: string
   locale: string
   onOpenViewFile: (file: FileNode) => void
   onOpenRenameFile: (file: FileNode) => void
   onOpenDeleteFile: (file: FileNode) => void
 }
 
-const rowGridTemplate = {
-  xs: 'minmax(0,1fr) auto',
-  md: '120px minmax(0,1fr) 130px 104px',
-}
+const mobileGridTemplate = 'minmax(0,1fr) auto'
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
   md: 'repeat(2, max-content)',
 }
 
-export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile, onOpenDeleteFile }: FileRowProps) {
+export function FileRow({
+  itemId,
+  file,
+  rowGridTemplate,
+  locale,
+  onOpenViewFile,
+  onOpenRenameFile,
+  onOpenDeleteFile,
+}: FileRowProps) {
   const { t } = useTranslation()
 
   return (
@@ -39,7 +45,7 @@ export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile
         sx={{
           width: '100%',
           display: 'grid',
-          gridTemplateColumns: rowGridTemplate,
+          gridTemplateColumns: { xs: mobileGridTemplate, md: rowGridTemplate },
           gap: 1,
           alignItems: 'center',
         }}
