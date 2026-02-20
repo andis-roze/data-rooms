@@ -1,6 +1,11 @@
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { Folder, NodeId } from '../../dataroom/model'
@@ -20,12 +25,12 @@ interface FolderRowProps {
 
 const rowGridTemplate = {
   xs: 'minmax(0,1fr) auto',
-  md: 'minmax(0,1fr) 120px 130px 190px',
+  md: '120px minmax(0,1fr) 130px 104px',
 }
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
-  md: 'repeat(2, minmax(84px, 1fr))',
+  md: 'repeat(2, max-content)',
 }
 
 export function FolderRow({
@@ -52,6 +57,13 @@ export function FolderRow({
           alignItems: 'center',
         }}
       >
+        <Box
+          sx={{ display: { xs: 'none', md: 'inline-flex' }, alignItems: 'center' }}
+          title={t('dataroomFolderItemType')}
+          aria-label={t('dataroomFolderItemType')}
+        >
+          <FolderOutlinedIcon fontSize="small" color="action" />
+        </Box>
         <Button
           size="small"
           color="inherit"
@@ -62,9 +74,6 @@ export function FolderRow({
         >
           <Typography noWrap>{formatPathForDisplay(displayName ?? resolveDisplayName(folder.name))}</Typography>
         </Button>
-        <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-          {t('dataroomFolderItemType')}
-        </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           {formatUpdatedAt(folder.updatedAt, locale)}
         </Typography>
@@ -85,23 +94,25 @@ export function FolderRow({
             </>
           ) : (
             <>
-              <Button
-                size="small"
-                sx={{ minWidth: 84 }}
-                aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
-                onClick={() => onOpenRenameFolder(folder)}
-              >
-                {t('dataroomActionRename')}
-              </Button>
-              <Button
-                size="small"
-                color="error"
-                sx={{ minWidth: 84 }}
-                aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
-                onClick={() => onOpenDeleteFolder(folder)}
-              >
-                {t('dataroomActionDelete')}
-              </Button>
+              <Tooltip title={t('dataroomActionRename')}>
+                <IconButton
+                  size="small"
+                  aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
+                  onClick={() => onOpenRenameFolder(folder)}
+                >
+                  <DriveFileRenameOutlineIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t('dataroomActionDelete')}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
+                  onClick={() => onOpenDeleteFolder(folder)}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </>
           )}
         </Box>

@@ -1,10 +1,15 @@
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import ListItem from '@mui/material/ListItem'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { FileNode } from '../../dataroom/model'
-import { formatFileSize, formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
+import { formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 
 interface FileRowProps {
   itemId: string
@@ -17,12 +22,12 @@ interface FileRowProps {
 
 const rowGridTemplate = {
   xs: 'minmax(0,1fr) auto',
-  md: 'minmax(0,1fr) 120px 130px 190px',
+  md: '120px minmax(0,1fr) 130px 104px',
 }
 
 const actionGridTemplate = {
   xs: 'repeat(2, max-content)',
-  md: 'repeat(2, minmax(84px, 1fr))',
+  md: 'repeat(2, max-content)',
 }
 
 export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile, onOpenDeleteFile }: FileRowProps) {
@@ -39,6 +44,13 @@ export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile
           alignItems: 'center',
         }}
       >
+        <Box
+          sx={{ display: { xs: 'none', md: 'inline-flex' }, alignItems: 'center' }}
+          title={t('dataroomFileItemType')}
+          aria-label={t('dataroomFileItemType')}
+        >
+          <DescriptionOutlinedIcon fontSize="small" color="action" />
+        </Box>
         <Button
           size="small"
           color="inherit"
@@ -49,9 +61,6 @@ export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile
         >
           <Typography noWrap>{formatPathForDisplay(file.name)}</Typography>
         </Button>
-        <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-          {`${t('dataroomFileItemType')} - ${formatFileSize(file.size)}`}
-        </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
           {formatUpdatedAt(file.updatedAt, locale)}
         </Typography>
@@ -65,23 +74,25 @@ export function FileRow({ itemId, file, locale, onOpenViewFile, onOpenRenameFile
             width: { xs: 'auto', md: '100%' },
           }}
         >
-          <Button
-            size="small"
-            sx={{ minWidth: 84 }}
-            aria-label={t('dataroomAriaRenameFile', { name: file.name })}
-            onClick={() => onOpenRenameFile(file)}
-          >
-            {t('dataroomActionRenameFile')}
-          </Button>
-          <Button
-            size="small"
-            color="error"
-            sx={{ minWidth: 84 }}
-            aria-label={t('dataroomAriaDeleteFile', { name: file.name })}
-            onClick={() => onOpenDeleteFile(file)}
-          >
-            {t('dataroomActionDeleteFile')}
-          </Button>
+          <Tooltip title={t('dataroomActionRenameFile')}>
+            <IconButton
+              size="small"
+              aria-label={t('dataroomAriaRenameFile', { name: file.name })}
+              onClick={() => onOpenRenameFile(file)}
+            >
+              <DriveFileRenameOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('dataroomActionDeleteFile')}>
+            <IconButton
+              size="small"
+              color="error"
+              aria-label={t('dataroomAriaDeleteFile', { name: file.name })}
+              onClick={() => onOpenDeleteFile(file)}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
     </ListItem>

@@ -5,7 +5,7 @@ import List from '@mui/material/List'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
-import type { DataRoom, DataRoomState, NodeId } from '../../dataroom/model'
+import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/model'
 import { DataRoomTreeNode } from '../FolderTree'
 
 interface HomeSidebarProps {
@@ -15,10 +15,12 @@ interface HomeSidebarProps {
   selectedFolderId: NodeId | null
   canDeleteActiveDataRoom: boolean
   onCreateDataRoom: () => void
-  onRenameDataRoom: () => void
-  onDeleteDataRoom: () => void
+  onRenameDataRoom: (dataRoom?: DataRoom) => void
+  onDeleteDataRoom: (dataRoom?: DataRoom) => void
   onSelectDataRoom: (dataRoomId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
+  onOpenRenameFolder: (folder: Folder) => void
+  onOpenDeleteFolder: (folder: Folder) => void
   resolveDisplayName: (value: string) => string
 }
 
@@ -33,6 +35,8 @@ export function HomeSidebar({
   onDeleteDataRoom,
   onSelectDataRoom,
   onSelectFolder,
+  onOpenRenameFolder,
+  onOpenDeleteFolder,
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
@@ -47,10 +51,16 @@ export function HomeSidebar({
         <Button size="small" variant="contained" onClick={onCreateDataRoom}>
           {t('dataroomActionCreateDataRoom')}
         </Button>
-        <Button size="small" variant="outlined" onClick={onRenameDataRoom}>
+        <Button size="small" variant="outlined" onClick={() => onRenameDataRoom()}>
           {t('dataroomActionRenameDataRoom')}
         </Button>
-        <Button size="small" variant="outlined" color="error" disabled={!canDeleteActiveDataRoom} onClick={onDeleteDataRoom}>
+        <Button
+          size="small"
+          variant="outlined"
+          color="error"
+          disabled={!canDeleteActiveDataRoom}
+          onClick={() => onDeleteDataRoom()}
+        >
           {t('dataroomActionDeleteDataRoom')}
         </Button>
       </Stack>
@@ -70,6 +80,10 @@ export function HomeSidebar({
             selectedFolderId={selectedFolderId}
             onSelectDataRoom={onSelectDataRoom}
             onSelectFolder={onSelectFolder}
+            onOpenRenameDataRoom={onRenameDataRoom}
+            onOpenDeleteDataRoom={onDeleteDataRoom}
+            onOpenRenameFolder={onOpenRenameFolder}
+            onOpenDeleteFolder={onOpenDeleteFolder}
             renderDataRoomName={resolveDisplayName}
             renderFolderName={resolveDisplayName}
           />

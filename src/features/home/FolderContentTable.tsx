@@ -25,7 +25,7 @@ interface FolderContentTableProps {
 
 const rowGridTemplate = {
   xs: 'minmax(0,1fr) auto',
-  md: 'minmax(0,1fr) 120px 130px 190px',
+  md: '120px minmax(0,1fr) 130px 104px',
 }
 
 export function FolderContentTable({
@@ -61,22 +61,22 @@ export function FolderContentTable({
         <Button
           size="small"
           color="inherit"
-          sx={{ justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
-          onClick={() => onToggleSort('name')}
-          aria-label={t('dataroomSortByNameAria')}
-          aria-pressed={sortState.field === 'name'}
-        >
-          {t('dataroomColumnName')} {sortIndicator('name')}
-        </Button>
-        <Button
-          size="small"
-          color="inherit"
           sx={{ display: { xs: 'none', md: 'inline-flex' }, justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
           onClick={() => onToggleSort('type')}
           aria-label={t('dataroomSortByTypeAria')}
           aria-pressed={sortState.field === 'type'}
         >
           {t('dataroomColumnType')} {sortIndicator('type')}
+        </Button>
+        <Button
+          size="small"
+          color="inherit"
+          sx={{ justifyContent: 'flex-start', px: 0.5, minWidth: 0 }}
+          onClick={() => onToggleSort('name')}
+          aria-label={t('dataroomSortByNameAria')}
+          aria-pressed={sortState.field === 'name'}
+        >
+          {t('dataroomColumnName')} {sortIndicator('name')}
         </Button>
         <Button
           size="small"

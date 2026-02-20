@@ -89,6 +89,8 @@ export function HomePageContainer() {
           onDeleteDataRoom={handlers.openDeleteDataRoomDialog}
           onSelectDataRoom={handlers.selectDataRoom}
           onSelectFolder={handlers.selectFolder}
+          onOpenRenameFolder={handlers.openRenameFolderDialog}
+          onOpenDeleteFolder={handlers.openDeleteFolderDialog}
           resolveDisplayName={resolveDisplayName}
         />
 

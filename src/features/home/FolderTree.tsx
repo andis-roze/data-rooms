@@ -1,6 +1,13 @@
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined'
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
-import type { DataRoom, DataRoomState, NodeId } from '../dataroom/model'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import type { DataRoom, DataRoomState, Folder, NodeId } from '../dataroom/model'
 import { formatPathForDisplay } from './services/formatters'
 import { getFolderChildren } from './utils'
 
@@ -9,6 +16,8 @@ interface FolderTreeNodeProps {
   state: DataRoomState
   selectedFolderId: NodeId | null
   onSelectFolder: (folderId: NodeId) => void
+  onOpenRenameFolder: (folder: Folder) => void
+  onOpenDeleteFolder: (folder: Folder) => void
   renderFolderName: (name: string) => string
   depth?: number
   visited?: Set<NodeId>
@@ -19,6 +28,8 @@ function FolderTreeNode({
   state,
   selectedFolderId,
   onSelectFolder,
+  onOpenRenameFolder,
+  onOpenDeleteFolder,
   renderFolderName,
   depth = 0,
   visited = new Set<NodeId>(),
@@ -40,15 +51,54 @@ function FolderTreeNode({
 
   return (
     <>
-      <ListItemButton
-        selected={selectedFolderId === folder.id}
-        onClick={() => onSelectFolder(folder.id)}
-        sx={{ pl: 2 + depth * 2 }}
-        title={folderDisplayName}
-        aria-label={folderDisplayName}
-      >
-        <ListItemText primary={formatPathForDisplay(folderDisplayName)} primaryTypographyProps={{ noWrap: true }} />
-      </ListItemButton>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <ListItemButton
+          selected={selectedFolderId === folder.id}
+          onClick={() => onSelectFolder(folder.id)}
+          sx={{ pl: 2 + depth * 2, minWidth: 0, flex: 1 }}
+          title={folderDisplayName}
+          aria-label={folderDisplayName}
+        >
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+                <FolderOutlinedIcon fontSize="small" />
+                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {formatPathForDisplay(folderDisplayName)}
+                </Box>
+              </Box>
+            }
+            primaryTypographyProps={{ noWrap: true }}
+          />
+        </ListItemButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
+          <Tooltip title="Rename">
+            <IconButton
+              size="small"
+              aria-label={`Rename folder ${folderDisplayName} in tree`}
+              onClick={(event) => {
+                event.stopPropagation()
+                onOpenRenameFolder(folder)
+              }}
+            >
+              <DriveFileRenameOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              color="error"
+              aria-label={`Delete folder ${folderDisplayName} in tree`}
+              onClick={(event) => {
+                event.stopPropagation()
+                onOpenDeleteFolder(folder)
+              }}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
       {children.map((childFolder) => (
         <FolderTreeNode
           key={childFolder.id}
@@ -56,6 +106,8 @@ function FolderTreeNode({
           state={state}
           selectedFolderId={selectedFolderId}
           onSelectFolder={onSelectFolder}
+          onOpenRenameFolder={onOpenRenameFolder}
+          onOpenDeleteFolder={onOpenDeleteFolder}
           renderFolderName={renderFolderName}
           depth={depth + 1}
           visited={nextVisited}
@@ -72,6 +124,10 @@ interface DataRoomTreeNodeProps {
   selectedFolderId: NodeId | null
   onSelectDataRoom: (dataRoomId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
+  onOpenRenameDataRoom: (dataRoom: DataRoom) => void
+  onOpenDeleteDataRoom: (dataRoom: DataRoom) => void
+  onOpenRenameFolder: (folder: Folder) => void
+  onOpenDeleteFolder: (folder: Folder) => void
   renderDataRoomName: (name: string) => string
   renderFolderName: (name: string) => string
 }
@@ -83,6 +139,10 @@ export function DataRoomTreeNode({
   selectedFolderId,
   onSelectDataRoom,
   onSelectFolder,
+  onOpenRenameDataRoom,
+  onOpenDeleteDataRoom,
+  onOpenRenameFolder,
+  onOpenDeleteFolder,
   renderDataRoomName,
   renderFolderName,
 }: DataRoomTreeNodeProps) {
@@ -94,18 +154,54 @@ export function DataRoomTreeNode({
 
   return (
     <>
-      <ListItemButton
-        selected={dataRoomSelected && rootSelected}
-        onClick={() => onSelectDataRoom(dataRoom.id)}
-        sx={{ pl: 1.5 }}
-        title={dataRoomDisplayName}
-        aria-label={dataRoomDisplayName}
-      >
-        <ListItemText
-          primary={formatPathForDisplay(dataRoomDisplayName)}
-          primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
-        />
-      </ListItemButton>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <ListItemButton
+          selected={dataRoomSelected && rootSelected}
+          onClick={() => onSelectDataRoom(dataRoom.id)}
+          sx={{ pl: 1.5, minWidth: 0, flex: 1 }}
+          title={dataRoomDisplayName}
+          aria-label={dataRoomDisplayName}
+        >
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+                <FolderOpenOutlinedIcon fontSize="small" />
+                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {formatPathForDisplay(dataRoomDisplayName)}
+                </Box>
+              </Box>
+            }
+            primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
+          />
+        </ListItemButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
+          <Tooltip title="Rename">
+            <IconButton
+              size="small"
+              aria-label={`Rename data room ${dataRoomDisplayName} in tree`}
+              onClick={(event) => {
+                event.stopPropagation()
+                onOpenRenameDataRoom(dataRoom)
+              }}
+            >
+              <DriveFileRenameOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              color="error"
+              aria-label={`Delete data room ${dataRoomDisplayName} in tree`}
+              onClick={(event) => {
+                event.stopPropagation()
+                onOpenDeleteDataRoom(dataRoom)
+              }}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
       {rootChildren.map((childFolder) => (
         <FolderTreeNode
           key={childFolder.id}
@@ -113,6 +209,8 @@ export function DataRoomTreeNode({
           state={state}
           selectedFolderId={selectedFolderId}
           onSelectFolder={onSelectFolder}
+          onOpenRenameFolder={onOpenRenameFolder}
+          onOpenDeleteFolder={onOpenDeleteFolder}
           renderFolderName={renderFolderName}
           depth={1}
         />

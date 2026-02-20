@@ -48,8 +48,8 @@ export interface HomePageUiState {
 
 export interface HomePageHandlers {
   openCreateDataRoomDialog: () => void
-  openRenameDataRoomDialog: () => void
-  openDeleteDataRoomDialog: () => void
+  openRenameDataRoomDialog: (dataRoom?: DataRoom) => void
+  openDeleteDataRoomDialog: (dataRoom?: DataRoom) => void
   closeCreateDataRoomDialog: () => void
   closeRenameDataRoomDialog: () => void
   closeDeleteDataRoomDialog: () => void
