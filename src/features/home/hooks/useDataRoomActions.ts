@@ -100,12 +100,9 @@ export function useDataRoomActions({
 
   const closeDataRoomDialog = (
     setIsOpen: Dispatch<SetStateAction<boolean>>,
-    options?: { clearDraft?: boolean; clearError?: boolean },
+    options?: { clearError?: boolean },
   ) => {
     setIsOpen(false)
-    if (options?.clearDraft) {
-      setDataRoomNameDraft('')
-    }
     if (options?.clearError) {
       setDataRoomNameError(null)
     }
@@ -139,7 +136,7 @@ export function useDataRoomActions({
       },
     })
 
-    setIsCreateDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsCreateDataRoomDialogOpen)
     enqueueFeedback(t('dataroomFeedbackDataRoomCreated'), 'success')
   }
 
@@ -160,7 +157,7 @@ export function useDataRoomActions({
       },
     })
 
-    setIsRenameDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsRenameDataRoomDialogOpen)
     enqueueFeedback(t('dataroomFeedbackDataRoomRenamed'), 'success')
   }
 
@@ -176,7 +173,7 @@ export function useDataRoomActions({
       payload: { dataRoomId: activeDataRoom.id },
     })
 
-    setIsDeleteDataRoomDialogOpen(false)
+    closeDataRoomDialog(setIsDeleteDataRoomDialogOpen)
     enqueueFeedback(t('dataroomFeedbackDataRoomDeleted'), 'success')
 
     try {
