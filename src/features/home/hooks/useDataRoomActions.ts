@@ -10,6 +10,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import { getDataRoomNameValidationMessage } from './nameValidationMessages'
 
 interface UseDataRoomActionsParams {
   t: (key: string, options?: Record<string, unknown>) => string
@@ -92,9 +93,7 @@ export function useDataRoomActions({
     const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
 
     if (validationError) {
-      setDataRoomNameError(
-        validationError === 'empty' ? t('dataroomErrorDataRoomNameEmpty') : t('dataroomErrorDataRoomNameReserved'),
-      )
+      setDataRoomNameError(getDataRoomNameValidationMessage(t, validationError))
       return
     }
 
@@ -125,9 +124,7 @@ export function useDataRoomActions({
     const validationError = getDataRoomNameValidationError(dataRoomNameDraft)
 
     if (validationError) {
-      setDataRoomNameError(
-        validationError === 'empty' ? t('dataroomErrorDataRoomNameEmpty') : t('dataroomErrorDataRoomNameReserved'),
-      )
+      setDataRoomNameError(getDataRoomNameValidationMessage(t, validationError))
       return
     }
 

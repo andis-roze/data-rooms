@@ -13,6 +13,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import { getFileNameValidationMessage } from './nameValidationMessages'
 
 interface UseFileActionsParams {
   t: (key: string, options?: Record<string, unknown>) => string
@@ -102,7 +103,7 @@ export function useFileActions({
     const nameError = getFileNameValidationError(preparedUpload.fileName)
 
     if (nameError) {
-      enqueueFeedback(nameError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'), 'error')
+      enqueueFeedback(getFileNameValidationMessage(t, nameError), 'error')
       event.target.value = ''
       return
     }
@@ -146,9 +147,7 @@ export function useFileActions({
     const validationError = getFileNameValidationError(fileNameDraft)
 
     if (validationError) {
-      setFileNameError(
-        validationError === 'empty' ? t('dataroomErrorFileNameEmpty') : t('dataroomErrorFileNameReserved'),
-      )
+      setFileNameError(getFileNameValidationMessage(t, validationError))
       return
     }
 

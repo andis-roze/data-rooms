@@ -11,6 +11,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import { getFolderNameValidationMessage } from './nameValidationMessages'
 
 interface UseFolderActionsParams {
   t: (key: string, options?: Record<string, unknown>) => string
@@ -93,9 +94,7 @@ export function useFolderActions({
     const validationError = getFolderNameValidationError(folderNameDraft)
 
     if (validationError) {
-      setFolderNameError(
-        validationError === 'empty' ? t('dataroomErrorFolderNameEmpty') : t('dataroomErrorFolderNameReserved'),
-      )
+      setFolderNameError(getFolderNameValidationMessage(t, validationError))
       return
     }
 
@@ -126,9 +125,7 @@ export function useFolderActions({
     const validationError = getFolderNameValidationError(folderNameDraft)
 
     if (validationError) {
-      setFolderNameError(
-        validationError === 'empty' ? t('dataroomErrorFolderNameEmpty') : t('dataroomErrorFolderNameReserved'),
-      )
+      setFolderNameError(getFolderNameValidationMessage(t, validationError))
       return
     }
 
