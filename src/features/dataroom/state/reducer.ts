@@ -17,6 +17,14 @@ import {
 } from '../model'
 import type { DataRoomAction, DataRoomStoreState } from './types'
 
+function withEntities(state: DataRoomStoreState, entities: DataRoomState): DataRoomStoreState {
+  return entities === state.entities ? state : { ...state, entities }
+}
+
+function withNow<T extends object>(payload: T): T & { now: number } {
+  return { ...payload, now: Date.now() }
+}
+
 export function createInitialDataRoomStoreState(entities: DataRoomState): DataRoomStoreState {
   const selection = getDefaultSelection(entities)
 
@@ -82,10 +90,7 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
     }
 
     case 'dataroom/createDataRoom': {
-      const entities = createDataRoom(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
+      const entities = createDataRoom(state.entities, withNow(action.payload))
 
       if (entities === state.entities) {
         return state
@@ -100,19 +105,7 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
     }
 
     case 'dataroom/renameDataRoom': {
-      const entities = renameDataRoom(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
-
-      if (entities === state.entities) {
-        return state
-      }
-
-      return {
-        ...state,
-        entities,
-      }
+      return withEntities(state, renameDataRoom(state.entities, withNow(action.payload)))
     }
 
     case 'dataroom/deleteDataRoom': {
@@ -133,10 +126,7 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
     }
 
     case 'dataroom/createFolder': {
-      const entities = createFolder(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
+      const entities = createFolder(state.entities, withNow(action.payload))
 
       if (entities === state.entities) {
         return state
@@ -151,26 +141,11 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
     }
 
     case 'dataroom/renameFolder': {
-      const entities = renameFolder(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
-
-      if (entities === state.entities) {
-        return state
-      }
-
-      return {
-        ...state,
-        entities,
-      }
+      return withEntities(state, renameFolder(state.entities, withNow(action.payload)))
     }
 
     case 'dataroom/deleteFolder': {
-      const result = deleteFolderCascade(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
+      const result = deleteFolderCascade(state.entities, withNow(action.payload))
 
       if (!result.deleted) {
         return state
@@ -191,51 +166,15 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
     }
 
     case 'dataroom/uploadFile': {
-      const entities = createFile(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
-
-      if (entities === state.entities) {
-        return state
-      }
-
-      return {
-        ...state,
-        entities,
-      }
+      return withEntities(state, createFile(state.entities, withNow(action.payload)))
     }
 
     case 'dataroom/renameFile': {
-      const entities = renameFile(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
-
-      if (entities === state.entities) {
-        return state
-      }
-
-      return {
-        ...state,
-        entities,
-      }
+      return withEntities(state, renameFile(state.entities, withNow(action.payload)))
     }
 
     case 'dataroom/deleteFile': {
-      const entities = deleteFile(state.entities, {
-        ...action.payload,
-        now: Date.now(),
-      })
-
-      if (entities === state.entities) {
-        return state
-      }
-
-      return {
-        ...state,
-        entities,
-      }
+      return withEntities(state, deleteFile(state.entities, withNow(action.payload)))
     }
 
     default:
