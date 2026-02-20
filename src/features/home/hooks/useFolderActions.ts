@@ -65,6 +65,21 @@ export function useFolderActions({
     }
   }
 
+  const validateFolderName = (parentFolderId: NodeId | null, excludeFolderId?: NodeId): boolean => {
+    const validationError = getFolderNameValidationError(folderNameDraft)
+    if (validationError) {
+      setFolderNameError(getFolderNameValidationMessage(t, validationError))
+      return false
+    }
+
+    if (hasDuplicateFolderName(entities, parentFolderId, folderNameDraft, excludeFolderId)) {
+      setFolderNameError(t('dataroomErrorFolderNameDuplicate'))
+      return false
+    }
+
+    return true
+  }
+
   const handleFolderNameDraftChange = (value: string) => {
     setFolderNameDraft(value)
     setFolderNameError(null)
@@ -105,15 +120,7 @@ export function useFolderActions({
       return
     }
 
-    const validationError = getFolderNameValidationError(folderNameDraft)
-
-    if (validationError) {
-      setFolderNameError(getFolderNameValidationMessage(t, validationError))
-      return
-    }
-
-    if (hasDuplicateFolderName(entities, activeFolder.id, folderNameDraft)) {
-      setFolderNameError(t('dataroomErrorFolderNameDuplicate'))
+    if (!validateFolderName(activeFolder.id)) {
       return
     }
 
@@ -136,15 +143,7 @@ export function useFolderActions({
       return
     }
 
-    const validationError = getFolderNameValidationError(folderNameDraft)
-
-    if (validationError) {
-      setFolderNameError(getFolderNameValidationMessage(t, validationError))
-      return
-    }
-
-    if (hasDuplicateFolderName(entities, targetFolder.parentFolderId, folderNameDraft, targetFolder.id)) {
-      setFolderNameError(t('dataroomErrorFolderNameDuplicate'))
+    if (!validateFolderName(targetFolder.parentFolderId, targetFolder.id)) {
       return
     }
 
