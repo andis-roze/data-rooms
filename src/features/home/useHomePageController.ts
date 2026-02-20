@@ -1,11 +1,9 @@
-import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   deleteManyFileBlobs,
   getDataRoomDeleteSummary,
   getFileIdsForFolderCascadeDelete,
   getFolderDeleteSummary,
-  normalizeNodeName,
   type NodeId,
 } from '../dataroom/model'
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
@@ -18,14 +16,16 @@ import {
   selectVisibleContentItems,
 } from './selectors/homeSelectors'
 import type { HomePageViewModel } from './model/homePageViewModel'
-import {
-  useMoveContentWorkflow,
-} from './hooks/useMoveContentWorkflow'
+import { useMoveContentWorkflow } from './hooks/useMoveContentWorkflow'
 import { useContentSelection } from './hooks/useContentSelection'
 import { useHomePageActions } from './hooks/useHomePageActions'
 import { useFeedbackQueue } from './hooks/useFeedbackQueue'
-import { loadSortModePreference } from './services/sortPreference'
-import type { SortState } from './types'
+import {
+  useHomePageDialogState,
+  useHomePageFormState,
+  useHomePageTransientState,
+} from './hooks/useHomePageUiState'
+import { useHomePageViewHelpers } from './hooks/useHomePageViewHelpers'
 
 const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
 
@@ -34,53 +34,68 @@ export function useHomePageController(): HomePageViewModel {
   const { t, i18n } = useTranslation()
   const { entities, selectedDataRoomId, selectedFolderId } = useDataRoomState()
   const dispatch = useDataRoomDispatch()
-  const uploadInputRef = useRef<HTMLInputElement | null>(null)
 
-  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false)
-  const [isRenameFolderDialogOpen, setIsRenameFolderDialogOpen] = useState(false)
-  const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false)
-  const [isCreateDataRoomDialogOpen, setIsCreateDataRoomDialogOpen] = useState(false)
-  const [isRenameDataRoomDialogOpen, setIsRenameDataRoomDialogOpen] = useState(false)
-  const [isDeleteDataRoomDialogOpen, setIsDeleteDataRoomDialogOpen] = useState(false)
-  const [isRenameFileDialogOpen, setIsRenameFileDialogOpen] = useState(false)
-  const [isDeleteFileDialogOpen, setIsDeleteFileDialogOpen] = useState(false)
-  const [isViewFileDialogOpen, setIsViewFileDialogOpen] = useState(false)
-  const [isDeleteSelectedContentDialogOpen, setIsDeleteSelectedContentDialogOpen] = useState(false)
+  const dialogs = useHomePageDialogState()
+  const forms = useHomePageFormState()
+  const transientState = useHomePageTransientState()
 
-  const [targetFolderId, setTargetFolderId] = useState<NodeId | null>(null)
-  const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
+  const {
+    uploadInputRef,
+    targetFolderId,
+    setTargetFolderId,
+    activeFileId,
+    setActiveFileId,
+    sortState,
+    setSortState,
+  } = transientState
 
-  const [folderNameDraft, setFolderNameDraft] = useState('')
-  const [folderNameError, setFolderNameError] = useState<string | null>(null)
-  const [dataRoomNameDraft, setDataRoomNameDraft] = useState('')
-  const [dataRoomNameError, setDataRoomNameError] = useState<string | null>(null)
-  const [fileNameDraft, setFileNameDraft] = useState('')
-  const [fileNameError, setFileNameError] = useState<string | null>(null)
+  const {
+    isCreateFolderDialogOpen,
+    setIsCreateFolderDialogOpen,
+    isRenameFolderDialogOpen,
+    setIsRenameFolderDialogOpen,
+    isDeleteFolderDialogOpen,
+    setIsDeleteFolderDialogOpen,
+    isCreateDataRoomDialogOpen,
+    setIsCreateDataRoomDialogOpen,
+    isRenameDataRoomDialogOpen,
+    setIsRenameDataRoomDialogOpen,
+    isDeleteDataRoomDialogOpen,
+    setIsDeleteDataRoomDialogOpen,
+    isRenameFileDialogOpen,
+    setIsRenameFileDialogOpen,
+    isDeleteFileDialogOpen,
+    setIsDeleteFileDialogOpen,
+    isViewFileDialogOpen,
+    setIsViewFileDialogOpen,
+    isDeleteSelectedContentDialogOpen,
+    setIsDeleteSelectedContentDialogOpen,
+  } = dialogs
 
-  const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
+  const {
+    folderNameDraft,
+    setFolderNameDraft,
+    folderNameError,
+    setFolderNameError,
+    dataRoomNameDraft,
+    setDataRoomNameDraft,
+    dataRoomNameError,
+    setDataRoomNameError,
+    fileNameDraft,
+    setFileNameDraft,
+    fileNameError,
+    setFileNameError,
+  } = forms
+
   const { feedbackQueue, feedbackTimeoutMs, enqueueFeedback, dismissFeedback } = useFeedbackQueue()
 
   const i18nTranslate = i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
   const translate = (key: string, options?: Record<string, unknown>): string => i18nTranslate(key, options)
 
-  const resolveDisplayName = (value: string) => (value.startsWith('i18n:') ? translate(value.slice(5)) : value)
-
-  const hasDuplicateDataRoomDisplayName = (candidateName: string, excludeDataRoomId?: NodeId) => {
-    const normalizedCandidate = normalizeNodeName(candidateName)
-
-    return entities.dataRoomOrder.some((dataRoomId) => {
-      if (excludeDataRoomId && dataRoomId === excludeDataRoomId) {
-        return false
-      }
-
-      const dataRoom = entities.dataRoomsById[dataRoomId]
-      if (!dataRoom) {
-        return false
-      }
-
-      return normalizeNodeName(resolveDisplayName(dataRoom.name)) === normalizedCandidate
-    })
-  }
+  const { resolveDisplayName, hasDuplicateDataRoomDisplayName } = useHomePageViewHelpers({
+    entities,
+    translate,
+  })
 
   const dataRooms = selectDataRooms(entities)
   const activeDataRoom = selectActiveDataRoom(entities, selectedDataRoomId, dataRooms)
