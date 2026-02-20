@@ -22,9 +22,11 @@ interface FolderContentTableProps {
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
+  onOpenMoveFolder: (folder: Folder) => void
   onOpenViewFile: (file: FileNode) => void
   onOpenRenameFile: (file: FileNode) => void
   onOpenDeleteFile: (file: FileNode) => void
+  onOpenMoveFile: (file: FileNode) => void
 }
 
 const rowGridTemplate = {
@@ -34,7 +36,7 @@ const rowGridTemplate = {
 
 const TYPE_COLUMN_WIDTH = 72
 const UPDATED_COLUMN_WIDTH = 112
-const ACTIONS_COLUMN_WIDTH = 90
+const ACTIONS_COLUMN_WIDTH = 128
 
 const desktopGridTemplate = `40px ${TYPE_COLUMN_WIDTH}px minmax(180px, 1fr) ${UPDATED_COLUMN_WIDTH}px ${ACTIONS_COLUMN_WIDTH}px`
 
@@ -50,9 +52,11 @@ export function FolderContentTable({
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
+  onOpenMoveFolder,
   onOpenViewFile,
   onOpenRenameFile,
   onOpenDeleteFile,
+  onOpenMoveFile,
 }: FolderContentTableProps) {
   const { t } = useTranslation()
   const selectableItems = items.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
@@ -198,6 +202,7 @@ export function FolderContentTable({
                 onSelectFolder={onSelectFolder}
                 onOpenRenameFolder={onOpenRenameFolder}
                 onOpenDeleteFolder={onOpenDeleteFolder}
+                onOpenMoveFolder={onOpenMoveFolder}
               />
             )
           }
@@ -214,6 +219,7 @@ export function FolderContentTable({
               onOpenViewFile={onOpenViewFile}
               onOpenRenameFile={onOpenRenameFile}
               onOpenDeleteFile={onOpenDeleteFile}
+              onOpenMoveFile={onOpenMoveFile}
             />
           )
         })}

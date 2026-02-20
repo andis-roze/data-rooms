@@ -50,6 +50,9 @@ msgstr "Loschen"
 msgid "dataroomActionDeleteSelected"
 msgstr "Auswahl loschen"
 
+msgid "dataroomActionMove"
+msgstr "Verschieben"
+
 msgid "dataroomActionRename"
 msgstr "Umbenennen"
 
@@ -67,6 +70,12 @@ msgstr "Datei {name} loschen"
 
 msgid "dataroomAriaDeleteFolder"
 msgstr "Ordner {name} loschen"
+
+msgid "dataroomAriaMoveFile"
+msgstr "Datei {name} verschieben"
+
+msgid "dataroomAriaMoveFolder"
+msgstr "Ordner {name} verschieben"
 
 msgid "dataroomAriaOpenFolder"
 msgstr "Ordner {name} offnen"
@@ -150,6 +159,9 @@ msgstr "Ordner loschen?"
 msgid "dataroomDialogDeleteSelectedTitle"
 msgstr "Ausgewahlte Elemente loschen?"
 
+msgid "dataroomDialogMoveTitle"
+msgstr "Elemente verschieben"
+
 msgid "dataroomDialogRenameDataRoomTitle"
 msgstr "Datenraum umbenennen"
 
@@ -230,8 +242,14 @@ msgstr "Ordner umbenannt."
 msgid "dataroomFeedbackSelectedItemsDeleted"
 msgstr "Ausgewahlte Elemente geloscht."
 
+msgid "dataroomFeedbackSelectedItemsMoved"
+msgstr "Ausgewahlte Elemente verschoben."
+
 msgid "dataroomFieldDataRoomName"
 msgstr "Datenraumname"
+
+msgid "dataroomFieldDestinationFolder"
+msgstr "Zielordner"
 
 msgid "dataroomFieldFileName"
 msgstr "Dateiname"
@@ -257,6 +275,27 @@ msgstr "Ordner"
 msgid "dataroomFolderTreeTitle"
 msgstr "Ordnerbaum"
 
+msgid "dataroomMoveInvalidDescendant"
+msgstr "{name} kann nicht in einen Unterordner von sich selbst verschoben werden."
+
+msgid "dataroomMoveInvalidFolder"
+msgstr "Ein oder mehrere Ordner konnen nicht verschoben werden."
+
+msgid "dataroomMoveInvalidNameConflict"
+msgstr "\"{name}\" existiert bereits im Zielordner."
+
+msgid "dataroomMoveInvalidSameParent"
+msgstr "Elemente befinden sich bereits in diesem Ordner."
+
+msgid "dataroomMoveInvalidSelfFolder"
+msgstr "{name} kann nicht in sich selbst verschoben werden."
+
+msgid "dataroomMoveNoDestination"
+msgstr "Zielordner auswahlen"
+
+msgid "dataroomMoveSelectedQuestion"
+msgstr "{count} ausgewahlte(s) Element(e) verschieben nach:"
+
 msgid "dataroomNoDataRoomBody"
 msgstr "Ein Datenraum wird hier angezeigt, sobald er erstellt wurde."
 
@@ -271,6 +310,9 @@ msgstr "Datenraum"
 
 msgid "dataroomSelectionCount"
 msgstr "{count} ausgewahlt"
+
+msgid "dataroomSelectionEmpty"
+msgstr "Mindestens ein Element auswahlen."
 
 msgid "dataroomSelectionMoreItems"
 msgstr "+{count} weitere"

@@ -74,6 +74,13 @@ export type DataRoomAction =
       }
     }
   | {
+      type: 'dataroom/moveFolder'
+      payload: {
+        folderId: NodeId
+        destinationFolderId: NodeId
+      }
+    }
+  | {
       type: 'dataroom/uploadFile'
       payload: {
         parentFolderId: NodeId
@@ -94,5 +101,12 @@ export type DataRoomAction =
       type: 'dataroom/deleteFile'
       payload: {
         fileId: NodeId
+      }
+    }
+  | {
+      type: 'dataroom/moveFile'
+      payload: {
+        fileId: NodeId
+        destinationFolderId: NodeId
       }
     }

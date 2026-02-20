@@ -35,6 +35,11 @@ export function HomePageContainer() {
     selectedFileCount,
     selectedFolderCount,
     selectedContentItemNames,
+    moveItemCount,
+    moveItemNames,
+    moveDestinationFolderId,
+    moveDestinationFolderOptions,
+    moveValidationError,
   } = selection
 
   const { resolveDisplayName } = viewHelpers
@@ -98,6 +103,7 @@ export function HomePageContainer() {
           onDeleteDataRoom={handlers.openDeleteDataRoomDialog}
           onSelectDataRoom={handlers.selectDataRoom}
           onSelectFolder={handlers.selectFolder}
+          onOpenMoveFolder={handlers.openMoveFolderDialog}
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
           onToggleContentItemSelection={handlers.toggleContentItemSelection}
@@ -117,6 +123,12 @@ export function HomePageContainer() {
           selectedFileCount={selectedFileCount}
           selectedFolderCount={selectedFolderCount}
           selectedContentItemNames={selectedContentItemNames}
+          moveContentDialogOpen={dialogs.isMoveContentDialogOpen}
+          moveItemCount={moveItemCount}
+          moveItemNames={moveItemNames}
+          moveDestinationFolderId={moveDestinationFolderId}
+          moveDestinationFolderOptions={moveDestinationFolderOptions}
+          moveValidationError={moveValidationError}
           deleteSelectedContentDialogOpen={dialogs.isDeleteSelectedContentDialogOpen}
           uploadInputRef={uploadInputRef}
           onCreateFolder={handlers.openCreateFolderDialog}
@@ -129,12 +141,18 @@ export function HomePageContainer() {
           onOpenDeleteSelectedContentDialog={handlers.openDeleteSelectedContentDialog}
           onCloseDeleteSelectedContentDialog={handlers.closeDeleteSelectedContentDialog}
           onDeleteSelectedContent={handlers.handleDeleteSelectedContent}
+          onOpenMoveSelectedContentDialog={handlers.openMoveSelectedContentDialog}
+          onCloseMoveContentDialog={handlers.closeMoveContentDialog}
+          onMoveDestinationFolderChange={handlers.handleMoveDestinationFolderChange}
+          onMoveSelectedContent={handlers.handleMoveSelectedContent}
           onSelectFolder={handlers.selectFolder}
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
+          onOpenMoveFolder={handlers.openMoveFolderDialog}
           onOpenViewFile={handlers.openViewFileDialog}
           onOpenRenameFile={handlers.openRenameFileDialog}
           onOpenDeleteFile={handlers.openDeleteFileDialog}
+          onOpenMoveFile={handlers.openMoveFileDialog}
         />
       </Paper>
 

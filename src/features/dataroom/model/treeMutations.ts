@@ -133,6 +133,29 @@ export interface DeleteFileInput {
   now: UnixMs
 }
 
+export interface MoveFolderInput {
+  folderId: NodeId
+  destinationFolderId: NodeId
+  now: UnixMs
+}
+
+export interface MoveFileInput {
+  fileId: NodeId
+  destinationFolderId: NodeId
+  now: UnixMs
+}
+
+function isDescendantFolder(state: DataRoomState, folderId: NodeId, possibleAncestorId: NodeId): boolean {
+  let currentFolderId: NodeId | null = folderId
+  while (currentFolderId) {
+    if (currentFolderId === possibleAncestorId) {
+      return true
+    }
+    currentFolderId = state.foldersById[currentFolderId]?.parentFolderId ?? null
+  }
+  return false
+}
+
 export function createDataRoom(state: DataRoomState, input: CreateDataRoomInput): DataRoomState {
   const { dataRoomId, rootFolderId, dataRoomName, rootFolderName, now } = input
   const dataRoomNameError = getDataRoomNameValidationError(dataRoomName)
@@ -399,6 +422,109 @@ export function deleteFile(state: DataRoomState, input: DeleteFileInput): DataRo
       },
     },
     dataRoomsById: withUpdatedDataRoomTimestamp(state, parent.dataRoomId, now),
+  }
+}
+
+export function moveFolder(state: DataRoomState, input: MoveFolderInput): DataRoomState {
+  const { folderId, destinationFolderId, now } = input
+  const folder = state.foldersById[folderId]
+  const destinationFolder = state.foldersById[destinationFolderId]
+
+  if (!folder || !destinationFolder || !folder.parentFolderId) {
+    return state
+  }
+
+  if (folder.id === destinationFolder.id || folder.parentFolderId === destinationFolder.id) {
+    return state
+  }
+
+  if (folder.dataRoomId !== destinationFolder.dataRoomId) {
+    return state
+  }
+
+  if (isDescendantFolder(state, destinationFolder.id, folder.id)) {
+    return state
+  }
+
+  if (hasDuplicateFolderName(state, destinationFolder.id, folder.name, folder.id)) {
+    return state
+  }
+
+  const sourceParent = state.foldersById[folder.parentFolderId]
+  if (!sourceParent) {
+    return state
+  }
+
+  return {
+    ...state,
+    foldersById: {
+      ...state.foldersById,
+      [sourceParent.id]: {
+        ...sourceParent,
+        childFolderIds: sourceParent.childFolderIds.filter((id) => id !== folder.id),
+        updatedAt: now,
+      },
+      [destinationFolder.id]: {
+        ...destinationFolder,
+        childFolderIds: [...destinationFolder.childFolderIds, folder.id],
+        updatedAt: now,
+      },
+      [folder.id]: {
+        ...folder,
+        parentFolderId: destinationFolder.id,
+        updatedAt: now,
+      },
+    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, folder.dataRoomId, now),
+  }
+}
+
+export function moveFile(state: DataRoomState, input: MoveFileInput): DataRoomState {
+  const { fileId, destinationFolderId, now } = input
+  const file = state.filesById[fileId]
+  const destinationFolder = state.foldersById[destinationFolderId]
+
+  if (!file || !destinationFolder || file.parentFolderId === destinationFolder.id) {
+    return state
+  }
+
+  const sourceParent = state.foldersById[file.parentFolderId]
+  if (!sourceParent) {
+    return state
+  }
+
+  if (sourceParent.dataRoomId !== destinationFolder.dataRoomId) {
+    return state
+  }
+
+  if (hasDuplicateFileName(state, destinationFolder.id, file.name, file.id)) {
+    return state
+  }
+
+  return {
+    ...state,
+    filesById: {
+      ...state.filesById,
+      [file.id]: {
+        ...file,
+        parentFolderId: destinationFolder.id,
+        updatedAt: now,
+      },
+    },
+    foldersById: {
+      ...state.foldersById,
+      [sourceParent.id]: {
+        ...sourceParent,
+        fileIds: sourceParent.fileIds.filter((id) => id !== file.id),
+        updatedAt: now,
+      },
+      [destinationFolder.id]: {
+        ...destinationFolder,
+        fileIds: [...destinationFolder.fileIds, file.id],
+        updatedAt: now,
+      },
+    },
+    dataRoomsById: withUpdatedDataRoomTimestamp(state, sourceParent.dataRoomId, now),
   }
 }
 

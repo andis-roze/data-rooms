@@ -50,6 +50,9 @@ msgstr "Delete"
 msgid "dataroomActionDeleteSelected"
 msgstr "Delete selected"
 
+msgid "dataroomActionMove"
+msgstr "Move"
+
 msgid "dataroomActionRename"
 msgstr "Rename"
 
@@ -67,6 +70,12 @@ msgstr "Delete file {name}"
 
 msgid "dataroomAriaDeleteFolder"
 msgstr "Delete folder {name}"
+
+msgid "dataroomAriaMoveFile"
+msgstr "Move file {name}"
+
+msgid "dataroomAriaMoveFolder"
+msgstr "Move folder {name}"
 
 msgid "dataroomAriaOpenFolder"
 msgstr "Open folder {name}"
@@ -148,6 +157,9 @@ msgstr "Delete folder?"
 msgid "dataroomDialogDeleteSelectedTitle"
 msgstr "Delete selected items?"
 
+msgid "dataroomDialogMoveTitle"
+msgstr "Move items"
+
 msgid "dataroomDialogRenameDataRoomTitle"
 msgstr "Rename data room"
 
@@ -226,8 +238,14 @@ msgstr "Folder renamed."
 msgid "dataroomFeedbackSelectedItemsDeleted"
 msgstr "Selected items deleted."
 
+msgid "dataroomFeedbackSelectedItemsMoved"
+msgstr "Selected items moved."
+
 msgid "dataroomFieldDataRoomName"
 msgstr "Data Room name"
+
+msgid "dataroomFieldDestinationFolder"
+msgstr "Destination folder"
 
 msgid "dataroomFieldFileName"
 msgstr "File name"
@@ -253,6 +271,27 @@ msgstr "Folder"
 msgid "dataroomFolderTreeTitle"
 msgstr "Folder tree"
 
+msgid "dataroomMoveInvalidDescendant"
+msgstr "{name} cannot be moved into its own subfolder."
+
+msgid "dataroomMoveInvalidFolder"
+msgstr "One or more folders cannot be moved."
+
+msgid "dataroomMoveInvalidNameConflict"
+msgstr "\"{name}\" already exists in destination."
+
+msgid "dataroomMoveInvalidSameParent"
+msgstr "Items are already in this folder."
+
+msgid "dataroomMoveInvalidSelfFolder"
+msgstr "{name} cannot be moved into itself."
+
+msgid "dataroomMoveNoDestination"
+msgstr "Select destination folder"
+
+msgid "dataroomMoveSelectedQuestion"
+msgstr "Move {count} selected item(s) to:"
+
 msgid "dataroomNoDataRoomBody"
 msgstr "A Data Room will appear here once it is created."
 
@@ -267,6 +306,9 @@ msgstr "Data Room"
 
 msgid "dataroomSelectionCount"
 msgstr "{count} selected"
+
+msgid "dataroomSelectionEmpty"
+msgstr "Select at least one item."
 
 msgid "dataroomSelectionMoreItems"
 msgstr "+{count} more"

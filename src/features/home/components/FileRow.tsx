@@ -1,5 +1,6 @@
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -22,13 +23,14 @@ interface FileRowProps {
   onOpenViewFile: (file: FileNode) => void
   onOpenRenameFile: (file: FileNode) => void
   onOpenDeleteFile: (file: FileNode) => void
+  onOpenMoveFile: (file: FileNode) => void
 }
 
 const mobileGridTemplate = '36px minmax(0,1fr) auto'
 
 const actionGridTemplate = {
-  xs: 'repeat(2, max-content)',
-  md: 'repeat(2, max-content)',
+  xs: 'repeat(3, max-content)',
+  md: 'repeat(3, max-content)',
 }
 
 export function FileRow({
@@ -41,6 +43,7 @@ export function FileRow({
   onOpenViewFile,
   onOpenRenameFile,
   onOpenDeleteFile,
+  onOpenMoveFile,
 }: FileRowProps) {
   const { t } = useTranslation()
 
@@ -93,6 +96,11 @@ export function FileRow({
             width: { xs: 'auto', md: '100%' },
           }}
         >
+          <Tooltip title={t('dataroomActionMove')}>
+            <IconButton size="small" aria-label={t('dataroomAriaMoveFile', { name: file.name })} onClick={() => onOpenMoveFile(file)}>
+              <DriveFileMoveOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <Tooltip title={t('dataroomActionRenameFile')}>
             <IconButton
               size="small"

@@ -1,6 +1,7 @@
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
+import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -25,13 +26,14 @@ interface FolderRowProps {
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
+  onOpenMoveFolder: (folder: Folder) => void
 }
 
 const mobileGridTemplate = '36px minmax(0,1fr) auto'
 
 const actionGridTemplate = {
-  xs: 'repeat(2, max-content)',
-  md: 'repeat(2, max-content)',
+  xs: 'repeat(3, max-content)',
+  md: 'repeat(3, max-content)',
 }
 
 export function FolderRow({
@@ -47,6 +49,7 @@ export function FolderRow({
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
+  onOpenMoveFolder,
 }: FolderRowProps) {
   const { t } = useTranslation()
 
@@ -105,9 +108,19 @@ export function FolderRow({
             <>
               <Box />
               <Box />
+              <Box />
             </>
           ) : (
             <>
+              <Tooltip title={t('dataroomActionMove')}>
+                <IconButton
+                  size="small"
+                  aria-label={t('dataroomAriaMoveFolder', { name: resolveDisplayName(folder.name) })}
+                  onClick={() => onOpenMoveFolder(folder)}
+                >
+                  <DriveFileMoveOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
               <Tooltip title={t('dataroomActionRename')}>
                 <IconButton
                   size="small"

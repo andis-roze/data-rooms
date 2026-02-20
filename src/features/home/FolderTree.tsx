@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
@@ -36,21 +37,41 @@ function TreeExpandToggle({ hasChildren, isExpanded, ariaLabel, onToggle, margin
 }
 
 interface TreeNodeActionsProps {
+  onMove: (event: MouseEvent<HTMLButtonElement>) => void
   onRename: (event: MouseEvent<HTMLButtonElement>) => void
   onDelete: (event: MouseEvent<HTMLButtonElement>) => void
+  moveAriaLabel: string
   renameAriaLabel: string
   deleteAriaLabel: string
+  moveTooltip: string
+  renameTooltip: string
+  deleteTooltip: string
 }
 
-function TreeNodeActions({ onRename, onDelete, renameAriaLabel, deleteAriaLabel }: TreeNodeActionsProps) {
+function TreeNodeActions({
+  onMove,
+  onRename,
+  onDelete,
+  moveAriaLabel,
+  renameAriaLabel,
+  deleteAriaLabel,
+  moveTooltip,
+  renameTooltip,
+  deleteTooltip,
+}: TreeNodeActionsProps) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
-      <Tooltip title="Rename">
+      <Tooltip title={moveTooltip}>
+        <IconButton size="small" aria-label={moveAriaLabel} onClick={onMove}>
+          <DriveFileMoveOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={renameTooltip}>
         <IconButton size="small" aria-label={renameAriaLabel} onClick={onRename}>
           <DriveFileRenameOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Delete">
+      <Tooltip title={deleteTooltip}>
         <IconButton size="small" color="error" aria-label={deleteAriaLabel} onClick={onDelete}>
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
@@ -64,6 +85,7 @@ interface FolderTreeNodeProps {
   state: DataRoomState
   selectedFolderId: NodeId | null
   onSelectFolder: (folderId: NodeId) => void
+  onOpenMoveFolder: (folder: Folder) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
   selectedContentItemIds: NodeId[]
@@ -80,6 +102,7 @@ function FolderTreeNode({
   state,
   selectedFolderId,
   onSelectFolder,
+  onOpenMoveFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
   selectedContentItemIds,
@@ -151,8 +174,16 @@ function FolderTreeNode({
           />
         </ListItemButton>
         <TreeNodeActions
-          renameAriaLabel={`Rename folder ${folderDisplayName} in tree`}
-          deleteAriaLabel={`Delete folder ${folderDisplayName} in tree`}
+          moveAriaLabel={`${t('dataroomAriaMoveFolder', { name: folderDisplayName })} in tree`}
+          renameAriaLabel={`${t('dataroomAriaRenameFolder', { name: folderDisplayName })} in tree`}
+          deleteAriaLabel={`${t('dataroomAriaDeleteFolder', { name: folderDisplayName })} in tree`}
+          moveTooltip={t('dataroomActionMove')}
+          renameTooltip={t('dataroomActionRename')}
+          deleteTooltip={t('dataroomActionDelete')}
+          onMove={(event) => {
+            event.stopPropagation()
+            onOpenMoveFolder(folder)
+          }}
           onRename={(event) => {
             event.stopPropagation()
             onOpenRenameFolder(folder)
@@ -171,6 +202,7 @@ function FolderTreeNode({
               state={state}
               selectedFolderId={selectedFolderId}
               onSelectFolder={onSelectFolder}
+              onOpenMoveFolder={onOpenMoveFolder}
               onOpenRenameFolder={onOpenRenameFolder}
               onOpenDeleteFolder={onOpenDeleteFolder}
               selectedContentItemIds={selectedContentItemIds}
@@ -192,6 +224,7 @@ interface DataRoomTreeNodeProps {
   state: DataRoomState
   selectedFolderId: NodeId | null
   onSelectFolder: (folderId: NodeId) => void
+  onOpenMoveFolder: (folder: Folder) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
   selectedContentItemIds: NodeId[]
@@ -206,6 +239,7 @@ export function DataRoomTreeNode({
   state,
   selectedFolderId,
   onSelectFolder,
+  onOpenMoveFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
   selectedContentItemIds,
@@ -226,6 +260,7 @@ export function DataRoomTreeNode({
           state={state}
           selectedFolderId={selectedFolderId}
           onSelectFolder={onSelectFolder}
+          onOpenMoveFolder={onOpenMoveFolder}
           onOpenRenameFolder={onOpenRenameFolder}
           onOpenDeleteFolder={onOpenDeleteFolder}
           selectedContentItemIds={selectedContentItemIds}

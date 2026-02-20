@@ -9,6 +9,8 @@ import {
   getDefaultSelection,
   hasDataRoom,
   hasFolder,
+  moveFile,
+  moveFolder,
   renameDataRoom,
   renameFile,
   renameFolder,
@@ -165,6 +167,10 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
       }
     }
 
+    case 'dataroom/moveFolder': {
+      return withEntities(state, moveFolder(state.entities, withNow(action.payload)))
+    }
+
     case 'dataroom/uploadFile': {
       return withEntities(state, createFile(state.entities, withNow(action.payload)))
     }
@@ -175,6 +181,10 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
 
     case 'dataroom/deleteFile': {
       return withEntities(state, deleteFile(state.entities, withNow(action.payload)))
+    }
+
+    case 'dataroom/moveFile': {
+      return withEntities(state, moveFile(state.entities, withNow(action.payload)))
     }
 
     default:

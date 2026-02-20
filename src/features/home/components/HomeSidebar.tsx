@@ -27,6 +27,7 @@ interface HomeSidebarProps {
   onDeleteDataRoom: (dataRoom?: DataRoom) => void
   onSelectDataRoom: (dataRoomId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
+  onOpenMoveFolder: (folder: Folder) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
   onToggleContentItemSelection: (itemId: NodeId) => void
@@ -45,6 +46,7 @@ export function HomeSidebar({
   onDeleteDataRoom,
   onSelectDataRoom,
   onSelectFolder,
+  onOpenMoveFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
   onToggleContentItemSelection,
@@ -232,6 +234,7 @@ export function HomeSidebar({
             state={entities}
             selectedFolderId={selectedFolderId}
             onSelectFolder={onSelectFolder}
+            onOpenMoveFolder={onOpenMoveFolder}
             onOpenRenameFolder={onOpenRenameFolder}
             onOpenDeleteFolder={onOpenDeleteFolder}
             selectedContentItemIds={selectedContentItemIds}

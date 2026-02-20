@@ -11,6 +11,8 @@ import {
   hasDuplicateDataRoomName,
   hasDuplicateFileName,
   hasDuplicateFolderName,
+  moveFile,
+  moveFolder,
   renameFile,
   renameFolder,
 } from '../../features/dataroom/model'
@@ -181,6 +183,59 @@ describe('tree mutations', () => {
     expect(result.nextState.foldersById['folder-a-1']).toBeUndefined()
     expect(result.nextState.filesById['file-a']).toBeUndefined()
     expect(result.nextState.filesById['file-b']).toBeUndefined()
+  })
+
+  it('moves folders across parents and blocks invalid descendant moves', () => {
+    const state = createStateWithNestedTree()
+
+    const moved = moveFolder(state, {
+      folderId: 'folder-a-1',
+      destinationFolderId: 'folder-b',
+      now: NOW + 40,
+    })
+
+    expect(moved.foldersById['folder-a'].childFolderIds).not.toContain('folder-a-1')
+    expect(moved.foldersById['folder-b'].childFolderIds).toContain('folder-a-1')
+    expect(moved.foldersById['folder-a-1'].parentFolderId).toBe('folder-b')
+
+    const blocked = moveFolder(state, {
+      folderId: 'folder-a',
+      destinationFolderId: 'folder-a-1',
+      now: NOW + 41,
+    })
+
+    expect(blocked).toBe(state)
+  })
+
+  it('moves files across folders and blocks duplicate conflicts', () => {
+    const state = createStateWithNestedTree()
+
+    const moved = moveFile(state, {
+      fileId: 'file-a',
+      destinationFolderId: 'folder-b',
+      now: NOW + 50,
+    })
+
+    expect(moved.filesById['file-a'].parentFolderId).toBe('folder-b')
+    expect(moved.foldersById['folder-a'].fileIds).not.toContain('file-a')
+    expect(moved.foldersById['folder-b'].fileIds).toContain('file-a')
+
+    const withConflict = createFile(state, {
+      parentFolderId: 'folder-b',
+      fileId: 'file-conflict',
+      fileName: 'Q1.pdf',
+      size: 99,
+      mimeType: 'application/pdf',
+      now: NOW + 51,
+    })
+
+    const blocked = moveFile(withConflict, {
+      fileId: 'file-a',
+      destinationFolderId: 'folder-b',
+      now: NOW + 52,
+    })
+
+    expect(blocked).toBe(withConflict)
   })
 })
 

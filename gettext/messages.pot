@@ -48,6 +48,9 @@ msgstr ""
 msgid "dataroomActionDeleteSelected"
 msgstr ""
 
+msgid "dataroomActionMove"
+msgstr ""
+
 msgid "dataroomActionRename"
 msgstr ""
 
@@ -64,6 +67,12 @@ msgid "dataroomAriaDeleteFile"
 msgstr ""
 
 msgid "dataroomAriaDeleteFolder"
+msgstr ""
+
+msgid "dataroomAriaMoveFile"
+msgstr ""
+
+msgid "dataroomAriaMoveFolder"
 msgstr ""
 
 msgid "dataroomAriaOpenFolder"
@@ -136,6 +145,9 @@ msgid "dataroomDialogDeleteFolderTitleConfirm"
 msgstr ""
 
 msgid "dataroomDialogDeleteSelectedTitle"
+msgstr ""
+
+msgid "dataroomDialogMoveTitle"
 msgstr ""
 
 msgid "dataroomDialogRenameDataRoomTitle"
@@ -216,7 +228,13 @@ msgstr ""
 msgid "dataroomFeedbackSelectedItemsDeleted"
 msgstr ""
 
+msgid "dataroomFeedbackSelectedItemsMoved"
+msgstr ""
+
 msgid "dataroomFieldDataRoomName"
+msgstr ""
+
+msgid "dataroomFieldDestinationFolder"
 msgstr ""
 
 msgid "dataroomFieldFileName"
@@ -243,6 +261,27 @@ msgstr ""
 msgid "dataroomFolderTreeTitle"
 msgstr ""
 
+msgid "dataroomMoveInvalidDescendant"
+msgstr ""
+
+msgid "dataroomMoveInvalidFolder"
+msgstr ""
+
+msgid "dataroomMoveInvalidNameConflict"
+msgstr ""
+
+msgid "dataroomMoveInvalidSameParent"
+msgstr ""
+
+msgid "dataroomMoveInvalidSelfFolder"
+msgstr ""
+
+msgid "dataroomMoveNoDestination"
+msgstr ""
+
+msgid "dataroomMoveSelectedQuestion"
+msgstr ""
+
 msgid "dataroomNoDataRoomBody"
 msgstr ""
 
@@ -256,6 +295,9 @@ msgid "dataroomSeedDefaultRootFolderName"
 msgstr ""
 
 msgid "dataroomSelectionCount"
+msgstr ""
+
+msgid "dataroomSelectionEmpty"
 msgstr ""
 
 msgid "dataroomSelectionMoreItems"

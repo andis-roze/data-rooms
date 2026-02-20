@@ -90,6 +90,14 @@ async function goToBreadcrumb(user: ReturnType<typeof userEvent.setup>, name: st
   await user.click(within(breadcrumbs).getByRole('button', { name }))
 }
 
+async function selectMoveDestination(
+  user: ReturnType<typeof userEvent.setup>,
+  container: HTMLElement,
+  destinationName: string,
+) {
+  await user.click(within(container).getByRole('button', { name: destinationName }))
+}
+
 describe('App routing and localization', () => {
   beforeEach(async () => {
     clearDataRoomState()
@@ -313,4 +321,50 @@ describe('App routing and localization', () => {
     await goToBreadcrumb(user, 'Data Room')
     expect(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })).not.toBeChecked()
   }, 30000)
+
+  it('moves selected folders and files to another folder', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Archive')
+    await goToBreadcrumb(user, 'Data Room')
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+    await uploadPdf(user, 'terms.pdf')
+
+    const contentList = screen.getByRole('list', { name: 'Current folder contents' })
+    await user.click(within(contentList).getByRole('checkbox', { name: 'Select item Finance' }))
+    await user.click(within(contentList).getByRole('checkbox', { name: 'Select item terms.pdf' }))
+    await user.click(screen.getByRole('button', { name: 'Move' }))
+
+    const moveDialog = screen.getByRole('dialog', { name: 'Move items' })
+    await selectMoveDestination(user, moveDialog, 'Data Room / Archive')
+    await user.click(within(moveDialog).getByRole('button', { name: 'Move' }))
+    await waitForElementToBeRemoved(moveDialog)
+
+    expect(screen.queryByRole('button', { name: 'Open folder Finance' })).not.toBeInTheDocument()
+    expect(screen.queryByText('terms.pdf')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Open folder Archive' }))
+    expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
+    expect(screen.getByText('terms.pdf')).toBeInTheDocument()
+  }, 20000)
+
+  it('blocks moving a folder into one of its descendants', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await createFolder(user, 'Invoices')
+    await goToBreadcrumb(user, 'Data Room')
+
+    await user.click(screen.getByRole('button', { name: 'Move folder Finance' }))
+    const moveDialog = screen.getByRole('dialog', { name: 'Move items' })
+    await selectMoveDestination(user, moveDialog, 'Data Room / Finance / Invoices')
+
+    expect(within(moveDialog).getByText('Finance cannot be moved into its own subfolder.')).toBeInTheDocument()
+    expect(within(moveDialog).getByRole('button', { name: 'Move' })).toBeDisabled()
+  }, 15000)
 })
