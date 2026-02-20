@@ -1,7 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
-import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
 import type { MouseEvent } from 'react'
@@ -171,15 +170,10 @@ function FolderTreeNode({
 interface DataRoomTreeNodeProps {
   dataRoom: DataRoom
   state: DataRoomState
-  selectedDataRoomId: NodeId | null
   selectedFolderId: NodeId | null
-  onSelectDataRoom: (dataRoomId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
-  onOpenRenameDataRoom: (dataRoom: DataRoom) => void
-  onOpenDeleteDataRoom: (dataRoom: DataRoom) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
-  renderDataRoomName: (name: string) => string
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -188,88 +182,34 @@ interface DataRoomTreeNodeProps {
 export function DataRoomTreeNode({
   dataRoom,
   state,
-  selectedDataRoomId,
   selectedFolderId,
-  onSelectDataRoom,
   onSelectFolder,
-  onOpenRenameDataRoom,
-  onOpenDeleteDataRoom,
   onOpenRenameFolder,
   onOpenDeleteFolder,
-  renderDataRoomName,
   renderFolderName,
   collapsedNodeIds,
   onToggleNode,
 }: DataRoomTreeNodeProps) {
   const rootFolder = state.foldersById[dataRoom.rootFolderId]
   const rootChildren = rootFolder ? getFolderChildren(state, rootFolder) : []
-  const hasChildren = rootChildren.length > 0
-  const isExpanded = !collapsedNodeIds.has(dataRoom.id)
-  const dataRoomSelected = selectedDataRoomId === dataRoom.id
-  const rootSelected = selectedFolderId === dataRoom.rootFolderId
-  const dataRoomDisplayName = renderDataRoomName(dataRoom.name)
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <TreeExpandToggle
-          hasChildren={hasChildren}
-          isExpanded={isExpanded}
-          ariaLabel={`${isExpanded ? 'Collapse' : 'Expand'} data room ${dataRoomDisplayName}`}
-          onToggle={(event) => {
-            event.stopPropagation()
-            onToggleNode(dataRoom.id)
-          }}
+      {rootChildren.map((childFolder) => (
+        <FolderTreeNode
+          key={childFolder.id}
+          folderId={childFolder.id}
+          state={state}
+          selectedFolderId={selectedFolderId}
+          onSelectFolder={onSelectFolder}
+          onOpenRenameFolder={onOpenRenameFolder}
+          onOpenDeleteFolder={onOpenDeleteFolder}
+          renderFolderName={renderFolderName}
+          collapsedNodeIds={collapsedNodeIds}
+          onToggleNode={onToggleNode}
+          depth={0}
         />
-        <ListItemButton
-          selected={dataRoomSelected && rootSelected}
-          onClick={() => onSelectDataRoom(dataRoom.id)}
-          sx={{ pl: 0.5, minWidth: 0, flex: 1 }}
-          title={dataRoomDisplayName}
-          aria-label={dataRoomDisplayName}
-        >
-          <ListItemText
-            primary={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-                <FolderOpenOutlinedIcon fontSize="small" />
-                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {formatPathForDisplay(dataRoomDisplayName)}
-                </Box>
-              </Box>
-            }
-            primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
-          />
-        </ListItemButton>
-        <TreeNodeActions
-          renameAriaLabel={`Rename data room ${dataRoomDisplayName} in tree`}
-          deleteAriaLabel={`Delete data room ${dataRoomDisplayName} in tree`}
-          onRename={(event) => {
-            event.stopPropagation()
-            onOpenRenameDataRoom(dataRoom)
-          }}
-          onDelete={(event) => {
-            event.stopPropagation()
-            onOpenDeleteDataRoom(dataRoom)
-          }}
-        />
-      </Box>
-      {isExpanded
-        ? rootChildren.map((childFolder) => (
-            <FolderTreeNode
-              key={childFolder.id}
-              folderId={childFolder.id}
-              state={state}
-              selectedFolderId={selectedFolderId}
-              onSelectFolder={onSelectFolder}
-              onOpenRenameFolder={onOpenRenameFolder}
-              onOpenDeleteFolder={onOpenDeleteFolder}
-              renderFolderName={renderFolderName}
-              collapsedNodeIds={collapsedNodeIds}
-              onToggleNode={onToggleNode}
-              depth={1}
-            />
-          ))
-        : null}
+      ))}
     </>
   )
 }

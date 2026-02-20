@@ -1,13 +1,19 @@
-import { useMemo, useState } from 'react'
+import { type MouseEvent, useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
-import Stack from '@mui/material/Stack'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import type { SelectChangeEvent } from '@mui/material/Select'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { useTranslation } from 'react-i18next'
 import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/model'
 import { DataRoomTreeNode } from '../FolderTree'
+import { truncateMiddle } from '../services/formatters'
 
 interface HomeSidebarProps {
   entities: DataRoomState
@@ -42,6 +48,11 @@ export function HomeSidebar({
 }: HomeSidebarProps) {
   const { t } = useTranslation()
   const [collapseOverrides, setCollapseOverrides] = useState<Map<NodeId, boolean>>(new Map())
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
+  const isActionsMenuOpen = Boolean(menuAnchorEl)
+  const activeDataRoom =
+    (selectedDataRoomId ? dataRooms.find((dataRoom) => dataRoom.id === selectedDataRoomId) : undefined) ?? dataRooms[0]
+  const visibleDataRooms = activeDataRoom ? [activeDataRoom] : []
 
   const autoCollapsedNodeIds = useMemo(() => {
     if (!selectedDataRoomId || !selectedFolderId) {
@@ -53,7 +64,7 @@ export function HomeSidebar({
       return new Set<NodeId>()
     }
 
-    const requiredOpenNodeIds = new Set<NodeId>([selectedDataRoomId])
+    const requiredOpenNodeIds = new Set<NodeId>()
     let currentFolder = selectedFolder
 
     while (currentFolder.parentFolderId) {
@@ -67,13 +78,6 @@ export function HomeSidebar({
 
     const nextCollapsedNodeIds = new Set<NodeId>()
 
-    for (const dataRoom of dataRooms) {
-      const rootFolder = entities.foldersById[dataRoom.rootFolderId]
-      if (rootFolder && rootFolder.childFolderIds.length > 0 && !requiredOpenNodeIds.has(dataRoom.id)) {
-        nextCollapsedNodeIds.add(dataRoom.id)
-      }
-    }
-
     for (const folder of Object.values(entities.foldersById)) {
       if (folder.childFolderIds.length > 0 && !requiredOpenNodeIds.has(folder.id)) {
         nextCollapsedNodeIds.add(folder.id)
@@ -81,7 +85,7 @@ export function HomeSidebar({
     }
 
     return nextCollapsedNodeIds
-  }, [dataRooms, entities.foldersById, selectedDataRoomId, selectedFolderId])
+  }, [entities.foldersById, selectedDataRoomId, selectedFolderId])
 
   const collapsedNodeIds = useMemo(() => {
     const next = new Set(autoCollapsedNodeIds)
@@ -104,29 +108,87 @@ export function HomeSidebar({
     })
   }
 
+  const openActionsMenu = (event: MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const closeActionsMenu = () => {
+    setMenuAnchorEl(null)
+  }
+
+  const selectWorkingDataRoom = (event: SelectChangeEvent<NodeId>) => {
+    const nextDataRoomId = event.target.value as NodeId
+    if (nextDataRoomId && nextDataRoomId !== selectedDataRoomId) {
+      onSelectDataRoom(nextDataRoomId)
+    }
+  }
+
   return (
     <Box component="aside" sx={{ width: { md: 320 }, borderRight: { md: '1px solid' }, borderColor: 'divider', p: 2 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        {t('dataroomSidebarTitle')}
-      </Typography>
-
-      <Stack direction={{ xs: 'column', sm: 'row', md: 'column' }} spacing={1} sx={{ mb: 1.5 }}>
-        <Button size="small" variant="contained" onClick={onCreateDataRoom}>
-          {t('dataroomActionCreateDataRoom')}
-        </Button>
-        <Button size="small" variant="outlined" onClick={() => onRenameDataRoom()}>
-          {t('dataroomActionRenameDataRoom')}
-        </Button>
-        <Button
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          {t('dataroomSidebarTitle')}
+        </Typography>
+        <IconButton
           size="small"
-          variant="outlined"
-          color="error"
-          disabled={!canDeleteActiveDataRoom}
-          onClick={() => onDeleteDataRoom()}
+          aria-label={t('dataroomColumnActions')}
+          onClick={openActionsMenu}
+          disabled={!activeDataRoom}
         >
-          {t('dataroomActionDeleteDataRoom')}
-        </Button>
-      </Stack>
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
+        <Menu anchorEl={menuAnchorEl} open={isActionsMenuOpen} onClose={closeActionsMenu}>
+          <MenuItem
+            onClick={() => {
+              closeActionsMenu()
+              onCreateDataRoom()
+            }}
+          >
+            {t('dataroomActionCreateDataRoom')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              closeActionsMenu()
+              onRenameDataRoom(activeDataRoom)
+            }}
+            disabled={!activeDataRoom}
+          >
+            {t('dataroomActionRenameDataRoom')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              closeActionsMenu()
+              onDeleteDataRoom(activeDataRoom)
+            }}
+            disabled={!canDeleteActiveDataRoom || !activeDataRoom}
+          >
+            {t('dataroomActionDeleteDataRoom')}
+          </MenuItem>
+        </Menu>
+      </Box>
+
+      <Select
+        fullWidth
+        size="small"
+        value={activeDataRoom?.id ?? ''}
+        onChange={selectWorkingDataRoom}
+        displayEmpty
+        aria-label={t('dataroomSidebarTitle')}
+        sx={{ mb: 1.5 }}
+      >
+        {dataRooms.map((dataRoom) => (
+          <MenuItem key={dataRoom.id} value={dataRoom.id}>
+            <Tooltip title={resolveDisplayName(dataRoom.name)} placement="right">
+              <Typography
+                component="span"
+                sx={{ display: 'block', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {truncateMiddle(resolveDisplayName(dataRoom.name), 42)}
+              </Typography>
+            </Tooltip>
+          </MenuItem>
+        ))}
+      </Select>
 
       <Divider sx={{ my: 2 }} />
 
@@ -134,20 +196,15 @@ export function HomeSidebar({
         {t('dataroomFolderTreeTitle')}
       </Typography>
       <List dense disablePadding aria-label={t('dataroomFolderTreeTitle')}>
-        {dataRooms.map((dataRoom) => (
+        {visibleDataRooms.map((dataRoom) => (
           <DataRoomTreeNode
             key={dataRoom.id}
             dataRoom={dataRoom}
             state={entities}
-            selectedDataRoomId={selectedDataRoomId}
             selectedFolderId={selectedFolderId}
-            onSelectDataRoom={onSelectDataRoom}
             onSelectFolder={onSelectFolder}
-            onOpenRenameDataRoom={onRenameDataRoom}
-            onOpenDeleteDataRoom={onDeleteDataRoom}
             onOpenRenameFolder={onOpenRenameFolder}
             onOpenDeleteFolder={onOpenDeleteFolder}
-            renderDataRoomName={resolveDisplayName}
             renderFolderName={resolveDisplayName}
             collapsedNodeIds={collapsedNodeIds}
             onToggleNode={toggleNode}

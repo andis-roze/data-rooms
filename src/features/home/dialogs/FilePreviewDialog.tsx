@@ -5,10 +5,12 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getFileBlob, type NodeId } from '../../dataroom/model'
+import { formatPathForDisplay } from '../services/formatters'
 
 interface FilePreviewDialogProps {
   viewFileDialogOpen: boolean
@@ -79,7 +81,20 @@ export function FilePreviewDialog({
 
   return (
     <Dialog open={viewFileDialogOpen} onClose={onCloseViewFileDialog} fullWidth maxWidth="md">
-      <DialogTitle>{activeFileName ?? t('dataroomFilePreviewTitle')}</DialogTitle>
+      <DialogTitle>
+        {activeFileName ? (
+          <Tooltip title={activeFileName}>
+            <Typography
+              component="span"
+              sx={{ display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {formatPathForDisplay(activeFileName, 72)}
+            </Typography>
+          </Tooltip>
+        ) : (
+          t('dataroomFilePreviewTitle')
+        )}
+      </DialogTitle>
       <DialogContent>
         {isLoading ? (
           <Box
