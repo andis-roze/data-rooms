@@ -6,6 +6,13 @@ const rootDir = process.cwd()
 const coverageSummaryPath = path.join(rootDir, 'coverage', 'coverage-summary.json')
 const minimumCoveragePercent = 60
 
+const tsLintRun = spawnSync('npx', ['eslint', 'src/**/*.{ts,tsx}', '--max-warnings=0'], { stdio: 'inherit' })
+
+if (tsLintRun.status !== 0) {
+  console.error('[pre-push] Blocked: TypeScript lint check failed or reported warnings.')
+  process.exit(tsLintRun.status ?? 1)
+}
+
 const testRun = spawnSync(
   'npm',
   ['run', 'test:coverage', '--', '--coverage.reporter=json-summary'],
