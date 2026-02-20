@@ -441,13 +441,7 @@ export function deleteFolderCascade(
       ...state,
       foldersById: nextFoldersById,
       filesById: nextFilesById,
-      dataRoomsById: {
-        ...state.dataRoomsById,
-        [folder.dataRoomId]: {
-          ...dataRoom,
-          updatedAt: now,
-        },
-      },
+      dataRoomsById: withUpdatedDataRoomTimestamp(state, folder.dataRoomId, now),
     },
     deleted: true,
     fallbackFolderId: parentFolder.id,
