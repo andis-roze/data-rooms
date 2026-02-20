@@ -53,6 +53,8 @@ export function useHomePageController(): HomePageViewModel {
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
   const [moveDestinationFolderId, setMoveDestinationFolderId] = useState<NodeId | null>(null)
   const [moveItemIds, setMoveItemIds] = useState<NodeId[]>([])
+  const [dragMoveItemIds, setDragMoveItemIds] = useState<NodeId[]>([])
+  const [dragMoveTargetFolderId, setDragMoveTargetFolderId] = useState<NodeId | null>(null)
   const [includedContentItemIds, setIncludedContentItemIds] = useState<NodeId[]>([])
   const [excludedContentItemIds, setExcludedContentItemIds] = useState<NodeId[]>([])
 
@@ -351,76 +353,14 @@ export function useHomePageController(): HomePageViewModel {
     .filter((folder) => isFolderInActiveDataRoom(folder.id))
     .map((folder) => folder.id)
     .filter((folderId) => getFolderSelectionMode(folderId) === 'partial')
-  const moveTargets = getNormalizedSelectionTargets(moveItemIds)
-  const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
-
-  const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
-    if (type === 'dataRoom') {
-      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: id } })
-      return
-    }
-
-    dispatch({ type: 'dataroom/selectFolder', payload: { folderId: id } })
-  }
-
-  const selectDataRoom = (dataRoomId: NodeId) => {
-    setIncludedContentItemIds([])
-    setExcludedContentItemIds([])
-    closeMoveContentDialog()
-    selectNode('dataRoom', dataRoomId)
-  }
-
-  const selectFolder = (folderId: NodeId) => {
-    selectNode('folder', folderId)
-  }
-
-  const moveDestinationFolderOptions = (() => {
-    if (!activeDataRoom) {
-      return []
-    }
-
-    const options: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }> = []
-    const pushFolderOption = (folderId: NodeId, depth: number, pathSegments: string[]) => {
-      const folder = entities.foldersById[folderId]
-      if (!folder || folder.dataRoomId !== activeDataRoom.id) {
-        return
-      }
-
-      const folderDisplayName = resolveDisplayName(folder.name)
-      const nextPathSegments = [...pathSegments, folderDisplayName]
-      options.push({
-        id: folder.id,
-        name: folderDisplayName,
-        depth,
-        path: nextPathSegments.join(' / '),
-        parentPath: pathSegments.length > 0 ? pathSegments.join(' / ') : null,
-      })
-
-      for (const childFolderId of folder.childFolderIds) {
-        pushFolderOption(childFolderId, depth + 1, nextPathSegments)
-      }
-    }
-
-    pushFolderOption(activeDataRoom.rootFolderId, 0, [])
-    return options
-  })()
-
-  const isFolderDescendantOf = (folderId: NodeId, possibleAncestorId: NodeId): boolean => {
-    let currentFolderId: NodeId | null = folderId
-    while (currentFolderId) {
-      if (currentFolderId === possibleAncestorId) {
-        return true
-      }
-      currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
-    }
-    return false
-  }
-
-  const getMoveValidationError = (destinationId: NodeId | null): string | null => {
+  const getMoveTargets = (itemIds: NodeId[]) => getNormalizedSelectionTargets(itemIds)
+  const getMoveValidationError = (itemIds: NodeId[], destinationId: NodeId | null): string | null => {
     if (!destinationId) {
       return t('dataroomMoveNoDestination')
     }
 
+    const moveTargets = getMoveTargets(itemIds)
+    const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
     const destinationFolder = entities.foldersById[destinationId]
     if (!destinationFolder || !activeDataRoom || destinationFolder.dataRoomId !== activeDataRoom.id) {
       return t('dataroomMoveNoDestination')
@@ -470,8 +410,73 @@ export function useHomePageController(): HomePageViewModel {
 
     return null
   }
+  const moveTargets = getMoveTargets(moveItemIds)
+  const moveItemCount = moveTargets.topLevelFolderIds.length + moveTargets.standaloneFileIds.length
 
-  const moveValidationError = getMoveValidationError(moveDestinationFolderId)
+  const selectNode = (type: 'dataRoom' | 'folder', id: NodeId) => {
+    if (type === 'dataRoom') {
+      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: id } })
+      return
+    }
+
+    dispatch({ type: 'dataroom/selectFolder', payload: { folderId: id } })
+  }
+
+  const selectDataRoom = (dataRoomId: NodeId) => {
+    setIncludedContentItemIds([])
+    setExcludedContentItemIds([])
+    closeMoveContentDialog()
+    endDragMove()
+    selectNode('dataRoom', dataRoomId)
+  }
+
+  const selectFolder = (folderId: NodeId) => {
+    selectNode('folder', folderId)
+  }
+
+  const moveDestinationFolderOptions = (() => {
+    if (!activeDataRoom) {
+      return []
+    }
+
+    const options: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }> = []
+    const pushFolderOption = (folderId: NodeId, depth: number, pathSegments: string[]) => {
+      const folder = entities.foldersById[folderId]
+      if (!folder || folder.dataRoomId !== activeDataRoom.id) {
+        return
+      }
+
+      const folderDisplayName = resolveDisplayName(folder.name)
+      const nextPathSegments = [...pathSegments, folderDisplayName]
+      options.push({
+        id: folder.id,
+        name: folderDisplayName,
+        depth,
+        path: nextPathSegments.join(' / '),
+        parentPath: pathSegments.length > 0 ? pathSegments.join(' / ') : null,
+      })
+
+      for (const childFolderId of folder.childFolderIds) {
+        pushFolderOption(childFolderId, depth + 1, nextPathSegments)
+      }
+    }
+
+    pushFolderOption(activeDataRoom.rootFolderId, 0, [])
+    return options
+  })()
+
+  const isFolderDescendantOf = (folderId: NodeId, possibleAncestorId: NodeId): boolean => {
+    let currentFolderId: NodeId | null = folderId
+    while (currentFolderId) {
+      if (currentFolderId === possibleAncestorId) {
+        return true
+      }
+      currentFolderId = entities.foldersById[currentFolderId]?.parentFolderId ?? null
+    }
+    return false
+  }
+
+  const moveValidationError = getMoveValidationError(moveItemIds, moveDestinationFolderId)
 
   const openMoveSelectedContentDialog = () => {
     if (selectedContentItemIds.length === 0 || !activeFolder) {
@@ -510,35 +515,70 @@ export function useHomePageController(): HomePageViewModel {
     setMoveDestinationFolderId(folderId)
   }
 
-  const handleMoveSelectedContent = () => {
-    if (moveValidationError || !moveDestinationFolderId) {
-      return
-    }
-
-    for (const fileId of moveTargets.standaloneFileIds) {
+  const applyMove = (itemIds: NodeId[], destinationFolderId: NodeId) => {
+    const targets = getMoveTargets(itemIds)
+    for (const fileId of targets.standaloneFileIds) {
       dispatch({
         type: 'dataroom/moveFile',
         payload: {
           fileId,
-          destinationFolderId: moveDestinationFolderId,
+          destinationFolderId,
         },
       })
     }
 
-    for (const folderId of moveTargets.topLevelFolderIds) {
+    for (const folderId of targets.topLevelFolderIds) {
       dispatch({
         type: 'dataroom/moveFolder',
         payload: {
           folderId,
-          destinationFolderId: moveDestinationFolderId,
+          destinationFolderId,
         },
       })
     }
 
     setIncludedContentItemIds([])
     setExcludedContentItemIds([])
-    closeMoveContentDialog()
     enqueueFeedback(t('dataroomFeedbackSelectedItemsMoved'), 'success')
+  }
+
+  const handleMoveSelectedContent = () => {
+    if (moveValidationError || !moveDestinationFolderId) {
+      return
+    }
+    applyMove(moveItemIds, moveDestinationFolderId)
+    closeMoveContentDialog()
+  }
+
+  const isDragMoveActive = dragMoveItemIds.length > 0
+  const resolveDragMoveItemIds = (itemId: NodeId) =>
+    selectedContentItemIds.includes(itemId) ? selectedContentItemIds : [itemId]
+  const startDragMove = (itemId: NodeId) => {
+    if (!entities.foldersById[itemId] && !entities.filesById[itemId]) {
+      return
+    }
+    setDragMoveItemIds(resolveDragMoveItemIds(itemId))
+    setDragMoveTargetFolderId(null)
+  }
+  const endDragMove = () => {
+    setDragMoveItemIds([])
+    setDragMoveTargetFolderId(null)
+  }
+  const setDragMoveTargetFolder = (folderId: NodeId | null) => {
+    setDragMoveTargetFolderId(folderId)
+  }
+  const canDropOnFolder = (folderId: NodeId) => {
+    if (!isDragMoveActive) {
+      return false
+    }
+    return getMoveValidationError(dragMoveItemIds, folderId) === null
+  }
+  const dropOnFolder = (folderId: NodeId) => {
+    if (!canDropOnFolder(folderId)) {
+      return
+    }
+    applyMove(dragMoveItemIds, folderId)
+    endDragMove()
   }
 
   const toggleContentItemSelection = (itemId: NodeId) => {
@@ -787,6 +827,8 @@ export function useHomePageController(): HomePageViewModel {
       moveDestinationFolderId,
       moveDestinationFolderOptions,
       moveValidationError,
+      dragMoveActive: isDragMoveActive,
+      dragMoveTargetFolderId,
     },
     viewHelpers: {
       resolveDisplayName,
@@ -835,6 +877,11 @@ export function useHomePageController(): HomePageViewModel {
       closeMoveContentDialog,
       handleMoveDestinationFolderChange,
       handleMoveSelectedContent,
+      startDragMove,
+      endDragMove,
+      setDragMoveTargetFolder,
+      canDropOnFolder,
+      dropOnFolder,
     },
   }
 }

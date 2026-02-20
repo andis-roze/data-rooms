@@ -22,6 +22,8 @@ interface HomeSidebarProps {
   selectedFolderId: NodeId | null
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
   canDeleteActiveDataRoom: boolean
   onCreateDataRoom: () => void
   onRenameDataRoom: (dataRoom?: DataRoom) => void
@@ -32,6 +34,9 @@ interface HomeSidebarProps {
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
   onToggleContentItemSelection: (itemId: NodeId) => void
+  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
+  onCanDropOnFolder: (folderId: NodeId) => boolean
+  onDropOnFolder: (folderId: NodeId) => void
   resolveDisplayName: (value: string) => string
 }
 
@@ -42,6 +47,8 @@ export function HomeSidebar({
   selectedFolderId,
   selectedContentItemIds,
   indeterminateFolderIds,
+  dragMoveActive,
+  dragMoveTargetFolderId,
   canDeleteActiveDataRoom,
   onCreateDataRoom,
   onRenameDataRoom,
@@ -52,6 +59,9 @@ export function HomeSidebar({
   onOpenRenameFolder,
   onOpenDeleteFolder,
   onToggleContentItemSelection,
+  onSetDragMoveTargetFolder,
+  onCanDropOnFolder,
+  onDropOnFolder,
   resolveDisplayName,
 }: HomeSidebarProps) {
   const { t } = useTranslation()
@@ -242,6 +252,11 @@ export function HomeSidebar({
             selectedContentItemIds={selectedContentItemIds}
             indeterminateFolderIds={indeterminateFolderIds}
             onToggleContentItemSelection={onToggleContentItemSelection}
+            dragMoveActive={dragMoveActive}
+            dragMoveTargetFolderId={dragMoveTargetFolderId}
+            onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
+            onCanDropOnFolder={onCanDropOnFolder}
+            onDropOnFolder={onDropOnFolder}
             renderFolderName={resolveDisplayName}
             collapsedNodeIds={collapsedNodeIds}
             onToggleNode={toggleNode}

@@ -4,7 +4,7 @@ import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
-import type { MouseEvent } from 'react'
+import type { DragEvent, MouseEvent } from 'react'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Box from '@mui/material/Box'
@@ -91,6 +91,11 @@ interface FolderTreeNodeProps {
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   onToggleContentItemSelection: (itemId: NodeId) => void
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
+  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
+  onCanDropOnFolder: (folderId: NodeId) => boolean
+  onDropOnFolder: (folderId: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -109,6 +114,11 @@ function FolderTreeNode({
   selectedContentItemIds,
   indeterminateFolderIds,
   onToggleContentItemSelection,
+  dragMoveActive,
+  dragMoveTargetFolderId,
+  onSetDragMoveTargetFolder,
+  onCanDropOnFolder,
+  onDropOnFolder,
   renderFolderName,
   collapsedNodeIds,
   onToggleNode,
@@ -135,6 +145,14 @@ function FolderTreeNode({
   const folderDisplayName = renderFolderName(folder.name)
   const isSelected = selectedContentItemIds.includes(folder.id)
   const isIndeterminate = indeterminateFolderIds.includes(folder.id)
+  const isDragTarget = dragMoveTargetFolderId === folder.id
+  const canDrop = onCanDropOnFolder(folder.id)
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (canDrop) {
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'move'
+    }
+  }
 
   return (
     <>
@@ -150,8 +168,31 @@ function FolderTreeNode({
         />
         <ListItemButton
           selected={selectedFolderId === folder.id}
+          onDragEnter={() => {
+            if (dragMoveActive) {
+              onSetDragMoveTargetFolder(folder.id)
+            }
+          }}
+          onDragLeave={() => {
+            if (dragMoveActive && isDragTarget) {
+              onSetDragMoveTargetFolder(null)
+            }
+          }}
+          onDragOver={handleDragOver}
+          onDrop={(event) => {
+            event.preventDefault()
+            onDropOnFolder(folder.id)
+          }}
           onClick={() => onSelectFolder(folder.id)}
-          sx={{ pl: 1, minWidth: 0, flex: 1 }}
+          sx={{
+            pl: 1,
+            minWidth: 0,
+            flex: 1,
+            cursor: dragMoveActive ? (isDragTarget ? (canDrop ? 'move' : 'not-allowed') : 'default') : 'pointer',
+            outline: dragMoveActive && isDragTarget ? '1px dashed' : 'none',
+            outlineColor: canDrop ? 'success.main' : 'error.main',
+            bgcolor: dragMoveActive && isDragTarget ? (canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover') : undefined,
+          }}
           title={folderDisplayName}
           aria-label={folderDisplayName}
         >
@@ -224,6 +265,11 @@ function FolderTreeNode({
               selectedContentItemIds={selectedContentItemIds}
               indeterminateFolderIds={indeterminateFolderIds}
               onToggleContentItemSelection={onToggleContentItemSelection}
+              dragMoveActive={dragMoveActive}
+              dragMoveTargetFolderId={dragMoveTargetFolderId}
+              onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
+              onCanDropOnFolder={onCanDropOnFolder}
+              onDropOnFolder={onDropOnFolder}
               renderFolderName={renderFolderName}
               collapsedNodeIds={collapsedNodeIds}
               onToggleNode={onToggleNode}
@@ -247,6 +293,11 @@ interface DataRoomTreeNodeProps {
   selectedContentItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
   onToggleContentItemSelection: (itemId: NodeId) => void
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
+  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
+  onCanDropOnFolder: (folderId: NodeId) => boolean
+  onDropOnFolder: (folderId: NodeId) => void
   renderFolderName: (name: string) => string
   collapsedNodeIds: Set<NodeId>
   onToggleNode: (nodeId: NodeId) => void
@@ -263,6 +314,11 @@ export function DataRoomTreeNode({
   selectedContentItemIds,
   indeterminateFolderIds,
   onToggleContentItemSelection,
+  dragMoveActive,
+  dragMoveTargetFolderId,
+  onSetDragMoveTargetFolder,
+  onCanDropOnFolder,
+  onDropOnFolder,
   renderFolderName,
   collapsedNodeIds,
   onToggleNode,
@@ -285,6 +341,11 @@ export function DataRoomTreeNode({
           selectedContentItemIds={selectedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
           onToggleContentItemSelection={onToggleContentItemSelection}
+          dragMoveActive={dragMoveActive}
+          dragMoveTargetFolderId={dragMoveTargetFolderId}
+          onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
+          onCanDropOnFolder={onCanDropOnFolder}
+          onDropOnFolder={onDropOnFolder}
           renderFolderName={renderFolderName}
           collapsedNodeIds={collapsedNodeIds}
           onToggleNode={onToggleNode}

@@ -1,4 +1,4 @@
-import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitForElementToBeRemoved, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -96,6 +96,28 @@ async function selectMoveDestination(
   destinationName: string,
 ) {
   await user.click(within(container).getByRole('button', { name: destinationName }))
+}
+
+function createMockDataTransfer() {
+  return {
+    effectAllowed: '',
+    dropEffect: '',
+    setData: () => {},
+    getData: () => '',
+    clearData: () => {},
+    files: [],
+    items: [],
+    types: [],
+  }
+}
+
+function dragAndDrop(source: Element, destination: Element) {
+  const dataTransfer = createMockDataTransfer()
+  fireEvent.dragStart(source, { dataTransfer })
+  fireEvent.dragEnter(destination, { dataTransfer })
+  fireEvent.dragOver(destination, { dataTransfer })
+  fireEvent.drop(destination, { dataTransfer })
+  fireEvent.dragEnd(source, { dataTransfer })
 }
 
 describe('App routing and localization', () => {
@@ -388,5 +410,108 @@ describe('App routing and localization', () => {
     const financeListCheckbox = within(list).getByRole('checkbox', { name: 'Select item Finance' })
     expect(financeListCheckbox).not.toBeChecked()
     expect(financeListCheckbox).toHaveAttribute('data-indeterminate', 'true')
+  }, 15000)
+
+  it('drags selected file to a visible destination folder row', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Archive')
+    await goToBreadcrumb(user, 'Data Room')
+    await uploadPdf(user, 'dragged.pdf')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    await user.click(within(list).getByRole('checkbox', { name: 'Select item dragged.pdf' }))
+
+    const sourceButton = within(list).getByRole('button', { name: 'View file dragged.pdf' })
+    const sourceRow = sourceButton.closest('li')
+    const destinationButton = within(list).getByRole('button', { name: 'Open folder Archive' })
+    const destinationRow = destinationButton.closest('li')
+
+    expect(sourceRow).not.toBeNull()
+    expect(destinationRow).not.toBeNull()
+
+    dragAndDrop(sourceRow as Element, destinationRow as Element)
+
+    expect(screen.queryByText('dragged.pdf')).not.toBeInTheDocument()
+
+    await user.click(destinationButton)
+    expect(screen.getByText('dragged.pdf')).toBeInTheDocument()
+  }, 15000)
+
+  it('dragging an unselected file moves only that file even if another file is selected', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Archive')
+    await goToBreadcrumb(user, 'Data Room')
+    await uploadPdf(user, 'selected.pdf')
+    await uploadPdf(user, 'dragged-only.pdf')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    await user.click(within(list).getByRole('checkbox', { name: 'Select item selected.pdf' }))
+
+    const draggedButton = within(list).getByRole('button', { name: 'View file dragged-only.pdf' })
+    const draggedRow = draggedButton.closest('li')
+    const destinationButton = within(list).getByRole('button', { name: 'Open folder Archive' })
+    const destinationRow = destinationButton.closest('li')
+
+    expect(draggedRow).not.toBeNull()
+    expect(destinationRow).not.toBeNull()
+    dragAndDrop(draggedRow as Element, destinationRow as Element)
+
+    expect(screen.getByText('selected.pdf')).toBeInTheDocument()
+    expect(screen.queryByText('dragged-only.pdf')).not.toBeInTheDocument()
+
+    await user.click(destinationButton)
+    expect(screen.getByText('dragged-only.pdf')).toBeInTheDocument()
+    expect(screen.queryByText('selected.pdf')).not.toBeInTheDocument()
+  }, 15000)
+
+  it('supports dropping selected files onto a folder target in tree view', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Archive')
+    await goToBreadcrumb(user, 'Data Room')
+    await uploadPdf(user, 'tree-drop.pdf')
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    await user.click(within(list).getByRole('checkbox', { name: 'Select item tree-drop.pdf' }))
+
+    const sourceButton = within(list).getByRole('button', { name: 'View file tree-drop.pdf' })
+    const sourceRow = sourceButton.closest('li')
+    const tree = screen.getByRole('list', { name: 'Folder tree' })
+    const treeDestination = within(tree).getByRole('button', { name: 'Archive' })
+
+    expect(sourceRow).not.toBeNull()
+    dragAndDrop(sourceRow as Element, treeDestination)
+
+    expect(screen.queryByText('tree-drop.pdf')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Open folder Archive' }))
+    expect(screen.getByText('tree-drop.pdf')).toBeInTheDocument()
+  }, 15000)
+
+  it('blocks dragging a folder into its descendant in tree view', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await goToBreadcrumb(user, 'Data Room')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await createFolder(user, 'Invoices')
+    await goToBreadcrumb(user, 'Data Room')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    const sourceButton = within(list).getByRole('button', { name: 'Open folder Finance' })
+    const sourceRow = sourceButton.closest('li')
+    const tree = screen.getByRole('list', { name: 'Folder tree' })
+    await user.click(within(tree).getByRole('button', { name: 'Expand folder Finance' }))
+    const descendantTarget = within(tree).getByRole('button', { name: 'Invoices' })
+
+    expect(sourceRow).not.toBeNull()
+    dragAndDrop(sourceRow as Element, descendantTarget)
+
+    expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
   }, 15000)
 })

@@ -1,3 +1,4 @@
+import type { DragEvent } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -18,6 +19,13 @@ interface FolderContentTableProps {
   resolveDisplayName: (value: string) => string
   selectedItemIds: NodeId[]
   indeterminateFolderIds: NodeId[]
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
+  onStartDragMove: (itemId: NodeId) => void
+  onEndDragMove: () => void
+  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
+  onCanDropOnFolder: (folderId: NodeId) => boolean
+  onDropOnFolder: (folderId: NodeId) => void
   onToggleItemSelection: (itemId: NodeId) => void
   onToggleAllItemSelection: () => void
   onSelectFolder: (folderId: NodeId) => void
@@ -49,6 +57,13 @@ export function FolderContentTable({
   resolveDisplayName,
   selectedItemIds,
   indeterminateFolderIds,
+  dragMoveActive,
+  dragMoveTargetFolderId,
+  onStartDragMove,
+  onEndDragMove,
+  onSetDragMoveTargetFolder,
+  onCanDropOnFolder,
+  onDropOnFolder,
   onToggleItemSelection,
   onToggleAllItemSelection,
   onSelectFolder,
@@ -79,6 +94,12 @@ export function FolderContentTable({
       width: '1px',
       backgroundColor: 'divider',
     },
+  }
+  const handleFolderDragOver = (event: DragEvent<HTMLLIElement>, folderId: NodeId) => {
+    if (onCanDropOnFolder(folderId)) {
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'move'
+    }
   }
 
   return (
@@ -201,6 +222,19 @@ export function FolderContentTable({
                 resolveDisplayName={resolveDisplayName}
                 selected={selectedItemIdSet.has(item.id)}
                 indeterminate={indeterminateFolderIds.includes(item.id)}
+                dragMoveActive={dragMoveActive}
+                dragMoveTargeted={dragMoveTargetFolderId === item.id}
+                canDrop={onCanDropOnFolder(item.id)}
+                onDragMoveStart={onStartDragMove}
+                onDragMoveEnd={onEndDragMove}
+                onDragMoveEnterFolder={onSetDragMoveTargetFolder}
+                onDragMoveLeaveFolder={() => {
+                  if (dragMoveTargetFolderId === item.id) {
+                    onSetDragMoveTargetFolder(null)
+                  }
+                }}
+                onDragMoveOver={(event) => handleFolderDragOver(event, item.id)}
+                onDropOnFolder={(folderId) => onDropOnFolder(folderId)}
                 onToggleSelect={onToggleItemSelection}
                 onSelectFolder={onSelectFolder}
                 onOpenRenameFolder={onOpenRenameFolder}
@@ -218,6 +252,9 @@ export function FolderContentTable({
               rowGridTemplate={desktopGridTemplate}
               locale={locale}
               selected={selectedItemIdSet.has(item.id)}
+              dragMoveActive={dragMoveActive}
+              onDragMoveStart={onStartDragMove}
+              onDragMoveEnd={onEndDragMove}
               onToggleSelect={onToggleItemSelection}
               onOpenViewFile={onOpenViewFile}
               onOpenRenameFile={onOpenRenameFile}

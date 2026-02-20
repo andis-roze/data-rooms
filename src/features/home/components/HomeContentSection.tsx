@@ -40,6 +40,8 @@ interface HomeContentSectionProps {
   moveDestinationFolderId: NodeId | null
   moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
   onCreateFolder: () => void
@@ -56,6 +58,11 @@ interface HomeContentSectionProps {
   onCloseMoveContentDialog: () => void
   onMoveDestinationFolderChange: (folderId: NodeId) => void
   onMoveSelectedContent: () => void
+  onStartDragMove: (itemId: NodeId) => void
+  onEndDragMove: () => void
+  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
+  onCanDropOnFolder: (folderId: NodeId) => boolean
+  onDropOnFolder: (folderId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
@@ -86,6 +93,8 @@ export function HomeContentSection({
   moveDestinationFolderId,
   moveDestinationFolderOptions,
   moveValidationError,
+  dragMoveActive,
+  dragMoveTargetFolderId,
   deleteSelectedContentDialogOpen,
   uploadInputRef,
   onCreateFolder,
@@ -102,6 +111,11 @@ export function HomeContentSection({
   onCloseMoveContentDialog,
   onMoveDestinationFolderChange,
   onMoveSelectedContent,
+  onStartDragMove,
+  onEndDragMove,
+  onSetDragMoveTargetFolder,
+  onCanDropOnFolder,
+  onDropOnFolder,
   onSelectFolder,
   onOpenRenameFolder,
   onOpenDeleteFolder,
@@ -205,6 +219,13 @@ export function HomeContentSection({
           resolveDisplayName={resolveDisplayName}
           selectedItemIds={selectedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
+          dragMoveActive={dragMoveActive}
+          dragMoveTargetFolderId={dragMoveTargetFolderId}
+          onStartDragMove={onStartDragMove}
+          onEndDragMove={onEndDragMove}
+          onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
+          onCanDropOnFolder={onCanDropOnFolder}
+          onDropOnFolder={onDropOnFolder}
           onToggleItemSelection={onToggleContentItemSelection}
           onToggleAllItemSelection={onToggleAllContentItemSelection}
           onSelectFolder={onSelectFolder}

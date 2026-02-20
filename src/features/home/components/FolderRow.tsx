@@ -2,6 +2,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined'
+import type { DragEvent } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -23,6 +24,15 @@ interface FolderRowProps {
   resolveDisplayName: (value: string) => string
   selected: boolean
   indeterminate: boolean
+  dragMoveActive: boolean
+  dragMoveTargeted: boolean
+  canDrop: boolean
+  onDragMoveStart: (itemId: NodeId) => void
+  onDragMoveEnd: () => void
+  onDragMoveEnterFolder: (folderId: NodeId | null) => void
+  onDragMoveLeaveFolder: () => void
+  onDragMoveOver: (event: DragEvent<HTMLLIElement>) => void
+  onDropOnFolder: (folderId: NodeId) => void
   onToggleSelect: (itemId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
@@ -47,6 +57,15 @@ export function FolderRow({
   resolveDisplayName,
   selected,
   indeterminate,
+  dragMoveActive,
+  dragMoveTargeted,
+  canDrop,
+  onDragMoveStart,
+  onDragMoveEnd,
+  onDragMoveEnterFolder,
+  onDragMoveLeaveFolder,
+  onDragMoveOver,
+  onDropOnFolder,
   onToggleSelect,
   onSelectFolder,
   onOpenRenameFolder,
@@ -56,7 +75,40 @@ export function FolderRow({
   const { t } = useTranslation()
 
   return (
-    <ListItem key={itemId} disablePadding sx={{ px: 2, py: 1 }}>
+    <ListItem
+      key={itemId}
+      disablePadding
+      draggable={!isParentNavigation}
+      onDragStart={(event) => {
+        if (isParentNavigation) {
+          return
+        }
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('text/plain', folder.id)
+        onDragMoveStart(folder.id)
+      }}
+      onDragEnd={onDragMoveEnd}
+      onDragEnter={() => {
+        if (dragMoveActive) {
+          onDragMoveEnterFolder(folder.id)
+        }
+      }}
+      onDragLeave={onDragMoveLeaveFolder}
+      onDragOver={onDragMoveOver}
+      onDrop={(event) => {
+        event.preventDefault()
+        onDropOnFolder(folder.id)
+      }}
+      sx={{
+        px: 2,
+        py: 1,
+        cursor: !isParentNavigation ? 'grab' : undefined,
+        '&:active': !isParentNavigation ? { cursor: 'grabbing' } : undefined,
+        outline: dragMoveActive && dragMoveTargeted ? '1px dashed' : 'none',
+        outlineColor: canDrop ? 'success.main' : 'error.main',
+        bgcolor: dragMoveActive && dragMoveTargeted ? (canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover') : undefined,
+      }}
+    >
       <Box
         sx={{
           width: '100%',

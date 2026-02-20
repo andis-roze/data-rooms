@@ -2,6 +2,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DriveFileMoveOutlinedIcon from '@mui/icons-material/DriveFileMoveOutlined'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline'
+import type { DragEvent } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -19,6 +20,9 @@ interface FileRowProps {
   rowGridTemplate: string
   locale: string
   selected: boolean
+  dragMoveActive: boolean
+  onDragMoveStart: (itemId: NodeId) => void
+  onDragMoveEnd: () => void
   onToggleSelect: (itemId: NodeId) => void
   onOpenViewFile: (file: FileNode) => void
   onOpenRenameFile: (file: FileNode) => void
@@ -39,6 +43,9 @@ export function FileRow({
   rowGridTemplate,
   locale,
   selected,
+  dragMoveActive,
+  onDragMoveStart,
+  onDragMoveEnd,
   onToggleSelect,
   onOpenViewFile,
   onOpenRenameFile,
@@ -48,7 +55,22 @@ export function FileRow({
   const { t } = useTranslation()
 
   return (
-    <ListItem key={itemId} disablePadding sx={{ px: 2, py: 1 }}>
+    <ListItem
+      key={itemId}
+      disablePadding
+      draggable
+      onDragStart={(event: DragEvent<HTMLLIElement>) => {
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('text/plain', file.id)
+        onDragMoveStart(file.id)
+      }}
+      onDragEnd={onDragMoveEnd}
+      sx={{
+        px: 2,
+        py: 1,
+        cursor: dragMoveActive ? 'grabbing' : 'grab',
+      }}
+    >
       <Box
         sx={{
           width: '100%',

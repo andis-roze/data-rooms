@@ -57,6 +57,8 @@ export interface HomePageSelectionState {
   moveDestinationFolderId: NodeId | null
   moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
+  dragMoveActive: boolean
+  dragMoveTargetFolderId: NodeId | null
 }
 
 export interface HomePageUiState {
@@ -111,6 +113,11 @@ export interface HomePageHandlers {
   closeMoveContentDialog: () => void
   handleMoveDestinationFolderChange: (folderId: NodeId) => void
   handleMoveSelectedContent: () => void
+  startDragMove: (itemId: NodeId) => void
+  endDragMove: () => void
+  setDragMoveTargetFolder: (folderId: NodeId | null) => void
+  canDropOnFolder: (folderId: NodeId) => boolean
+  dropOnFolder: (folderId: NodeId) => void
   toggleSort: (field: 'name' | 'type' | 'updated') => void
   dismissFeedback: (id: number) => void
   selectDataRoom: (dataRoomId: NodeId) => void

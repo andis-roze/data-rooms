@@ -41,6 +41,8 @@ export function HomePageContainer() {
     moveDestinationFolderId,
     moveDestinationFolderOptions,
     moveValidationError,
+    dragMoveActive,
+    dragMoveTargetFolderId,
   } = selection
 
   const { resolveDisplayName } = viewHelpers
@@ -99,6 +101,8 @@ export function HomePageContainer() {
           selectedFolderId={selectedFolderId}
           selectedContentItemIds={selectedContentItemIds}
           indeterminateFolderIds={indeterminateFolderIds}
+          dragMoveActive={dragMoveActive}
+          dragMoveTargetFolderId={dragMoveTargetFolderId}
           canDeleteActiveDataRoom={canDeleteActiveDataRoom}
           onCreateDataRoom={handlers.openCreateDataRoomDialog}
           onRenameDataRoom={handlers.openRenameDataRoomDialog}
@@ -109,6 +113,9 @@ export function HomePageContainer() {
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
           onToggleContentItemSelection={handlers.toggleContentItemSelection}
+          onSetDragMoveTargetFolder={handlers.setDragMoveTargetFolder}
+          onCanDropOnFolder={handlers.canDropOnFolder}
+          onDropOnFolder={handlers.dropOnFolder}
           resolveDisplayName={resolveDisplayName}
         />
 
@@ -132,6 +139,8 @@ export function HomePageContainer() {
           moveDestinationFolderId={moveDestinationFolderId}
           moveDestinationFolderOptions={moveDestinationFolderOptions}
           moveValidationError={moveValidationError}
+          dragMoveActive={dragMoveActive}
+          dragMoveTargetFolderId={dragMoveTargetFolderId}
           deleteSelectedContentDialogOpen={dialogs.isDeleteSelectedContentDialogOpen}
           uploadInputRef={uploadInputRef}
           onCreateFolder={handlers.openCreateFolderDialog}
@@ -148,6 +157,11 @@ export function HomePageContainer() {
           onCloseMoveContentDialog={handlers.closeMoveContentDialog}
           onMoveDestinationFolderChange={handlers.handleMoveDestinationFolderChange}
           onMoveSelectedContent={handlers.handleMoveSelectedContent}
+          onStartDragMove={handlers.startDragMove}
+          onEndDragMove={handlers.endDragMove}
+          onSetDragMoveTargetFolder={handlers.setDragMoveTargetFolder}
+          onCanDropOnFolder={handlers.canDropOnFolder}
+          onDropOnFolder={handlers.dropOnFolder}
           onSelectFolder={handlers.selectFolder}
           onOpenRenameFolder={handlers.openRenameFolderDialog}
           onOpenDeleteFolder={handlers.openDeleteFolderDialog}
