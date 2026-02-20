@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import {
-  deleteManyFileBlobs,
   getDataRoomDeleteSummary,
   getFileIdsForFolderCascadeDelete,
   getFolderDeleteSummary,
@@ -26,6 +25,7 @@ import {
   useHomePageTransientState,
 } from './hooks/useHomePageUiState'
 import { useHomePageViewHelpers } from './hooks/useHomePageViewHelpers'
+import { defaultFileBlobStorageService } from './services/fileBlobStorage'
 
 const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
 
@@ -228,7 +228,7 @@ export function useHomePageController(): HomePageViewModel {
     enqueueFeedback(t('dataroomFeedbackSelectedItemsDeleted'), 'success')
 
     try {
-      await deleteManyFileBlobs([...fileIdsForCleanup])
+      await defaultFileBlobStorageService.deleteManyBlobs([...fileIdsForCleanup])
     } catch {
       // Best-effort cleanup only.
     }
@@ -244,6 +244,7 @@ export function useHomePageController(): HomePageViewModel {
       resolveDisplayName,
       hasDuplicateDataRoomDisplayName,
       enqueueFeedback,
+      fileBlobStorage: defaultFileBlobStorageService,
       setDataRoomNameDraft,
       setDataRoomNameError,
       setIsCreateDataRoomDialogOpen,
@@ -260,6 +261,7 @@ export function useHomePageController(): HomePageViewModel {
       folderNameDraft,
       resolveDisplayName,
       enqueueFeedback,
+      fileBlobStorage: defaultFileBlobStorageService,
       setFolderNameDraft,
       setFolderNameError,
       setTargetFolderId,
@@ -275,6 +277,7 @@ export function useHomePageController(): HomePageViewModel {
       activeFile,
       fileNameDraft,
       enqueueFeedback,
+      fileBlobStorage: defaultFileBlobStorageService,
       setActiveFileId,
       setFileNameDraft,
       setFileNameError,

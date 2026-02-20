@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
 import {
-  deleteManyFileBlobs,
   getDataRoomNameValidationError,
   getFileIdsForDataRoomDelete,
   hasDuplicateDataRoomName,
@@ -10,6 +9,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import type { FileBlobStorageService } from '../services/fileBlobStorage'
 import { getDataRoomNameValidationMessage } from './nameValidationMessages'
 
 interface UseDataRoomActionsParams {
@@ -21,6 +21,7 @@ interface UseDataRoomActionsParams {
   resolveDisplayName: (value: string) => string
   hasDuplicateDataRoomDisplayName: (candidateName: string, excludeDataRoomId?: NodeId) => boolean
   enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  fileBlobStorage: FileBlobStorageService
   setDataRoomNameDraft: Dispatch<SetStateAction<string>>
   setDataRoomNameError: Dispatch<SetStateAction<string | null>>
   setIsCreateDataRoomDialogOpen: Dispatch<SetStateAction<boolean>>
@@ -37,6 +38,7 @@ export function useDataRoomActions({
   resolveDisplayName,
   hasDuplicateDataRoomDisplayName,
   enqueueFeedback,
+  fileBlobStorage,
   setDataRoomNameDraft,
   setDataRoomNameError,
   setIsCreateDataRoomDialogOpen,
@@ -177,7 +179,7 @@ export function useDataRoomActions({
     enqueueFeedback(t('dataroomFeedbackDataRoomDeleted'), 'success')
 
     try {
-      await deleteManyFileBlobs(fileIdsToDelete)
+      await fileBlobStorage.deleteManyBlobs(fileIdsToDelete)
     } catch {
       // Best-effort cleanup only.
     }

@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
 import {
-  deleteManyFileBlobs,
   getFileIdsForFolderCascadeDelete,
   getFolderNameValidationError,
   hasDuplicateFolderName,
@@ -11,6 +10,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import type { FileBlobStorageService } from '../services/fileBlobStorage'
 import { getFolderNameValidationMessage } from './nameValidationMessages'
 
 interface UseFolderActionsParams {
@@ -23,6 +23,7 @@ interface UseFolderActionsParams {
   folderNameDraft: string
   resolveDisplayName: (value: string) => string
   enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  fileBlobStorage: FileBlobStorageService
   setFolderNameDraft: Dispatch<SetStateAction<string>>
   setFolderNameError: Dispatch<SetStateAction<string | null>>
   setTargetFolderId: Dispatch<SetStateAction<NodeId | null>>
@@ -41,6 +42,7 @@ export function useFolderActions({
   folderNameDraft,
   resolveDisplayName,
   enqueueFeedback,
+  fileBlobStorage,
   setFolderNameDraft,
   setFolderNameError,
   setTargetFolderId,
@@ -177,7 +179,7 @@ export function useFolderActions({
     enqueueFeedback(t('dataroomFeedbackFolderDeleted'), 'success')
 
     try {
-      await deleteManyFileBlobs(fileIdsToDelete)
+      await fileBlobStorage.deleteManyBlobs(fileIdsToDelete)
     } catch {
       // Best-effort cleanup only.
     }

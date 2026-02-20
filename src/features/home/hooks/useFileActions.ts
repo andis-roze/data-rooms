@@ -1,11 +1,9 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import {
-  deleteFileBlob,
   getFileNameValidationError,
   getPdfUploadValidationError,
   hasDuplicateFileName,
   preparePdfUpload,
-  putFileBlob,
   type DataRoomState,
   type FileNode,
   type Folder,
@@ -13,6 +11,7 @@ import {
 } from '../../dataroom/model'
 import type { DataRoomAction } from '../../dataroom/state/types'
 import { generateNodeId } from '../services/id'
+import type { FileBlobStorageService } from '../services/fileBlobStorage'
 import { getFileNameValidationMessage } from './nameValidationMessages'
 
 interface UseFileActionsParams {
@@ -23,6 +22,7 @@ interface UseFileActionsParams {
   activeFile: FileNode | null
   fileNameDraft: string
   enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  fileBlobStorage: FileBlobStorageService
   setActiveFileId: Dispatch<SetStateAction<NodeId | null>>
   setFileNameDraft: Dispatch<SetStateAction<string>>
   setFileNameError: Dispatch<SetStateAction<string | null>>
@@ -41,6 +41,7 @@ export function useFileActions({
   activeFile,
   fileNameDraft,
   enqueueFeedback,
+  fileBlobStorage,
   setActiveFileId,
   setFileNameDraft,
   setFileNameError,
@@ -146,7 +147,7 @@ export function useFileActions({
     const fileId = generateNodeId('file')
 
     try {
-      await putFileBlob(fileId, selectedFile)
+      await fileBlobStorage.putBlob(fileId, selectedFile)
     } catch {
       enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
       clearUploadInput(event)
@@ -212,7 +213,7 @@ export function useFileActions({
     enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
 
     try {
-      await deleteFileBlob(fileId)
+      await fileBlobStorage.deleteBlob(fileId)
     } catch {
       // Best-effort cleanup only.
     }
