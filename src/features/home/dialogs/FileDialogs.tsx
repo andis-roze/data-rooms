@@ -5,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
+import { DialogEntityName } from './DialogEntityName'
 import { NamePromptDialog } from './NamePromptDialog'
 
 interface FileDialogsProps {
@@ -33,6 +34,7 @@ export function FileDialogs({
   onDeleteFile,
 }: FileDialogsProps) {
   const { t } = useTranslation()
+  const fileName = activeFileName?.trim()
 
   return (
     <>
@@ -50,9 +52,10 @@ export function FileDialogs({
       />
 
       <Dialog open={deleteFileDialogOpen} onClose={onCloseDeleteFileDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogDeleteFileTitle')}</DialogTitle>
+        <DialogTitle>{t('dataroomDialogDeleteFileTitleConfirm')}</DialogTitle>
         <DialogContent>
-          <Typography>{t('dataroomDeleteFileQuestion', { name: activeFileName ?? '' })}</Typography>
+          <Typography>{t('dataroomDeleteFileQuestionConfirmWithoutName')}</Typography>
+          {fileName ? <DialogEntityName name={fileName} /> : null}
         </DialogContent>
         <DialogActions>
           <Button onClick={onCloseDeleteFileDialog}>{t('dataroomActionCancel')}</Button>

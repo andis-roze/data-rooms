@@ -6,6 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { CreateDataRoomDialog } from './CreateDataRoomDialog'
+import { DialogEntityName } from './DialogEntityName'
 import { NamePromptDialog } from './NamePromptDialog'
 
 // Handles create/rename/delete dialogs for data room actions.
@@ -69,9 +70,10 @@ export function DataRoomDialogs({
       />
 
       <Dialog open={deleteDataRoomDialogOpen} onClose={onCloseDeleteDataRoomDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogDeleteDataRoomTitle')}</DialogTitle>
+        <DialogTitle>{t('dataroomDialogDeleteDataRoomTitleConfirm')}</DialogTitle>
         <DialogContent>
-          <Typography>{t('dataroomDeleteDataRoomQuestion', { name: activeDataRoomName })}</Typography>
+          <Typography>{t('dataroomDeleteDataRoomQuestionConfirmWithoutName')}</Typography>
+          <DialogEntityName name={activeDataRoomName} />
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             {t('dataroomDeleteDataRoomImpact', {
               folderCount: dataRoomDeleteSummary.folderCount,

@@ -5,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
+import { DialogEntityName } from './DialogEntityName'
 import { NamePromptDialog } from './NamePromptDialog'
 
 interface FolderDialogsProps {
@@ -43,6 +44,8 @@ export function FolderDialogs({
   onDeleteFolder,
 }: FolderDialogsProps) {
   const { t } = useTranslation()
+  const folderName = (targetFolderName ?? activeFolderName).trim()
+  const nestedItemCount = Math.max(folderDeleteSummary.folderCount - 1, 0) + folderDeleteSummary.fileCount
 
   return (
     <>
@@ -73,19 +76,17 @@ export function FolderDialogs({
       />
 
       <Dialog open={deleteFolderDialogOpen} onClose={onCloseDeleteFolderDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogDeleteFolderTitle')}</DialogTitle>
+        <DialogTitle>{t('dataroomDialogDeleteFolderTitleConfirm')}</DialogTitle>
         <DialogContent>
-          <Typography>
-            {t('dataroomDeleteFolderQuestion', {
-              name: targetFolderName ?? activeFolderName,
-            })}
-          </Typography>
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            {t('dataroomDeleteFolderImpact', {
-              folderCount: folderDeleteSummary.folderCount,
-              fileCount: folderDeleteSummary.fileCount,
-            })}
-          </Typography>
+          <Typography>{t('dataroomDeleteFolderQuestionConfirmWithoutName')}</Typography>
+          <DialogEntityName name={folderName} />
+          {nestedItemCount > 0 ? (
+            <Typography color="text.secondary" sx={{ mt: 1 }}>
+              {nestedItemCount === 1
+                ? t('dataroomDeleteFolderNestedItemsSingle')
+                : t('dataroomDeleteFolderNestedItemsMultiple', { count: nestedItemCount })}
+            </Typography>
+          ) : null}
         </DialogContent>
         <DialogActions>
           <Button onClick={onCloseDeleteFolderDialog}>{t('dataroomActionCancel')}</Button>

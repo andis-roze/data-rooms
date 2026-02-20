@@ -93,16 +93,19 @@ msgstr ""
 msgid "dataroomDeleteDataRoomImpact"
 msgstr ""
 
-msgid "dataroomDeleteDataRoomQuestion"
+msgid "dataroomDeleteDataRoomQuestionConfirmWithoutName"
 msgstr ""
 
-msgid "dataroomDeleteFileQuestion"
+msgid "dataroomDeleteFileQuestionConfirmWithoutName"
 msgstr ""
 
-msgid "dataroomDeleteFolderImpact"
+msgid "dataroomDeleteFolderNestedItemsMultiple"
 msgstr ""
 
-msgid "dataroomDeleteFolderQuestion"
+msgid "dataroomDeleteFolderNestedItemsSingle"
+msgstr ""
+
+msgid "dataroomDeleteFolderQuestionConfirmWithoutName"
 msgstr ""
 
 msgid "dataroomDialogCreateDataRoomTitle"
@@ -111,13 +114,13 @@ msgstr ""
 msgid "dataroomDialogCreateFolderTitle"
 msgstr ""
 
-msgid "dataroomDialogDeleteDataRoomTitle"
+msgid "dataroomDialogDeleteDataRoomTitleConfirm"
 msgstr ""
 
-msgid "dataroomDialogDeleteFileTitle"
+msgid "dataroomDialogDeleteFileTitleConfirm"
 msgstr ""
 
-msgid "dataroomDialogDeleteFolderTitle"
+msgid "dataroomDialogDeleteFolderTitleConfirm"
 msgstr ""
 
 msgid "dataroomDialogRenameDataRoomTitle"

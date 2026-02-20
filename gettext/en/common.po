@@ -95,17 +95,24 @@ msgstr "Current folder contents"
 msgid "dataroomDeleteDataRoomImpact"
 msgstr "This will remove {folderCount} folder(s) and {fileCount} file(s)."
 
-msgid "dataroomDeleteDataRoomQuestion"
-msgstr "Delete Data Room \"{name}\" and all its content?"
+msgid "dataroomDeleteDataRoomQuestionConfirmWithoutName"
+msgstr ""
+"Are you sure you want to delete this data room? This action cannot be "
+"undone."
 
-msgid "dataroomDeleteFileQuestion"
-msgstr "Delete \"{name}\"?"
+msgid "dataroomDeleteFileQuestionConfirmWithoutName"
+msgstr "Are you sure you want to delete this file? This action cannot be undone."
 
-msgid "dataroomDeleteFolderImpact"
-msgstr "This will remove {folderCount} folder(s) and {fileCount} file(s)."
+msgid "dataroomDeleteFolderNestedItemsMultiple"
+msgstr "This will also delete {count} items inside this folder."
 
-msgid "dataroomDeleteFolderQuestion"
-msgstr "Delete \"{name}\" and all nested content?"
+msgid "dataroomDeleteFolderNestedItemsSingle"
+msgstr "This will also delete 1 item inside this folder."
+
+msgid "dataroomDeleteFolderQuestionConfirmWithoutName"
+msgstr ""
+"Are you sure you want to delete this folder and everything inside it? This "
+"action cannot be undone."
 
 msgid "dataroomDialogCreateDataRoomTitle"
 msgstr "Create data room"
@@ -113,14 +120,14 @@ msgstr "Create data room"
 msgid "dataroomDialogCreateFolderTitle"
 msgstr "Create folder"
 
-msgid "dataroomDialogDeleteDataRoomTitle"
-msgstr "Delete data room"
+msgid "dataroomDialogDeleteDataRoomTitleConfirm"
+msgstr "Delete data room?"
 
-msgid "dataroomDialogDeleteFileTitle"
-msgstr "Delete file"
+msgid "dataroomDialogDeleteFileTitleConfirm"
+msgstr "Delete file?"
 
-msgid "dataroomDialogDeleteFolderTitle"
-msgstr "Delete folder"
+msgid "dataroomDialogDeleteFolderTitleConfirm"
+msgstr "Delete folder?"
 
 msgid "dataroomDialogRenameDataRoomTitle"
 msgstr "Rename data room"
