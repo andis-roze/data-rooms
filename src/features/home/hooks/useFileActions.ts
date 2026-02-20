@@ -54,6 +54,16 @@ export function useFileActions({
     setActiveFileId(file.id)
   }
 
+  const closeFileDialog = (
+    setIsOpen: Dispatch<SetStateAction<boolean>>,
+    options?: { clearError?: boolean },
+  ) => {
+    setIsOpen(false)
+    if (options?.clearError) {
+      setFileNameError(null)
+    }
+  }
+
   const validateFileName = (
     fileName: string,
     options?: { parentFolderId: NodeId; excludeFileId?: NodeId },
@@ -83,7 +93,7 @@ export function useFileActions({
   }
 
   const closeRenameFileDialog = () => {
-    setIsRenameFileDialogOpen(false)
+    closeFileDialog(setIsRenameFileDialogOpen, { clearError: true })
   }
 
   const openDeleteFileDialog = (file: FileNode) => {
@@ -92,7 +102,7 @@ export function useFileActions({
   }
 
   const closeDeleteFileDialog = () => {
-    setIsDeleteFileDialogOpen(false)
+    closeFileDialog(setIsDeleteFileDialogOpen)
   }
 
   const openViewFileDialog = (file: FileNode) => {
@@ -101,7 +111,7 @@ export function useFileActions({
   }
 
   const closeViewFileDialog = () => {
-    setIsViewFileDialogOpen(false)
+    closeFileDialog(setIsViewFileDialogOpen)
   }
 
   const handleUploadInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -178,7 +188,7 @@ export function useFileActions({
       },
     })
 
-    setIsRenameFileDialogOpen(false)
+    closeFileDialog(setIsRenameFileDialogOpen)
     enqueueFeedback(t('dataroomFeedbackFileRenamed'), 'success')
   }
 
@@ -196,7 +206,7 @@ export function useFileActions({
       },
     })
 
-    setIsDeleteFileDialogOpen(false)
+    closeFileDialog(setIsDeleteFileDialogOpen)
     enqueueFeedback(t('dataroomFeedbackFileDeleted'), 'success')
 
     try {
