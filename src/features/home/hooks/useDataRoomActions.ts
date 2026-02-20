@@ -43,6 +43,12 @@ export function useDataRoomActions({
   setIsRenameDataRoomDialogOpen,
   setIsDeleteDataRoomDialogOpen,
 }: UseDataRoomActionsParams) {
+  const selectTargetDataRoom = (targetDataRoom?: DataRoom) => {
+    if (targetDataRoom && activeDataRoom?.id !== targetDataRoom.id) {
+      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: targetDataRoom.id } })
+    }
+  }
+
   const openCreateDataRoomDialog = () => {
     setDataRoomNameDraft('')
     setDataRoomNameError(null)
@@ -55,9 +61,7 @@ export function useDataRoomActions({
       return
     }
 
-    if (targetDataRoom && activeDataRoom?.id !== targetDataRoom.id) {
-      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: targetDataRoom.id } })
-    }
+    selectTargetDataRoom(targetDataRoom)
 
     setDataRoomNameDraft(resolveDisplayName(dataRoom.name))
     setDataRoomNameError(null)
@@ -65,9 +69,7 @@ export function useDataRoomActions({
   }
 
   const openDeleteDataRoomDialog = (targetDataRoom?: DataRoom) => {
-    if (targetDataRoom && activeDataRoom?.id !== targetDataRoom.id) {
-      dispatch({ type: 'dataroom/selectDataRoom', payload: { dataRoomId: targetDataRoom.id } })
-    }
+    selectTargetDataRoom(targetDataRoom)
 
     setIsDeleteDataRoomDialogOpen(true)
   }
