@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import {
   getDataRoomDeleteSummary,
-  getFileIdsForFolderCascadeDelete,
   getFolderDeleteSummary,
   type NodeId,
 } from '../dataroom/model'
@@ -26,6 +25,7 @@ import {
 } from './hooks/useHomePageUiState'
 import { useHomePageViewHelpers } from './hooks/useHomePageViewHelpers'
 import { defaultFileBlobStorageService } from './services/fileBlobStorage'
+import { useDeleteSelectedContent } from './hooks/useDeleteSelectedContent'
 
 const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
 
@@ -193,46 +193,21 @@ export function useHomePageController(): HomePageViewModel {
     selectNode('folder', folderId)
   }
 
-  const openDeleteSelectedContentDialog = () => {
-    if (deleteSelectionItemIds.length > 0) {
-      setIsDeleteSelectedContentDialogOpen(true)
-    }
-  }
-
-  const closeDeleteSelectedContentDialog = () => {
-    setIsDeleteSelectedContentDialogOpen(false)
-  }
-
-  const handleDeleteSelectedContent = async () => {
-    if (deleteSelectionItemIds.length === 0) {
-      return
-    }
-    for (const fileId of deleteSelectionTargets.standaloneFileIds) {
-      dispatch({ type: 'dataroom/deleteFile', payload: { fileId } })
-    }
-
-    for (const folderId of deleteSelectionTargets.topLevelFolderIds) {
-      dispatch({ type: 'dataroom/deleteFolder', payload: { folderId } })
-    }
-
-    const fileIdsForCleanup = new Set<NodeId>(deleteSelectionTargets.standaloneFileIds)
-    for (const folderId of deleteSelectionTargets.topLevelFolderIds) {
-      const nestedFileIds = getFileIdsForFolderCascadeDelete(entities, folderId)
-      for (const fileId of nestedFileIds) {
-        fileIdsForCleanup.add(fileId)
-      }
-    }
-
-    setIsDeleteSelectedContentDialogOpen(false)
-    clearContentItemSelection()
-    enqueueFeedback(t('dataroomFeedbackSelectedItemsDeleted'), 'success')
-
-    try {
-      await defaultFileBlobStorageService.deleteManyBlobs([...fileIdsForCleanup])
-    } catch {
-      // Best-effort cleanup only.
-    }
-  }
+  const {
+    openDeleteSelectedContentDialog,
+    closeDeleteSelectedContentDialog,
+    handleDeleteSelectedContent,
+  } = useDeleteSelectedContent({
+    t: translate,
+    entities,
+    dispatch,
+    fileBlobStorage: defaultFileBlobStorageService,
+    deleteSelectionItemIds,
+    deleteSelectionTargets,
+    clearContentItemSelection,
+    enqueueFeedback,
+    setIsDeleteSelectedContentDialogOpen,
+  })
 
   const actions = useHomePageActions({
     dataRoom: {
