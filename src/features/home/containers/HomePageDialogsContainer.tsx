@@ -55,21 +55,8 @@ export function HomePageDialogsContainer({
 }: HomePageDialogsContainerProps) {
   return (
     <HomeDialogs
-      createDataRoomDialogOpen={dialogs.isCreateDataRoomDialogOpen}
-      renameDataRoomDialogOpen={dialogs.isRenameDataRoomDialogOpen}
-      deleteDataRoomDialogOpen={dialogs.isDeleteDataRoomDialogOpen}
-      createFolderDialogOpen={dialogs.isCreateFolderDialogOpen}
-      renameFolderDialogOpen={dialogs.isRenameFolderDialogOpen}
-      deleteFolderDialogOpen={dialogs.isDeleteFolderDialogOpen}
-      renameFileDialogOpen={dialogs.isRenameFileDialogOpen}
-      deleteFileDialogOpen={dialogs.isDeleteFileDialogOpen}
-      viewFileDialogOpen={dialogs.isViewFileDialogOpen}
-      dataRoomNameDraft={forms.dataRoomNameDraft}
-      dataRoomNameError={forms.dataRoomNameError}
-      folderNameDraft={forms.folderNameDraft}
-      folderNameError={forms.folderNameError}
-      fileNameDraft={forms.fileNameDraft}
-      fileNameError={forms.fileNameError}
+      dialogs={dialogs}
+      forms={forms}
       activeDataRoomName={activeDataRoomName}
       activeFolderName={activeFolderName}
       targetFolderName={targetFolder ? resolveDisplayName(targetFolder.name) : null}
@@ -77,26 +64,7 @@ export function HomePageDialogsContainer({
       activeFileId={activeFile?.id ?? null}
       dataRoomDeleteSummary={dataRoomDeleteSummary}
       folderDeleteSummary={folderDeleteSummary}
-      onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
-      onDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
-      onCreateDataRoom={handlers.handleCreateDataRoom}
-      onCloseRenameDataRoomDialog={handlers.closeRenameDataRoomDialog}
-      onRenameDataRoom={handlers.handleRenameDataRoom}
-      onCloseDeleteDataRoomDialog={handlers.closeDeleteDataRoomDialog}
-      onDeleteDataRoom={handlers.handleDeleteDataRoom}
-      onCloseCreateFolderDialog={handlers.closeCreateFolderDialog}
-      onFolderNameChange={handlers.handleFolderNameDraftChange}
-      onCreateFolder={handlers.handleCreateFolder}
-      onCloseRenameFolderDialog={handlers.closeRenameFolderDialog}
-      onRenameFolder={handlers.handleRenameFolder}
-      onCloseDeleteFolderDialog={handlers.closeDeleteFolderDialog}
-      onDeleteFolder={handlers.handleDeleteFolder}
-      onCloseRenameFileDialog={handlers.closeRenameFileDialog}
-      onFileNameChange={handlers.handleFileNameDraftChange}
-      onRenameFile={handlers.handleRenameFile}
-      onCloseDeleteFileDialog={handlers.closeDeleteFileDialog}
-      onDeleteFile={handlers.handleDeleteFile}
-      onCloseViewFileDialog={handlers.closeViewFileDialog}
+      handlers={handlers}
     />
   )
 }

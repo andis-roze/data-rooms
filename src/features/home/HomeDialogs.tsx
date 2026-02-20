@@ -1,4 +1,9 @@
 import type { NodeId } from '../dataroom/model'
+import type {
+  HomePageHandlers,
+  HomePageSelectionState,
+  HomePageUiState,
+} from './model/homePageViewModel'
 import { DataRoomDialogs } from './dialogs/DataRoomDialogs'
 import { FileDialogs } from './dialogs/FileDialogs'
 import { FilePreviewDialog } from './dialogs/FilePreviewDialog'
@@ -8,66 +13,43 @@ export { FeedbackStack } from './dialogs/FeedbackStack'
 
 // Composes all home-page dialogs behind a single prop surface for container usage.
 interface HomeDialogsProps {
-  createDataRoomDialogOpen: boolean
-  renameDataRoomDialogOpen: boolean
-  deleteDataRoomDialogOpen: boolean
-  createFolderDialogOpen: boolean
-  renameFolderDialogOpen: boolean
-  deleteFolderDialogOpen: boolean
-  renameFileDialogOpen: boolean
-  deleteFileDialogOpen: boolean
-  viewFileDialogOpen: boolean
-  dataRoomNameDraft: string
-  dataRoomNameError: string | null
-  folderNameDraft: string
-  folderNameError: string | null
-  fileNameDraft: string
-  fileNameError: string | null
+  dialogs: HomePageUiState['dialogs']
+  forms: HomePageUiState['forms']
   activeDataRoomName: string
   activeFolderName: string
   targetFolderName: string | null
   activeFileId: NodeId | null
   activeFileName: string | null
-  dataRoomDeleteSummary: { folderCount: number; fileCount: number }
-  folderDeleteSummary: { folderCount: number; fileCount: number }
-  onCloseCreateDataRoomDialog: () => void
-  onDataRoomNameChange: (value: string) => void
-  onCreateDataRoom: () => void
-  onCloseRenameDataRoomDialog: () => void
-  onRenameDataRoom: () => void
-  onCloseDeleteDataRoomDialog: () => void
-  onDeleteDataRoom: () => void
-  onCloseCreateFolderDialog: () => void
-  onFolderNameChange: (value: string) => void
-  onCreateFolder: () => void
-  onCloseRenameFolderDialog: () => void
-  onRenameFolder: () => void
-  onCloseDeleteFolderDialog: () => void
-  onDeleteFolder: () => void
-  onCloseRenameFileDialog: () => void
-  onFileNameChange: (value: string) => void
-  onRenameFile: () => void
-  onCloseDeleteFileDialog: () => void
-  onDeleteFile: () => void
-  onCloseViewFileDialog: () => void
+  dataRoomDeleteSummary: HomePageSelectionState['dataRoomDeleteSummary']
+  folderDeleteSummary: HomePageSelectionState['folderDeleteSummary']
+  handlers: Pick<
+    HomePageHandlers,
+    | 'closeCreateDataRoomDialog'
+    | 'handleDataRoomNameDraftChange'
+    | 'handleCreateDataRoom'
+    | 'closeRenameDataRoomDialog'
+    | 'handleRenameDataRoom'
+    | 'closeDeleteDataRoomDialog'
+    | 'handleDeleteDataRoom'
+    | 'closeCreateFolderDialog'
+    | 'handleFolderNameDraftChange'
+    | 'handleCreateFolder'
+    | 'closeRenameFolderDialog'
+    | 'handleRenameFolder'
+    | 'closeDeleteFolderDialog'
+    | 'handleDeleteFolder'
+    | 'closeRenameFileDialog'
+    | 'handleFileNameDraftChange'
+    | 'handleRenameFile'
+    | 'closeDeleteFileDialog'
+    | 'handleDeleteFile'
+    | 'closeViewFileDialog'
+  >
 }
 
 export function HomeDialogs({
-  createDataRoomDialogOpen,
-  renameDataRoomDialogOpen,
-  deleteDataRoomDialogOpen,
-  createFolderDialogOpen,
-  renameFolderDialogOpen,
-  deleteFolderDialogOpen,
-  renameFileDialogOpen,
-  deleteFileDialogOpen,
-  viewFileDialogOpen,
-  dataRoomNameDraft,
-  dataRoomNameError,
-  folderNameDraft,
-  folderNameError,
-  fileNameDraft,
-  fileNameError,
+  dialogs,
+  forms,
   activeDataRoomName,
   activeFolderName,
   targetFolderName,
@@ -75,82 +57,63 @@ export function HomeDialogs({
   activeFileName,
   dataRoomDeleteSummary,
   folderDeleteSummary,
-  onCloseCreateDataRoomDialog,
-  onDataRoomNameChange,
-  onCreateDataRoom,
-  onCloseRenameDataRoomDialog,
-  onRenameDataRoom,
-  onCloseDeleteDataRoomDialog,
-  onDeleteDataRoom,
-  onCloseCreateFolderDialog,
-  onFolderNameChange,
-  onCreateFolder,
-  onCloseRenameFolderDialog,
-  onRenameFolder,
-  onCloseDeleteFolderDialog,
-  onDeleteFolder,
-  onCloseRenameFileDialog,
-  onFileNameChange,
-  onRenameFile,
-  onCloseDeleteFileDialog,
-  onDeleteFile,
-  onCloseViewFileDialog,
+  handlers,
 }: HomeDialogsProps) {
   return (
     <>
       <DataRoomDialogs
-        createDataRoomDialogOpen={createDataRoomDialogOpen}
-        renameDataRoomDialogOpen={renameDataRoomDialogOpen}
-        deleteDataRoomDialogOpen={deleteDataRoomDialogOpen}
-        dataRoomNameDraft={dataRoomNameDraft}
-        dataRoomNameError={dataRoomNameError}
+        createDataRoomDialogOpen={dialogs.isCreateDataRoomDialogOpen}
+        renameDataRoomDialogOpen={dialogs.isRenameDataRoomDialogOpen}
+        deleteDataRoomDialogOpen={dialogs.isDeleteDataRoomDialogOpen}
+        dataRoomNameDraft={forms.dataRoomNameDraft}
+        dataRoomNameError={forms.dataRoomNameError}
         activeDataRoomName={activeDataRoomName}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
-        onCloseCreateDataRoomDialog={onCloseCreateDataRoomDialog}
-        onDataRoomNameChange={onDataRoomNameChange}
-        onCreateDataRoom={onCreateDataRoom}
-        onCloseRenameDataRoomDialog={onCloseRenameDataRoomDialog}
-        onRenameDataRoom={onRenameDataRoom}
-        onCloseDeleteDataRoomDialog={onCloseDeleteDataRoomDialog}
-        onDeleteDataRoom={onDeleteDataRoom}
+        onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
+        onDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
+        onCreateDataRoom={handlers.handleCreateDataRoom}
+        onCloseRenameDataRoomDialog={handlers.closeRenameDataRoomDialog}
+        onRenameDataRoom={handlers.handleRenameDataRoom}
+        onCloseDeleteDataRoomDialog={handlers.closeDeleteDataRoomDialog}
+        onDeleteDataRoom={handlers.handleDeleteDataRoom}
       />
 
       <FolderDialogs
-        createFolderDialogOpen={createFolderDialogOpen}
-        renameFolderDialogOpen={renameFolderDialogOpen}
-        deleteFolderDialogOpen={deleteFolderDialogOpen}
-        folderNameDraft={folderNameDraft}
-        folderNameError={folderNameError}
+        createFolderDialogOpen={dialogs.isCreateFolderDialogOpen}
+        renameFolderDialogOpen={dialogs.isRenameFolderDialogOpen}
+        deleteFolderDialogOpen={dialogs.isDeleteFolderDialogOpen}
+        folderNameDraft={forms.folderNameDraft}
+        folderNameError={forms.folderNameError}
         activeFolderName={activeFolderName}
         targetFolderName={targetFolderName}
         folderDeleteSummary={folderDeleteSummary}
-        onCloseCreateFolderDialog={onCloseCreateFolderDialog}
-        onFolderNameChange={onFolderNameChange}
-        onCreateFolder={onCreateFolder}
-        onCloseRenameFolderDialog={onCloseRenameFolderDialog}
-        onRenameFolder={onRenameFolder}
-        onCloseDeleteFolderDialog={onCloseDeleteFolderDialog}
-        onDeleteFolder={onDeleteFolder}
+        onCloseCreateFolderDialog={handlers.closeCreateFolderDialog}
+        onFolderNameChange={handlers.handleFolderNameDraftChange}
+        onCreateFolder={handlers.handleCreateFolder}
+        onCloseRenameFolderDialog={handlers.closeRenameFolderDialog}
+        onRenameFolder={handlers.handleRenameFolder}
+        onCloseDeleteFolderDialog={handlers.closeDeleteFolderDialog}
+        onDeleteFolder={handlers.handleDeleteFolder}
       />
 
       <FileDialogs
-        renameFileDialogOpen={renameFileDialogOpen}
-        deleteFileDialogOpen={deleteFileDialogOpen}
-        fileNameDraft={fileNameDraft}
-        fileNameError={fileNameError}
+        renameFileDialogOpen={dialogs.isRenameFileDialogOpen}
+        deleteFileDialogOpen={dialogs.isDeleteFileDialogOpen}
+        fileNameDraft={forms.fileNameDraft}
+        fileNameError={forms.fileNameError}
         activeFileName={activeFileName}
-        onCloseRenameFileDialog={onCloseRenameFileDialog}
-        onFileNameChange={onFileNameChange}
-        onRenameFile={onRenameFile}
-        onCloseDeleteFileDialog={onCloseDeleteFileDialog}
-        onDeleteFile={onDeleteFile}
+        onCloseRenameFileDialog={handlers.closeRenameFileDialog}
+        onFileNameChange={handlers.handleFileNameDraftChange}
+        onRenameFile={handlers.handleRenameFile}
+        onCloseDeleteFileDialog={handlers.closeDeleteFileDialog}
+        onDeleteFile={handlers.handleDeleteFile}
       />
 
       <FilePreviewDialog
-        viewFileDialogOpen={viewFileDialogOpen}
+        viewFileDialogOpen={dialogs.isViewFileDialogOpen}
         activeFileId={activeFileId}
         activeFileName={activeFileName}
-        onCloseViewFileDialog={onCloseViewFileDialog}
+        onCloseViewFileDialog={handlers.closeViewFileDialog}
       />
     </>
   )
