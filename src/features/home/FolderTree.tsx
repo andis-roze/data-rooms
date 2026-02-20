@@ -4,6 +4,7 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined'
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
 import RemoveIcon from '@mui/icons-material/Remove'
+import type { MouseEvent } from 'react'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Box from '@mui/material/Box'
@@ -12,6 +13,50 @@ import Tooltip from '@mui/material/Tooltip'
 import type { DataRoom, DataRoomState, Folder, NodeId } from '../dataroom/model'
 import { formatPathForDisplay } from './services/formatters'
 import { getFolderChildren } from './utils'
+
+interface TreeExpandToggleProps {
+  hasChildren: boolean
+  isExpanded: boolean
+  ariaLabel: string
+  onToggle: (event: MouseEvent<HTMLButtonElement>) => void
+  marginLeft?: number
+}
+
+function TreeExpandToggle({ hasChildren, isExpanded, ariaLabel, onToggle, marginLeft = 0.5 }: TreeExpandToggleProps) {
+  if (!hasChildren) {
+    return <Box sx={{ width: 36 }} />
+  }
+
+  return (
+    <IconButton size="small" aria-label={ariaLabel} onClick={onToggle} sx={{ ml: marginLeft }}>
+      {isExpanded ? <RemoveIcon fontSize="small" /> : <AddIcon fontSize="small" />}
+    </IconButton>
+  )
+}
+
+interface TreeNodeActionsProps {
+  onRename: (event: MouseEvent<HTMLButtonElement>) => void
+  onDelete: (event: MouseEvent<HTMLButtonElement>) => void
+  renameAriaLabel: string
+  deleteAriaLabel: string
+}
+
+function TreeNodeActions({ onRename, onDelete, renameAriaLabel, deleteAriaLabel }: TreeNodeActionsProps) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
+      <Tooltip title="Rename">
+        <IconButton size="small" aria-label={renameAriaLabel} onClick={onRename}>
+          <DriveFileRenameOutlineIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Delete">
+        <IconButton size="small" color="error" aria-label={deleteAriaLabel} onClick={onDelete}>
+          <DeleteOutlineIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  )
+}
 
 interface FolderTreeNodeProps {
   folderId: NodeId
@@ -60,21 +105,15 @@ function FolderTreeNode({
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', pl: depth * 2 }}>
-        {hasChildren ? (
-          <IconButton
-            size="small"
-            aria-label={`${isExpanded ? 'Collapse' : 'Expand'} folder ${folderDisplayName}`}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleNode(folder.id)
-            }}
-            sx={{ ml: 0.5 }}
-          >
-            {isExpanded ? <RemoveIcon fontSize="small" /> : <AddIcon fontSize="small" />}
-          </IconButton>
-        ) : (
-          <Box sx={{ width: 36 }} />
-        )}
+        <TreeExpandToggle
+          hasChildren={hasChildren}
+          isExpanded={isExpanded}
+          ariaLabel={`${isExpanded ? 'Collapse' : 'Expand'} folder ${folderDisplayName}`}
+          onToggle={(event) => {
+            event.stopPropagation()
+            onToggleNode(folder.id)
+          }}
+        />
         <ListItemButton
           selected={selectedFolderId === folder.id}
           onClick={() => onSelectFolder(folder.id)}
@@ -94,33 +133,18 @@ function FolderTreeNode({
             primaryTypographyProps={{ noWrap: true }}
           />
         </ListItemButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
-          <Tooltip title="Rename">
-            <IconButton
-              size="small"
-              aria-label={`Rename folder ${folderDisplayName} in tree`}
-              onClick={(event) => {
-                event.stopPropagation()
-                onOpenRenameFolder(folder)
-              }}
-            >
-              <DriveFileRenameOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              color="error"
-              aria-label={`Delete folder ${folderDisplayName} in tree`}
-              onClick={(event) => {
-                event.stopPropagation()
-                onOpenDeleteFolder(folder)
-              }}
-            >
-              <DeleteOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        <TreeNodeActions
+          renameAriaLabel={`Rename folder ${folderDisplayName} in tree`}
+          deleteAriaLabel={`Delete folder ${folderDisplayName} in tree`}
+          onRename={(event) => {
+            event.stopPropagation()
+            onOpenRenameFolder(folder)
+          }}
+          onDelete={(event) => {
+            event.stopPropagation()
+            onOpenDeleteFolder(folder)
+          }}
+        />
       </Box>
       {isExpanded
         ? children.map((childFolder) => (
@@ -188,21 +212,15 @@ export function DataRoomTreeNode({
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        {hasChildren ? (
-          <IconButton
-            size="small"
-            aria-label={`${isExpanded ? 'Collapse' : 'Expand'} data room ${dataRoomDisplayName}`}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleNode(dataRoom.id)
-            }}
-            sx={{ ml: 0.5 }}
-          >
-            {isExpanded ? <RemoveIcon fontSize="small" /> : <AddIcon fontSize="small" />}
-          </IconButton>
-        ) : (
-          <Box sx={{ width: 36 }} />
-        )}
+        <TreeExpandToggle
+          hasChildren={hasChildren}
+          isExpanded={isExpanded}
+          ariaLabel={`${isExpanded ? 'Collapse' : 'Expand'} data room ${dataRoomDisplayName}`}
+          onToggle={(event) => {
+            event.stopPropagation()
+            onToggleNode(dataRoom.id)
+          }}
+        />
         <ListItemButton
           selected={dataRoomSelected && rootSelected}
           onClick={() => onSelectDataRoom(dataRoom.id)}
@@ -222,33 +240,18 @@ export function DataRoomTreeNode({
             primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
           />
         </ListItemButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}>
-          <Tooltip title="Rename">
-            <IconButton
-              size="small"
-              aria-label={`Rename data room ${dataRoomDisplayName} in tree`}
-              onClick={(event) => {
-                event.stopPropagation()
-                onOpenRenameDataRoom(dataRoom)
-              }}
-            >
-              <DriveFileRenameOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              color="error"
-              aria-label={`Delete data room ${dataRoomDisplayName} in tree`}
-              onClick={(event) => {
-                event.stopPropagation()
-                onOpenDeleteDataRoom(dataRoom)
-              }}
-            >
-              <DeleteOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        <TreeNodeActions
+          renameAriaLabel={`Rename data room ${dataRoomDisplayName} in tree`}
+          deleteAriaLabel={`Delete data room ${dataRoomDisplayName} in tree`}
+          onRename={(event) => {
+            event.stopPropagation()
+            onOpenRenameDataRoom(dataRoom)
+          }}
+          onDelete={(event) => {
+            event.stopPropagation()
+            onOpenDeleteDataRoom(dataRoom)
+          }}
+        />
       </Box>
       {isExpanded
         ? rootChildren.map((childFolder) => (
