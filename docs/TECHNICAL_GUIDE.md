@@ -122,6 +122,22 @@ docker compose up --build
 
 App URL: `http://localhost:8080`
 
+## UX Walkthrough Video Recording
+
+One-command automated recording:
+
+```bash
+npm run record:ux
+```
+
+If Chromium is not installed for Playwright yet:
+
+```bash
+npm run record:ux:install-browser
+```
+
+Output video files are written to `recordings/`.
+
 ## Quality Gates
 
 Manual checks:

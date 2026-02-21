@@ -60,6 +60,16 @@
     },
     {
       "type": "npm",
+      "script": "record:ux:install-browser",
+      "label": "npm: record:ux:install-browser"
+    },
+    {
+      "type": "npm",
+      "script": "record:ux",
+      "label": "npm: record:ux"
+    },
+    {
+      "type": "npm",
       "script": "hooks:install",
       "label": "npm: hooks:install"
     },
