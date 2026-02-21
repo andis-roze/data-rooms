@@ -70,6 +70,16 @@
     },
     {
       "type": "npm",
+      "script": "record:ux:slow",
+      "label": "npm: record:ux:slow"
+    },
+    {
+      "type": "npm",
+      "script": "record:ux:slower",
+      "label": "npm: record:ux:slower"
+    },
+    {
+      "type": "npm",
       "script": "hooks:install",
       "label": "npm: hooks:install"
     },

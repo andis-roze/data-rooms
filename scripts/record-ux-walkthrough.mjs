@@ -1,10 +1,32 @@
 import { spawn } from 'node:child_process'
 import { mkdir } from 'node:fs/promises'
 import process from 'node:process'
-import { chromium } from 'playwright'
+import { chromium, firefox, webkit } from 'playwright'
 
-const APP_URL = 'http://127.0.0.1:4173'
-const RECORDINGS_DIR = 'recordings'
+function readArg(name) {
+  const prefix = `--${name}=`
+  for (const arg of process.argv.slice(2)) {
+    if (arg.startsWith(prefix)) {
+      return arg.slice(prefix.length)
+    }
+  }
+  return null
+}
+
+function asNumber(value, fallback) {
+  if (!value) {
+    return fallback
+  }
+  const parsed = Number.parseInt(value, 10)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback
+}
+
+const APP_URL = process.env.APP_URL || 'http://127.0.0.1:4173'
+const RECORDINGS_DIR = process.env.RECORDINGS_DIR || 'recordings'
+const START_LOCAL_SERVER = process.env.START_LOCAL_SERVER !== '0'
+const BROWSER = process.env.BROWSER || 'chromium'
+const STEP_DELAY_MS = asNumber(readArg('step-delay-ms') ?? process.env.DEMO_STEP_DELAY_MS, 1800)
+const ACTION_DELAY_MS = asNumber(readArg('action-delay-ms') ?? process.env.DEMO_ACTION_DELAY_MS, 300)
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -51,11 +73,57 @@ function startDevServer() {
 
 async function runWalkthrough(page) {
   page.setDefaultTimeout(20_000)
+  await page.setViewportSize({ width: 1600, height: 900 })
 
-  const step = async (title, action) => {
+  const installStepOverlay = async () => {
+    await page.evaluate(() => {
+      if (document.getElementById('demo-step-overlay')) {
+        return
+      }
+
+      const overlay = document.createElement('div')
+      overlay.id = 'demo-step-overlay'
+      overlay.setAttribute('aria-hidden', 'true')
+      overlay.style.position = 'fixed'
+      overlay.style.top = '16px'
+      overlay.style.right = '16px'
+      overlay.style.zIndex = '2147483647'
+      overlay.style.width = '420px'
+      overlay.style.padding = '14px 16px'
+      overlay.style.pointerEvents = 'none'
+      overlay.style.borderRadius = '12px'
+      overlay.style.background = 'rgba(17, 24, 39, 0.9)'
+      overlay.style.color = '#ffffff'
+      overlay.style.fontFamily = 'Manrope, system-ui, sans-serif'
+      overlay.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.25)'
+      overlay.style.lineHeight = '1.35'
+      overlay.innerHTML = '<div id="demo-step-title" style="font-size:18px;font-weight:800;margin-bottom:6px;"></div><div id="demo-step-note" style="font-size:14px;opacity:0.95;"></div>'
+      document.body.appendChild(overlay)
+    })
+  }
+
+  const updateStepOverlay = async (title, note) => {
+    await page.evaluate(
+      ({ nextTitle, nextNote }) => {
+        const titleElement = document.getElementById('demo-step-title')
+        const noteElement = document.getElementById('demo-step-note')
+        if (titleElement) {
+          titleElement.textContent = nextTitle
+        }
+        if (noteElement) {
+          noteElement.textContent = nextNote
+        }
+      },
+      { nextTitle: title, nextNote: note },
+    )
+  }
+
+  const step = async (title, note, action) => {
     console.log(`\n▶ ${title}`)
+    await updateStepOverlay(title, note)
+    await page.waitForTimeout(STEP_DELAY_MS)
     await action()
-    await page.waitForTimeout(700)
+    await page.waitForTimeout(STEP_DELAY_MS)
   }
 
   const createFolder = async (name) => {
@@ -82,12 +150,13 @@ async function runWalkthrough(page) {
     })
   }
 
-  await step('Open app', async () => {
+  await step('Open app', 'Load the live demo and wait for the default data room.', async () => {
     await page.goto(APP_URL, { waitUntil: 'networkidle' })
+    await installStepOverlay()
     await page.getByRole('heading', { name: 'Acme Due Diligence Room' }).waitFor()
   })
 
-  await step('Create data room', async () => {
+  await step('Create data room', 'Open sidebar actions and create a new data room.', async () => {
     await openDataRoomActions()
     await page.getByRole('menuitem', { name: 'Create data room' }).click()
     const dialog = page.getByRole('dialog', { name: 'Create data room' })
@@ -97,7 +166,7 @@ async function runWalkthrough(page) {
     await page.getByRole('heading', { name: 'Project Zephyr' }).waitFor()
   })
 
-  await step('Rename data room', async () => {
+  await step('Rename data room', 'Rename the active data room through sidebar actions.', async () => {
     await openDataRoomActions()
     await page.getByRole('menuitem', { name: 'Rename data room' }).click()
     const dialog = page.getByRole('dialog', { name: 'Rename data room' })
@@ -107,23 +176,25 @@ async function runWalkthrough(page) {
     await page.getByRole('heading', { name: 'Project Apollo' }).waitFor()
   })
 
-  await step('Create folder structure', async () => {
+  await step('Create folder structure', 'Create Archive and Finance folders at root level.', async () => {
     await createFolder('Archive')
     await goToBreadcrumb('Data Room')
     await createFolder('Finance')
     await goToBreadcrumb('Data Room')
   })
 
-  await step('Upload a PDF', async () => {
+  await step('Upload a PDF', 'Upload a sample PDF into the current folder.', async () => {
     await uploadPdf('terms.pdf')
     await page.getByText('terms.pdf').waitFor()
   })
 
-  await step('Bulk move selected folder + file', async () => {
+  await step('Bulk move selected folder + file', 'Select multiple items and move them to Archive.', async () => {
     const contentList = page.getByRole('list', { name: 'Current folder contents' })
     await contentList.getByRole('checkbox', { name: 'Select item Finance' }).click()
+    await page.waitForTimeout(ACTION_DELAY_MS)
     await contentList.getByRole('checkbox', { name: 'Select item terms.pdf' }).click()
-    await page.getByRole('button', { name: 'Move' }).click()
+    await page.waitForTimeout(ACTION_DELAY_MS)
+    await page.getByRole('button', { name: 'Move', exact: true }).click()
 
     const moveDialog = page.getByRole('dialog', { name: 'Move items' })
     await moveDialog.getByRole('button', { name: 'Data Room / Archive' }).click()
@@ -131,21 +202,21 @@ async function runWalkthrough(page) {
     await moveDialog.waitFor({ state: 'hidden' })
   })
 
-  await step('Browse folders with breadcrumbs and ".."', async () => {
+  await step('Browse folders with breadcrumbs and ".."', 'Navigate via folder rows, breadcrumbs, and parent entry.', async () => {
     await page.getByRole('button', { name: 'Open folder Archive' }).click()
+    await page.waitForTimeout(ACTION_DELAY_MS)
     await page.getByRole('button', { name: 'Open folder Finance' }).click()
     await createFolder('Invoices')
     const parentNavigationButton = page.getByRole('button', { name: 'Open folder ..' })
     if (await parentNavigationButton.count()) {
       await parentNavigationButton.click()
     } else {
-      await page.getByRole('button', { name: 'Open folder Invoices' }).click()
-      await page.getByRole('button', { name: 'Open folder ..' }).click()
+      await goToBreadcrumb('Archive')
     }
     await goToBreadcrumb('Archive')
   })
 
-  await step('Drag and drop move', async () => {
+  await step('Drag and drop move', 'Drag a selected file and drop it onto a destination folder.', async () => {
     await uploadPdf('dragged.pdf')
     const list = page.getByRole('list', { name: 'Current folder contents' })
     await list.getByRole('checkbox', { name: 'Select item dragged.pdf' }).click()
@@ -159,7 +230,7 @@ async function runWalkthrough(page) {
     await goToBreadcrumb('Archive')
   })
 
-  await step('Validation message (duplicate folder name)', async () => {
+  await step('Validation message (duplicate folder name)', 'Trigger and display duplicate name validation in dialog.', async () => {
     await createFolder('Validation')
     await goToBreadcrumb('Archive')
 
@@ -172,44 +243,52 @@ async function runWalkthrough(page) {
     await dialog.waitFor({ state: 'hidden' })
   })
 
-  await step('Bulk delete flow with confirm dialog', async () => {
+  await step('Bulk delete flow with confirm dialog', 'Open delete dialog, cancel once, then confirm.', async () => {
     const contentList = page.getByRole('list', { name: 'Current folder contents' })
     await contentList.getByRole('checkbox', { name: 'Select item Finance' }).click()
-    await page.getByRole('button', { name: 'Delete selected' }).click()
+    await page.getByRole('button', { name: 'Delete selected', exact: true }).click()
 
     const deleteDialog = page.getByRole('dialog', { name: 'Delete selected items?' })
     await deleteDialog.getByRole('button', { name: 'Cancel' }).click()
     await deleteDialog.waitFor({ state: 'hidden' })
 
-    await page.getByRole('button', { name: 'Delete selected' }).click()
+    await page.getByRole('button', { name: 'Delete selected', exact: true }).click()
     const deleteDialogConfirm = page.getByRole('dialog', { name: 'Delete selected items?' })
     await deleteDialogConfirm.getByRole('button', { name: 'Delete' }).click()
     await deleteDialogConfirm.waitFor({ state: 'hidden' })
   })
 
-  await step('Switch language to DE and back to EN', async () => {
-    await page.getByRole('button', { name: 'DE' }).click()
+  await step('Switch language to DE and back to EN', 'Switch UI language to German, then back to English.', async () => {
+    await page.getByRole('button', { name: 'DE', exact: true }).click()
     await page.getByRole('link', { name: 'Start' }).waitFor()
-    await page.getByRole('button', { name: 'EN' }).click()
+    await page.getByRole('button', { name: 'EN', exact: true }).click()
     await page.getByRole('link', { name: 'Home' }).waitFor()
   })
 
-  await step('Sort content by name', async () => {
+  await step('Sort content by name', 'Toggle table sort by name to finish the walkthrough.', async () => {
     await page.getByRole('button', { name: 'Sort by name' }).click()
   })
 }
 
 async function main() {
   await mkdir(RECORDINGS_DIR, { recursive: true })
+  console.log(`Recorder config: browser=${BROWSER}, stepDelay=${STEP_DELAY_MS}ms, actionDelay=${ACTION_DELAY_MS}ms`)
 
-  console.log('Starting dev server...')
-  const server = startDevServer()
+  const server = START_LOCAL_SERVER ? startDevServer() : null
+  if (START_LOCAL_SERVER) {
+    console.log('Starting dev server...')
+  } else {
+    console.log('Skipping local dev server startup (START_LOCAL_SERVER=0)')
+  }
 
   try {
-    await waitForServer(APP_URL)
+    if (START_LOCAL_SERVER) {
+      await waitForServer(APP_URL)
+    }
 
-    console.log('Launching browser and recording walkthrough...')
-    const browser = await chromium.launch({ headless: true })
+    console.log(`Launching ${BROWSER} and recording walkthrough...`)
+    const browserType = BROWSER === 'firefox' ? firefox : BROWSER === 'webkit' ? webkit : chromium
+    const browser = await browserType.launch({ headless: true })
     const context = await browser.newContext({
       viewport: { width: 1600, height: 900 },
       recordVideo: {
@@ -233,7 +312,7 @@ async function main() {
       console.log('\nWalkthrough complete. No video path returned.')
     }
   } finally {
-    if (!server.killed) {
+    if (server && !server.killed) {
       server.kill('SIGTERM')
     }
   }

@@ -130,6 +130,13 @@ One-command automated recording:
 npm run record:ux
 ```
 
+Slower presets:
+
+```bash
+npm run record:ux:slow
+npm run record:ux:slower
+```
+
 If Chromium is not installed for Playwright yet:
 
 ```bash
@@ -137,6 +144,15 @@ npm run record:ux:install-browser
 ```
 
 Output video files are written to `recordings/`.
+
+Speed is configurable via CLI or env:
+
+```bash
+node scripts/record-ux-walkthrough.mjs --step-delay-ms=3500 --action-delay-ms=800
+```
+
+- `--step-delay-ms` / `DEMO_STEP_DELAY_MS`: pause before and after each step
+- `--action-delay-ms` / `DEMO_ACTION_DELAY_MS`: pause between key actions inside a step
 
 ## Quality Gates
 
