@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
   const pollInterval = asNumber(env.VITE_HMR_POLL_INTERVAL, 250)
 
   return {
+    base: env.VITE_BASE_PATH || '/',
     plugins: [react()],
     server: {
       host: env.VITE_DEV_HOST || '0.0.0.0',

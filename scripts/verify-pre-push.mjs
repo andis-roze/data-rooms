@@ -45,3 +45,13 @@ if (linesPct < minimumCoveragePercent) {
 }
 
 console.log(`[pre-push] Coverage check passed: ${linesPct.toFixed(2)}% >= ${minimumCoveragePercent}%.`)
+
+if (process.env.AUTO_DEPLOY_GH_PAGES === '1') {
+  console.log('[pre-push] AUTO_DEPLOY_GH_PAGES=1, running GitHub Pages deploy...')
+  const deployRun = spawnSync('npm', ['run', 'deploy:gh-pages'], { stdio: 'inherit' })
+
+  if (deployRun.status !== 0) {
+    console.error('[pre-push] Blocked: GitHub Pages deploy failed.')
+    process.exit(deployRun.status ?? 1)
+  }
+}

@@ -181,6 +181,38 @@ Verify in Vercel:
 - Automatic deployments enabled
 - Production branch configuration
 
+## Deployment Notes (GitHub Pages)
+
+Scripts:
+
+```bash
+npm run build:gh-pages
+npm run deploy:gh-pages
+```
+
+What `build:gh-pages` does:
+
+- detects repository name and sets `VITE_BASE_PATH` (for example `/data-rooms/`)
+- runs the regular production build
+- creates `dist/404.html` from `dist/index.html` for SPA deep-link fallback
+- writes `dist/.nojekyll`
+
+What `deploy:gh-pages` does:
+
+- runs `build:gh-pages` (unless `--skip-build` is passed)
+- publishes `dist/` to `gh-pages` branch via `gh-pages` package
+
+Optional pre-push auto-deploy:
+
+- set `AUTO_DEPLOY_GH_PAGES=1` before `git push`
+- pre-push quality gate runs first, then deployment runs automatically
+
+Optional overrides:
+
+- `GH_PAGES_BASE_PATH` (default auto-detected from repo name)
+- `GH_PAGES_BRANCH` (default `gh-pages`)
+- `GH_PAGES_COMMIT_MESSAGE` (default `chore(deploy): publish GitHub Pages`)
+
 ## Current Tradeoffs
 
 - Browser-local persistence only
