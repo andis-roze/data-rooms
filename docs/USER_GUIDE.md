@@ -2,6 +2,14 @@
 
 This guide explains how to use the Data Room app from an end-user perspective.
 
+## Demo Recordings
+
+Pre-recorded UX walkthroughs are available in:
+
+- `artifacts/demo-video/demo-full-ux-slow.webm`
+- `artifacts/demo-video/demo-full-ux-slowest.webm`
+- `artifacts/demo-video/demo-full-ux-ultra-slow.webm` (best for step-by-step review)
+
 ## What You Can Do
 
 - Create, rename, and delete Data Rooms

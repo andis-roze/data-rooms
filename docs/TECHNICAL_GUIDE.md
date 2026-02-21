@@ -143,7 +143,19 @@ If Chromium is not installed for Playwright yet:
 npm run record:ux:install-browser
 ```
 
-Output video files are written to `recordings/`.
+Output video files are written to `recordings/` by default.
+
+For shared/review artifacts in this repository, use:
+
+```bash
+RECORDINGS_DIR=artifacts/demo-video npm run record:ux
+```
+
+Current provided demo recordings:
+
+- `artifacts/demo-video/demo-full-ux-slow.webm`
+- `artifacts/demo-video/demo-full-ux-slowest.webm`
+- `artifacts/demo-video/demo-full-ux-ultra-slow.webm`
 
 Speed is configurable via CLI or env:
 
