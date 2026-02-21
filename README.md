@@ -9,7 +9,8 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 
 ## Demo
 
-- Public URL: `TODO: add deployment URL`
+- Public URL: [https://data-rooms-two.vercel.app/](https://data-rooms-two.vercel.app/)
+- Deployment: auto-deploy from `main` branch (Vercel Git integration)
 
 ## Quick Start
 
