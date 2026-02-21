@@ -1,24 +1,14 @@
 import Box from '@mui/material/Box'
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
-import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
 import type { ChangeEvent, RefObject } from 'react'
-import { useTranslation } from 'react-i18next'
 import type { Folder, NodeId } from '../../dataroom/model'
-import { DialogEntityName } from '../dialogs/DialogEntityName'
-import { formatPathForDisplay, truncateMiddle } from '../services/formatters'
 import { FolderContentTable } from '../FolderContentTable'
 import type { FileItem, FolderContentItem, SortState } from '../types'
+import { ContentActionBar } from './content/ContentActionBar'
+import { ContentBreadcrumbBar } from './content/ContentBreadcrumbBar'
+import { ContentSelectionBanner } from './content/ContentSelectionBanner'
+import { DeleteSelectedContentDialog } from './content/DeleteSelectedContentDialog'
+import { MoveContentDialog } from './content/MoveContentDialog'
 
 interface HomeContentSectionStateProps {
   activeDataRoomName: string
@@ -87,106 +77,74 @@ export function HomeContentSection({
   handlers,
 }: HomeContentSectionProps) {
   const {
-  activeDataRoomName,
-  activeFolderId,
-  breadcrumbs,
-  visibleContentItems,
-  sortState,
-  locale,
-  resolveDisplayName,
-  checkedContentItemIds,
-  selectedContentItemCount,
-  deleteSelectedContentItemCount,
-  deleteSelectedFileCount,
-  deleteSelectedFolderCount,
-  selectedContentItemNames,
-  indeterminateFolderIds,
-  moveContentDialogOpen,
-  moveItemCount,
-  moveItemNames,
-  moveDestinationFolderId,
-  moveDestinationFolderOptions,
-  moveValidationError,
-  dragMoveActive,
-  dragMoveTargetFolderId,
-  deleteSelectedContentDialogOpen,
-  uploadInputRef,
+    activeDataRoomName,
+    activeFolderId,
+    breadcrumbs,
+    visibleContentItems,
+    sortState,
+    locale,
+    resolveDisplayName,
+    checkedContentItemIds,
+    selectedContentItemCount,
+    deleteSelectedContentItemCount,
+    deleteSelectedFileCount,
+    deleteSelectedFolderCount,
+    selectedContentItemNames,
+    indeterminateFolderIds,
+    moveContentDialogOpen,
+    moveItemCount,
+    moveItemNames,
+    moveDestinationFolderId,
+    moveDestinationFolderOptions,
+    moveValidationError,
+    dragMoveActive,
+    dragMoveTargetFolderId,
+    deleteSelectedContentDialogOpen,
+    uploadInputRef,
   } = state
 
   const {
-  onCreateFolder,
-  onUploadPdf,
-  onUploadInputChange,
-  onToggleSort,
-  onToggleContentItemSelection,
-  onToggleAllContentItemSelection,
-  onClearContentItemSelection,
-  onOpenDeleteSelectedContentDialog,
-  onCloseDeleteSelectedContentDialog,
-  onDeleteSelectedContent,
-  onOpenMoveSelectedContentDialog,
-  onCloseMoveContentDialog,
-  onMoveDestinationFolderChange,
-  onMoveSelectedContent,
-  onStartDragMove,
-  onEndDragMove,
-  onSetDragMoveTargetFolder,
-  onCanDropOnFolder,
-  onDropOnFolder,
-  onSelectFolder,
-  onOpenRenameFolder,
-  onOpenDeleteFolder,
-  onOpenMoveFolder,
-  onOpenViewFile,
-  onOpenRenameFile,
-  onOpenDeleteFile,
-  onOpenMoveFile,
+    onCreateFolder,
+    onUploadPdf,
+    onUploadInputChange,
+    onToggleSort,
+    onToggleContentItemSelection,
+    onToggleAllContentItemSelection,
+    onClearContentItemSelection,
+    onOpenDeleteSelectedContentDialog,
+    onCloseDeleteSelectedContentDialog,
+    onDeleteSelectedContent,
+    onOpenMoveSelectedContentDialog,
+    onCloseMoveContentDialog,
+    onMoveDestinationFolderChange,
+    onMoveSelectedContent,
+    onStartDragMove,
+    onEndDragMove,
+    onSetDragMoveTargetFolder,
+    onCanDropOnFolder,
+    onDropOnFolder,
+    onSelectFolder,
+    onOpenRenameFolder,
+    onOpenDeleteFolder,
+    onOpenMoveFolder,
+    onOpenViewFile,
+    onOpenRenameFile,
+    onOpenDeleteFile,
+    onOpenMoveFile,
   } = handlers
-
-  const { t } = useTranslation()
-  const activeDataRoomDisplayName = formatPathForDisplay(activeDataRoomName)
-  const formatMoveOptionLabel = (name: string) => truncateMiddle(name, 56)
 
   return (
     <Box component="section" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
       <Stack spacing={2.5}>
-        <Stack spacing={0.75}>
-          <Typography
-            variant="h1"
-            title={activeDataRoomName}
-            sx={{
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {activeDataRoomDisplayName}
-          </Typography>
-          <Breadcrumbs aria-label={t('dataroomBreadcrumbsLabel')}>
-            {breadcrumbs.map((folder) => (
-              <Button
-                key={folder.id}
-                size="small"
-                color={folder.id === activeFolderId ? 'primary' : 'inherit'}
-                onClick={() => onSelectFolder(folder.id)}
-                title={resolveDisplayName(folder.name)}
-                aria-label={resolveDisplayName(folder.name)}
-              >
-                {formatPathForDisplay(resolveDisplayName(folder.name))}
-              </Button>
-            ))}
-          </Breadcrumbs>
-        </Stack>
+        <ContentBreadcrumbBar
+          activeDataRoomName={activeDataRoomName}
+          activeFolderId={activeFolderId}
+          breadcrumbs={breadcrumbs}
+          resolveDisplayName={resolveDisplayName}
+          onSelectFolder={onSelectFolder}
+        />
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-          <Button variant="contained" onClick={onCreateFolder}>
-            {t('dataroomActionCreateFolder')}
-          </Button>
-          <Button variant="text" onClick={onUploadPdf}>
-            {t('dataroomActionUploadPdf')}
-          </Button>
-        </Stack>
+        <ContentActionBar onCreateFolder={onCreateFolder} onUploadPdf={onUploadPdf} />
 
         <input
           ref={uploadInputRef}
@@ -197,37 +155,12 @@ export function HomeContentSection({
           style={{ display: 'none' }}
         />
 
-        {selectedContentItemCount > 0 ? (
-          <Box
-            sx={{
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 2,
-              px: 2,
-              py: 1.5,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 1,
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Typography sx={{ fontWeight: 600 }}>
-              {t('dataroomSelectionCount', { count: selectedContentItemCount })}
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <Button variant="contained" onClick={onOpenMoveSelectedContentDialog}>
-                {t('dataroomActionMove')}
-              </Button>
-              <Button color="error" variant="contained" onClick={onOpenDeleteSelectedContentDialog}>
-                {t('dataroomActionDeleteSelected')}
-              </Button>
-              <Button variant="text" onClick={onClearContentItemSelection}>
-                {t('dataroomActionClearSelection')}
-              </Button>
-            </Stack>
-          </Box>
-        ) : null}
+        <ContentSelectionBanner
+          selectedContentItemCount={selectedContentItemCount}
+          onOpenMoveSelectedContentDialog={onOpenMoveSelectedContentDialog}
+          onOpenDeleteSelectedContentDialog={onOpenDeleteSelectedContentDialog}
+          onClearContentItemSelection={onClearContentItemSelection}
+        />
 
         <FolderContentTable
           items={visibleContentItems}
@@ -257,91 +190,27 @@ export function HomeContentSection({
         />
       </Stack>
 
-      <Dialog open={moveContentDialogOpen} onClose={onCloseMoveContentDialog} fullWidth maxWidth="sm">
-        <DialogTitle>{t('dataroomDialogMoveTitle')}</DialogTitle>
-        <DialogContent>
-          <Typography>{t('dataroomMoveSelectedQuestion', { count: moveItemCount })}</Typography>
-          {moveItemNames.slice(0, 3).map((name, index) => (
-            <DialogEntityName key={`${name}-${index}`} name={name} maxLength={36} />
-          ))}
-          {moveItemNames.length > 3 ? (
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              {t('dataroomSelectionMoreItems', { count: moveItemNames.length - 3 })}
-            </Typography>
-          ) : null}
-          <Typography sx={{ mt: 2, mb: 1, fontWeight: 600 }}>{t('dataroomFieldDestinationFolder')}</Typography>
-          <Paper variant="outlined" sx={{ maxHeight: 220, overflowY: 'auto' }}>
-            <List dense disablePadding aria-label={t('dataroomFieldDestinationFolder')}>
-              {moveDestinationFolderOptions.map((folderOption) => {
-                const displayLabel = formatMoveOptionLabel(folderOption.name)
-                const displayParentPath = folderOption.parentPath ? truncateMiddle(folderOption.parentPath, 72) : null
-                const isTruncated =
-                  displayLabel !== folderOption.name ||
-                  (folderOption.parentPath ? displayParentPath !== folderOption.parentPath : false)
-                return (
-                  <ListItemButton
-                    key={folderOption.id}
-                    selected={moveDestinationFolderId === folderOption.id}
-                    onClick={() => onMoveDestinationFolderChange(folderOption.id)}
-                    aria-label={folderOption.path}
-                    sx={{ pl: 1 + folderOption.depth * 2 }}
-                  >
-                    <Tooltip title={folderOption.path} disableHoverListener={!isTruncated}>
-                      <ListItemText
-                        primary={displayLabel}
-                        secondary={displayParentPath}
-                        primaryTypographyProps={{
-                          noWrap: true,
-                          fontWeight: 500,
-                        }}
-                        secondaryTypographyProps={{
-                          noWrap: true,
-                          color: 'text.secondary',
-                        }}
-                      />
-                    </Tooltip>
-                  </ListItemButton>
-                )
-              })}
-            </List>
-          </Paper>
-          {moveValidationError ? (
-            <Typography color="error" variant="body2">
-              {moveValidationError}
-            </Typography>
-          ) : null}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseMoveContentDialog}>{t('dataroomActionCancel')}</Button>
-          <Button variant="contained" onClick={onMoveSelectedContent} disabled={Boolean(moveValidationError)}>
-            {t('dataroomActionMove')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <MoveContentDialog
+        open={moveContentDialogOpen}
+        moveItemCount={moveItemCount}
+        moveItemNames={moveItemNames}
+        moveDestinationFolderId={moveDestinationFolderId}
+        moveDestinationFolderOptions={moveDestinationFolderOptions}
+        moveValidationError={moveValidationError}
+        onClose={onCloseMoveContentDialog}
+        onMoveDestinationFolderChange={onMoveDestinationFolderChange}
+        onConfirmMove={onMoveSelectedContent}
+      />
 
-      <Dialog open={deleteSelectedContentDialogOpen} onClose={onCloseDeleteSelectedContentDialog} fullWidth maxWidth="xs">
-        <DialogTitle>{t('dataroomDialogDeleteSelectedTitle')}</DialogTitle>
-        <DialogContent>
-          <Typography>{t('dataroomDeleteSelectedQuestion', { count: deleteSelectedContentItemCount })}</Typography>
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            {t('dataroomDeleteSelectedImpact', { fileCount: deleteSelectedFileCount, folderCount: deleteSelectedFolderCount })}
-          </Typography>
-          {selectedContentItemNames.slice(0, 3).map((name, index) => (
-            <DialogEntityName key={`${name}-${index}`} name={name} maxLength={44} />
-          ))}
-          {selectedContentItemNames.length > 3 ? (
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              {t('dataroomSelectionMoreItems', { count: selectedContentItemNames.length - 3 })}
-            </Typography>
-          ) : null}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onCloseDeleteSelectedContentDialog}>{t('dataroomActionCancel')}</Button>
-          <Button color="error" variant="contained" onClick={() => void onDeleteSelectedContent()}>
-            {t('dataroomActionDelete')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeleteSelectedContentDialog
+        open={deleteSelectedContentDialogOpen}
+        deleteSelectedContentItemCount={deleteSelectedContentItemCount}
+        deleteSelectedFileCount={deleteSelectedFileCount}
+        deleteSelectedFolderCount={deleteSelectedFolderCount}
+        selectedContentItemNames={selectedContentItemNames}
+        onClose={onCloseDeleteSelectedContentDialog}
+        onConfirmDelete={onDeleteSelectedContent}
+      />
     </Box>
   )
 }
