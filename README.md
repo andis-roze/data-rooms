@@ -45,7 +45,17 @@ Then open:
 ```bash
 npm run lint
 npm run test:run
+npm run test:smoke:home
+npm run audit:unused
+npm run audit:unused:types
 npm run build
+```
+
+Install git hooks and run the pre-push checks manually:
+
+```bash
+npm run hooks:install
+npm run hooks:pre-push
 ```
 
 ## Localization
