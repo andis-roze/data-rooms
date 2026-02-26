@@ -20,8 +20,6 @@ export interface FolderItem {
   name: string
   updatedAt: number
   folder: Folder
-  displayName?: string
-  isParentNavigation?: boolean
 }
 
 export interface FileItem {

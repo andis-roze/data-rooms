@@ -515,32 +515,4 @@ describe('App routing and localization', () => {
     expect(screen.queryByText('selected.pdf')).not.toBeInTheDocument()
   }, 15000)
 
-  it('moves a folder to parent when dropped on the parent (..) row', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-
-    const financeList = screen.getByRole('list', { name: 'Current folder contents' })
-    const sourceButton = within(financeList).getByRole('button', { name: 'Open folder Invoices' })
-    const sourceRow = sourceButton.closest('li')
-    const parentButton = within(financeList).getByRole('button', { name: 'Open folder Data Room' })
-    const parentRow = parentButton.closest('li')
-
-    expect(sourceRow).not.toBeNull()
-    expect(parentRow).not.toBeNull()
-    dragAndDrop(sourceRow as Element, parentRow as Element)
-
-    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
-
-    await goToBreadcrumb(user, 'Data Room')
-    expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
-  }, 40000)
-
 })

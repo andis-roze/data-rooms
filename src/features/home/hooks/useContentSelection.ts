@@ -26,9 +26,7 @@ export function useContentSelection({
 }: UseContentSelectionParams) {
   const [includedContentItemIds, setIncludedContentItemIds] = useState<NodeId[]>([])
   const [excludedContentItemIds, setExcludedContentItemIds] = useState<NodeId[]>([])
-  const selectableContentItems = visibleContentItems.filter(
-    (item) => !(item.kind === 'folder' && item.isParentNavigation),
-  )
+  const selectableContentItems = visibleContentItems
 
   const includedIdSet = new Set(includedContentItemIds)
   const excludedIdSet = new Set(excludedContentItemIds)

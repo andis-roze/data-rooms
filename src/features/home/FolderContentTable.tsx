@@ -88,8 +88,7 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
     onOpenDeleteFile,
     onOpenMoveFile,
   } = handlers
-  const selectableItems = items.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
-  const selectableItemIds = selectableItems.map((item) => item.id)
+  const selectableItemIds = items.map((item) => item.id)
   const selectedItemIdSet = new Set(selectedItemIds)
   const selectedSelectableCount = selectableItemIds.filter((itemId) => selectedItemIdSet.has(itemId)).length
   const areAllSelectableItemsSelected = selectableItemIds.length > 0 && selectedSelectableCount === selectableItemIds.length
@@ -120,8 +119,6 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
                 key={item.id}
                 itemId={item.id}
                 folder={item.folder}
-                displayName={item.displayName}
-                isParentNavigation={item.isParentNavigation}
                 rowGridTemplate={desktopGridTemplate}
                 locale={locale}
                 resolveDisplayName={resolveDisplayName}

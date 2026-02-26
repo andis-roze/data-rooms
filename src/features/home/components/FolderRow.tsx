@@ -17,8 +17,6 @@ import { formatPathForDisplay, formatUpdatedAt } from '../services/formatters'
 interface FolderRowProps {
   itemId: string
   folder: Folder
-  displayName?: string
-  isParentNavigation?: boolean
   rowGridTemplate: string
   locale: string
   resolveDisplayName: (value: string) => string
@@ -51,8 +49,6 @@ const actionGridTemplate = {
 export function FolderRow({
   itemId,
   folder,
-  displayName,
-  isParentNavigation,
   rowGridTemplate,
   locale,
   resolveDisplayName,
@@ -75,7 +71,7 @@ export function FolderRow({
   onOpenMoveFolder,
 }: FolderRowProps) {
   const { t } = useTranslation()
-  const isDraggable = !isParentNavigation
+  const isDraggable = true
   const idleHoverCursor = selected ? 'move' : 'grab'
   const activeCursor = dragMoveActive ? 'grabbing' : idleHoverCursor
 
@@ -85,9 +81,6 @@ export function FolderRow({
       disablePadding
       draggable={isDraggable}
       onDragStart={(event) => {
-        if (isParentNavigation) {
-          return
-        }
         event.dataTransfer.effectAllowed = 'move'
         event.dataTransfer.setData('text/plain', folder.id)
         if (typeof event.dataTransfer.setDragImage === 'function') {
@@ -133,20 +126,18 @@ export function FolderRow({
         }}
       >
         <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
-          {!isParentNavigation ? (
-            <Checkbox
-              size="small"
-              checked={selected}
-              indeterminate={indeterminate}
-              sx={{
-                '&.MuiCheckbox-indeterminate': {
-                  color: 'text.disabled',
-                },
-              }}
-              inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: resolveDisplayName(folder.name) }) }}
-              onChange={() => onToggleSelect(folder.id)}
-            />
-          ) : null}
+          <Checkbox
+            size="small"
+            checked={selected}
+            indeterminate={indeterminate}
+            sx={{
+              '&.MuiCheckbox-indeterminate': {
+                color: 'text.disabled',
+              },
+            }}
+            inputProps={{ 'aria-label': t('dataroomSelectionSelectItemAria', { name: resolveDisplayName(folder.name) }) }}
+            onChange={() => onToggleSelect(folder.id)}
+          />
         </Box>
         <Box
           sx={{ display: { xs: 'none', md: 'inline-flex' }, alignItems: 'center' }}
@@ -161,10 +152,10 @@ export function FolderRow({
           sx={{ justifyContent: 'flex-start', px: 0, minWidth: 0, textTransform: 'none' }}
           aria-label={t('dataroomAriaOpenFolder', { name: resolveDisplayName(folder.name) })}
           onClick={() => onSelectFolder(folder.id)}
-          title={displayName ?? resolveDisplayName(folder.name)}
+          title={resolveDisplayName(folder.name)}
         >
           <Typography noWrap color={indeterminate ? 'text.secondary' : 'inherit'}>
-            {formatPathForDisplay(displayName ?? resolveDisplayName(folder.name))}
+            {formatPathForDisplay(resolveDisplayName(folder.name))}
           </Typography>
         </Button>
         <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -180,44 +171,34 @@ export function FolderRow({
             width: { xs: 'auto', md: '100%' },
           }}
         >
-          {isParentNavigation ? (
-            <>
-              <Box />
-              <Box />
-              <Box />
-            </>
-          ) : (
-            <>
-              <Tooltip title={t('dataroomActionMove')}>
-                <IconButton
-                  size="small"
-                  aria-label={t('dataroomAriaMoveFolder', { name: resolveDisplayName(folder.name) })}
-                  onClick={() => onOpenMoveFolder(folder)}
-                >
-                  <DriveFileMoveOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={t('dataroomActionRename')}>
-                <IconButton
-                  size="small"
-                  aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
-                  onClick={() => onOpenRenameFolder(folder)}
-                >
-                  <DriveFileRenameOutlineIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={t('dataroomActionDelete')}>
-                <IconButton
-                  size="small"
-                  color="error"
-                  aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
-                  onClick={() => onOpenDeleteFolder(folder)}
-                >
-                  <DeleteOutlineIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
+          <Tooltip title={t('dataroomActionMove')}>
+            <IconButton
+              size="small"
+              aria-label={t('dataroomAriaMoveFolder', { name: resolveDisplayName(folder.name) })}
+              onClick={() => onOpenMoveFolder(folder)}
+            >
+              <DriveFileMoveOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('dataroomActionRename')}>
+            <IconButton
+              size="small"
+              aria-label={t('dataroomAriaRenameFolder', { name: resolveDisplayName(folder.name) })}
+              onClick={() => onOpenRenameFolder(folder)}
+            >
+              <DriveFileRenameOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('dataroomActionDelete')}>
+            <IconButton
+              size="small"
+              color="error"
+              aria-label={t('dataroomAriaDeleteFolder', { name: resolveDisplayName(folder.name) })}
+              onClick={() => onOpenDeleteFolder(folder)}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
     </ListItem>

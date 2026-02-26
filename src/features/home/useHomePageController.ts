@@ -110,15 +110,12 @@ export function useHomePageController(): HomePageViewModel {
   const rootFolder = selectRootFolder(entities, activeDataRoom)
   const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
   const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
-  const allVisibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
-  const parentNavigationItem = allVisibleContentItems.find((item) => item.kind === 'folder' && item.isParentNavigation)
-  const pageableContentItems = allVisibleContentItems.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
-  const listViewPageCount = Math.max(1, Math.ceil(pageableContentItems.length / listViewItemsPerPage))
+  const visibleContentItems = selectVisibleContentItems(entities, activeFolder, sortState)
+  const listViewPageCount = Math.max(1, Math.ceil(visibleContentItems.length / listViewItemsPerPage))
   const resolvedListViewPage = Math.min(listViewPage, listViewPageCount - 1)
   const pageStart = resolvedListViewPage * listViewItemsPerPage
   const pageEnd = pageStart + listViewItemsPerPage
-  const pageItems = pageableContentItems.slice(pageStart, pageEnd)
-  const pagedContentItems = parentNavigationItem ? [parentNavigationItem, ...pageItems] : pageItems
+  const pagedContentItems = visibleContentItems.slice(pageStart, pageEnd)
   const activeDataRoomId = activeDataRoom?.id ?? null
   const locale = i18n.resolvedLanguage ?? i18n.language
 
