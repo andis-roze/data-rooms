@@ -4,7 +4,12 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AppProviders } from '../../app/providers/AppProviders'
 import { appRoutes } from '../../app/router'
-import { clearDataRoomState } from '../../features/dataroom/model'
+import {
+  clearDataRoomState,
+  createFolder as createFolderInState,
+  createSeedDataRoomState,
+  saveDataRoomState,
+} from '../../features/dataroom/model'
 import i18n from '../../i18n/config'
 
 function renderRoute(path: string) {
@@ -17,6 +22,30 @@ function renderRoute(path: string) {
       <RouterProvider router={router} />
     </AppProviders>,
   )
+}
+
+function seedRootFolders(count: number) {
+  const baseNow = Date.now()
+  let state = createSeedDataRoomState(baseNow)
+  const dataRoomId = state.dataRoomOrder[0]
+  const rootFolderId = state.dataRoomsById[dataRoomId]?.rootFolderId
+
+  if (!rootFolderId) {
+    return
+  }
+
+  for (let index = 1; index <= count; index += 1) {
+    const padded = index.toString().padStart(2, '0')
+    state = createFolderInState(state, {
+      dataRoomId,
+      parentFolderId: rootFolderId,
+      folderId: `folder-seed-${padded}`,
+      folderName: `Folder ${padded}`,
+      now: baseNow + index,
+    })
+  }
+
+  saveDataRoomState(state)
 }
 
 async function createFolder(user: ReturnType<typeof userEvent.setup>, name: string) {
@@ -342,14 +371,8 @@ describe('App routing and localization', () => {
 
   it('paginates list view and allows changing items per page', async () => {
     const user = userEvent.setup()
+    seedRootFolders(11)
     renderRoute('/')
-
-    for (let index = 1; index <= 11; index += 1) {
-      await createFolder(user, `Folder ${index.toString().padStart(2, '0')}`)
-    }
-
-    await user.click(screen.getByRole('button', { name: 'Sort by type' }))
-    await user.click(screen.getByRole('button', { name: 'Sort by name' }))
 
     const listButtonsPageOne = screen.getAllByRole('button', { name: /Open folder Folder / })
     expect(listButtonsPageOne).toHaveLength(10)
@@ -369,7 +392,7 @@ describe('App routing and localization', () => {
     await user.click(screen.getAllByRole('combobox', { name: 'Items per page' })[0])
     await user.click(screen.getByRole('option', { name: '10' }))
 
-    await user.click(screen.getByRole('button', { name: 'Open folder Folder 01' }))
+    await user.click(screen.getAllByRole('button', { name: /Open folder Folder / })[0])
     await goToBreadcrumb(user, 'Data Room')
     expect(screen.getAllByText('Page 1 / 2')).toHaveLength(2)
   }, 60000)
