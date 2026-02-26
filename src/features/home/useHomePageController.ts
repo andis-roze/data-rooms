@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useEffect, useMemo } from 'react'
 import {
   getDataRoomDeleteSummary,
   getFolderDeleteSummary,
@@ -26,6 +27,7 @@ import {
 import { useHomePageViewHelpers } from './hooks/useHomePageViewHelpers'
 import { defaultFileBlobStorageService } from './services/fileBlobStorage'
 import { useDeleteSelectedContent } from './hooks/useDeleteSelectedContent'
+import { LIST_VIEW_ITEMS_PER_PAGE_OPTIONS } from './config/pagination'
 
 const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
 
@@ -47,6 +49,10 @@ export function useHomePageController(): HomePageViewModel {
     setActiveFileId,
     highlightedContentItemId,
     setHighlightedContentItemId,
+    listViewPage,
+    setListViewPage,
+    listViewItemsPerPage,
+    setListViewItemsPerPage,
     sortState,
     setSortState,
   } = transientState
@@ -105,8 +111,28 @@ export function useHomePageController(): HomePageViewModel {
   const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
   const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
   const visibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
+  const parentNavigationItem = visibleContentItems.find((item) => item.kind === 'folder' && item.isParentNavigation)
+  const pageableContentItems = visibleContentItems.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
+  const listViewPageCount = Math.max(1, Math.ceil(pageableContentItems.length / listViewItemsPerPage))
+  const resolvedListViewPage = Math.min(listViewPage, listViewPageCount - 1)
+  const pagedContentItems = useMemo(() => {
+    const pageStart = resolvedListViewPage * listViewItemsPerPage
+    const pageEnd = pageStart + listViewItemsPerPage
+    const pageItems = pageableContentItems.slice(pageStart, pageEnd)
+    return parentNavigationItem ? [parentNavigationItem, ...pageItems] : pageItems
+  }, [parentNavigationItem, pageableContentItems, resolvedListViewPage, listViewItemsPerPage])
   const activeDataRoomId = activeDataRoom?.id ?? null
   const locale = i18n.resolvedLanguage ?? i18n.language
+
+  useEffect(() => {
+    if (listViewPage !== resolvedListViewPage) {
+      setListViewPage(resolvedListViewPage)
+    }
+  }, [listViewPage, resolvedListViewPage, setListViewPage])
+
+  useEffect(() => {
+    setListViewPage(0)
+  }, [activeFolder?.id, listViewItemsPerPage, setListViewPage])
 
   const canDeleteActiveDataRoom = Boolean(activeDataRoom)
   const dataRoomDeleteSummary = activeDataRoom
@@ -197,6 +223,15 @@ export function useHomePageController(): HomePageViewModel {
     selectNode('folder', folderId)
   }
 
+  const handleListViewPageChange = (page: number) => {
+    setListViewPage(page)
+  }
+
+  const handleListViewItemsPerPageChange = (itemsPerPage: number) => {
+    setListViewItemsPerPage(itemsPerPage)
+    setListViewPage(0)
+  }
+
   const {
     openDeleteSelectedContentDialog,
     closeDeleteSelectedContentDialog,
@@ -283,7 +318,7 @@ export function useHomePageController(): HomePageViewModel {
       rootFolder,
       activeFolder,
       breadcrumbs,
-      visibleContentItems,
+      visibleContentItems: pagedContentItems,
       locale,
       targetFolder,
       activeFile,
@@ -309,6 +344,10 @@ export function useHomePageController(): HomePageViewModel {
       dragMoveItemIds,
       dragMoveTargetFolderId,
       highlightedContentItemId,
+      listViewPage: resolvedListViewPage,
+      listViewPageCount,
+      listViewItemsPerPage,
+      listViewItemsPerPageOptions: [...LIST_VIEW_ITEMS_PER_PAGE_OPTIONS],
     },
     viewHelpers: {
       resolveDisplayName,
@@ -363,6 +402,8 @@ export function useHomePageController(): HomePageViewModel {
       canDropOnFolder,
       dropOnFolder,
       moveItemsToFolder,
+      handleListViewPageChange,
+      handleListViewItemsPerPageChange,
     },
   }
 }

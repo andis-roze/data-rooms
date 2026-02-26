@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { loadSortModePreference } from '../services/sortPreference'
 import type { NodeId } from '../../dataroom/model'
 import type { SortState } from '../types'
+import { DEFAULT_LIST_VIEW_ITEMS_PER_PAGE } from '../config/pagination'
 
 export function useHomePageDialogState() {
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false)
@@ -68,6 +69,8 @@ export function useHomePageTransientState() {
   const [targetFolderId, setTargetFolderId] = useState<NodeId | null>(null)
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
   const [highlightedContentItemId, setHighlightedContentItemId] = useState<NodeId | null>(null)
+  const [listViewPage, setListViewPage] = useState(0)
+  const [listViewItemsPerPage, setListViewItemsPerPage] = useState(DEFAULT_LIST_VIEW_ITEMS_PER_PAGE)
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
 
   return {
@@ -78,6 +81,10 @@ export function useHomePageTransientState() {
     setActiveFileId,
     highlightedContentItemId,
     setHighlightedContentItemId,
+    listViewPage,
+    setListViewPage,
+    listViewItemsPerPage,
+    setListViewItemsPerPage,
     sortState,
     setSortState,
   }

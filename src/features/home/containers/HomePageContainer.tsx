@@ -41,6 +41,10 @@ export function HomePageContainer() {
     dragMoveItemIds,
     dragMoveTargetFolderId,
     highlightedContentItemId,
+    listViewPage,
+    listViewPageCount,
+    listViewItemsPerPage,
+    listViewItemsPerPageOptions,
   } = selection
 
   const { resolveDisplayName } = viewHelpers
@@ -124,6 +128,10 @@ export function HomePageContainer() {
         dragMoveActive,
         dragMoveTargetFolderId,
         highlightedContentItemId,
+        listViewPage,
+        listViewPageCount,
+        listViewItemsPerPage,
+        listViewItemsPerPageOptions,
         deleteSelectedContentDialogOpen: dialogs.isDeleteSelectedContentDialogOpen,
         uploadInputRef,
       }}
@@ -147,6 +155,8 @@ export function HomePageContainer() {
         onSetDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
         onCanDropOnFolder: handlers.canDropOnFolder,
         onDropOnFolder: handlers.dropOnFolder,
+        onListViewPageChange: handlers.handleListViewPageChange,
+        onListViewItemsPerPageChange: handlers.handleListViewItemsPerPageChange,
         onSelectFolder: handlers.selectFolder,
         onOpenRenameFolder: handlers.openRenameFolderDialog,
         onOpenDeleteFolder: handlers.openDeleteFolderDialog,

@@ -1,5 +1,10 @@
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import type { SelectChangeEvent } from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import type { ChangeEvent, RefObject } from 'react'
 import type { Folder, NodeId } from '../../dataroom/model'
 import { FolderContentTable } from '../FolderContentTable'
@@ -34,6 +39,10 @@ interface HomeContentSectionStateProps {
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
   highlightedContentItemId: NodeId | null
+  listViewPage: number
+  listViewPageCount: number
+  listViewItemsPerPage: number
+  listViewItemsPerPageOptions: number[]
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
 }
@@ -58,6 +67,8 @@ interface HomeContentSectionHandlerProps {
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
   onDropOnFolder: (folderId: NodeId) => void
+  onListViewPageChange: (page: number) => void
+  onListViewItemsPerPageChange: (itemsPerPage: number) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
@@ -71,6 +82,71 @@ interface HomeContentSectionHandlerProps {
 interface HomeContentSectionProps {
   state: HomeContentSectionStateProps
   handlers: HomeContentSectionHandlerProps
+}
+
+interface ListPaginationControlsProps {
+  listViewPage: number
+  listViewPageCount: number
+  listViewItemsPerPage: number
+  listViewItemsPerPageOptions: number[]
+  onListViewPageChange: (page: number) => void
+  onListViewItemsPerPageChange: (itemsPerPage: number) => void
+}
+
+function ListPaginationControls({
+  listViewPage,
+  listViewPageCount,
+  listViewItemsPerPage,
+  listViewItemsPerPageOptions,
+  onListViewPageChange,
+  onListViewItemsPerPageChange,
+}: ListPaginationControlsProps) {
+  const handleItemsPerPageChange = (event: SelectChangeEvent<number>) => {
+    onListViewItemsPerPageChange(Number(event.target.value))
+  }
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          Items per page
+        </Typography>
+        <Select
+          size="small"
+          value={listViewItemsPerPage}
+          onChange={handleItemsPerPageChange}
+          inputProps={{ 'aria-label': 'Items per page' }}
+        >
+          {listViewItemsPerPageOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          Page {listViewPage + 1} / {listViewPageCount}
+        </Typography>
+        <Button
+          size="small"
+          onClick={() => onListViewPageChange(Math.max(0, listViewPage - 1))}
+          disabled={listViewPage <= 0}
+          aria-label="Previous page"
+        >
+          Prev
+        </Button>
+        <Button
+          size="small"
+          onClick={() => onListViewPageChange(Math.min(listViewPageCount - 1, listViewPage + 1))}
+          disabled={listViewPage >= listViewPageCount - 1}
+          aria-label="Next page"
+        >
+          Next
+        </Button>
+      </Box>
+    </Box>
+  )
 }
 
 export function HomeContentSection({
@@ -101,6 +177,10 @@ export function HomeContentSection({
     dragMoveActive,
     dragMoveTargetFolderId,
     highlightedContentItemId,
+    listViewPage,
+    listViewPageCount,
+    listViewItemsPerPage,
+    listViewItemsPerPageOptions,
     deleteSelectedContentDialogOpen,
     uploadInputRef,
   } = state
@@ -125,6 +205,8 @@ export function HomeContentSection({
     onSetDragMoveTargetFolder,
     onCanDropOnFolder,
     onDropOnFolder,
+    onListViewPageChange,
+    onListViewItemsPerPageChange,
     onSelectFolder,
     onOpenRenameFolder,
     onOpenDeleteFolder,
@@ -164,6 +246,15 @@ export function HomeContentSection({
           onClearContentItemSelection={onClearContentItemSelection}
         />
 
+        <ListPaginationControls
+          listViewPage={listViewPage}
+          listViewPageCount={listViewPageCount}
+          listViewItemsPerPage={listViewItemsPerPage}
+          listViewItemsPerPageOptions={listViewItemsPerPageOptions}
+          onListViewPageChange={onListViewPageChange}
+          onListViewItemsPerPageChange={onListViewItemsPerPageChange}
+        />
+
         <FolderContentTable
           items={visibleContentItems}
           sortState={sortState}
@@ -190,6 +281,15 @@ export function HomeContentSection({
           onOpenRenameFile={onOpenRenameFile}
           onOpenDeleteFile={onOpenDeleteFile}
           onOpenMoveFile={onOpenMoveFile}
+        />
+
+        <ListPaginationControls
+          listViewPage={listViewPage}
+          listViewPageCount={listViewPageCount}
+          listViewItemsPerPage={listViewItemsPerPage}
+          listViewItemsPerPageOptions={listViewItemsPerPageOptions}
+          onListViewPageChange={onListViewPageChange}
+          onListViewItemsPerPageChange={onListViewItemsPerPageChange}
         />
       </Stack>
 

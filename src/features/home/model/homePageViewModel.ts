@@ -65,6 +65,10 @@ export interface HomePageSelectionState {
   dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
   highlightedContentItemId: NodeId | null
+  listViewPage: number
+  listViewPageCount: number
+  listViewItemsPerPage: number
+  listViewItemsPerPageOptions: number[]
 }
 
 export interface HomePageUiState {
@@ -125,6 +129,8 @@ export interface HomePageHandlers {
   canDropOnFolder: (folderId: NodeId) => boolean
   dropOnFolder: (folderId: NodeId) => void
   moveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
+  handleListViewPageChange: (page: number) => void
+  handleListViewItemsPerPageChange: (itemsPerPage: number) => void
   toggleSort: (field: 'name' | 'type' | 'updated') => void
   dismissFeedback: (id: number) => void
   selectDataRoom: (dataRoomId: NodeId) => void

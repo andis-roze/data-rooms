@@ -315,6 +315,31 @@ describe('App routing and localization', () => {
     expect(persistedOrder[0]).toHaveAccessibleName('View file zeta.pdf')
   })
 
+  it('paginates list view and allows changing items per page', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    for (let index = 1; index <= 11; index += 1) {
+      await createFolder(user, `Folder ${index.toString().padStart(2, '0')}`)
+    }
+
+    await user.click(screen.getByRole('button', { name: 'Sort by type' }))
+    await user.click(screen.getByRole('button', { name: 'Sort by name' }))
+
+    const listButtonsPageOne = screen.getAllByRole('button', { name: /Open folder Folder / })
+    expect(listButtonsPageOne).toHaveLength(10)
+
+    await user.click(screen.getAllByRole('button', { name: 'Next page' })[0])
+    const listButtonsPageTwo = screen.getAllByRole('button', { name: /Open folder Folder / })
+    expect(listButtonsPageTwo).toHaveLength(1)
+
+    await user.click(screen.getAllByRole('combobox', { name: 'Items per page' })[0])
+    await user.click(screen.getByRole('option', { name: '25' }))
+
+    const listButtonsExpanded = screen.getAllByRole('button', { name: /Open folder Folder / })
+    expect(listButtonsExpanded).toHaveLength(11)
+  }, 60000)
+
   it('switches language to German from header controls', async () => {
     const user = userEvent.setup()
     renderRoute('/')

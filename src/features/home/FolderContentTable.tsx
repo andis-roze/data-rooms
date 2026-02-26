@@ -103,7 +103,6 @@ export function FolderContentTable({
       event.dataTransfer.dropEffect = 'move'
     }
   }
-
   return (
     <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
       <Box
