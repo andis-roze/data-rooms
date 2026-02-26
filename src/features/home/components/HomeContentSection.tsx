@@ -8,7 +8,11 @@ import { ContentActionBar } from './content/ContentActionBar'
 import { ContentBreadcrumbBar } from './content/ContentBreadcrumbBar'
 import { ContentSelectionBanner } from './content/ContentSelectionBanner'
 import { DeleteSelectedContentDialog } from './content/DeleteSelectedContentDialog'
-import { ListPaginationControls } from './content/ListPaginationControls'
+import {
+  ListPaginationControls,
+  type ListPaginationHandlers,
+  type ListPaginationState,
+} from './content/ListPaginationControls'
 import { MoveContentDialog } from './content/MoveContentDialog'
 
 interface HomeContentSectionStateProps {
@@ -35,12 +39,7 @@ interface HomeContentSectionStateProps {
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
   highlightedContentItemId: NodeId | null
-  pagination: {
-    page: number
-    pageCount: number
-    itemsPerPage: number
-    itemsPerPageOptions: number[]
-  }
+  pagination: ListPaginationState
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
 }
@@ -65,10 +64,7 @@ interface HomeContentSectionHandlerProps {
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
   onDropOnFolder: (folderId: NodeId) => void
-  pagination: {
-    onPageChange: (page: number) => void
-    onItemsPerPageChange: (itemsPerPage: number) => void
-  }
+  pagination: ListPaginationHandlers
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void

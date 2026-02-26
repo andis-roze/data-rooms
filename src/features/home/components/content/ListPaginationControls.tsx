@@ -5,14 +5,14 @@ import Select from '@mui/material/Select'
 import type { SelectChangeEvent } from '@mui/material/Select'
 import Typography from '@mui/material/Typography'
 
-interface ListPaginationState {
+export interface ListPaginationState {
   page: number
   pageCount: number
   itemsPerPage: number
   itemsPerPageOptions: number[]
 }
 
-interface ListPaginationHandlers {
+export interface ListPaginationHandlers {
   onPageChange: (page: number) => void
   onItemsPerPageChange: (itemsPerPage: number) => void
 }
