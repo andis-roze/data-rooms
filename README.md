@@ -6,7 +6,6 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 
 - User documentation: [User Guide](docs/USER_GUIDE.md)
 - Technical/developer documentation: [Technical Guide](docs/TECHNICAL_GUIDE.md)
-- Refactor implementation roadmap: [Refactor Roadmap](docs/refactor/IMPLEMENTATION_ROADMAP.md)
 
 ## Demo
 
@@ -14,7 +13,7 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 - GitHub Pages URL: [https://andis-roze.github.io/data-rooms/](https://andis-roze.github.io/data-rooms/)
 - Deployment: auto-deploy from `main` branch (Vercel Git integration)
 - Recorded walkthroughs:
-  - `artifacts/demo-video/demo-full-ux-ultra-slow.av1.mkv`
+  - [demo-full-ux-ultra-slow.av1.mkv](artifacts/demo-video/demo-full-ux-ultra-slow.av1.mkv)
 
 ## Quick Start
 

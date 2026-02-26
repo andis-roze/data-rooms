@@ -6,7 +6,7 @@ This guide explains how to use the Data Room app from an end-user perspective.
 
 Pre-recorded UX walkthroughs are available in:
 
-- `artifacts/demo-video/demo-full-ux-ultra-slow.av1.mkv`
+- [demo-full-ux-ultra-slow.av1.mkv](../artifacts/demo-video/demo-full-ux-ultra-slow.av1.mkv)
 
 ## What You Can Do
 
