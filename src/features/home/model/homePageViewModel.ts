@@ -131,6 +131,92 @@ export interface HomePageHandlers {
   selectFolder: (folderId: NodeId) => void
 }
 
+export type HomeDataRoomHandlers = Pick<
+  HomePageHandlers,
+  | 'openCreateDataRoomDialog'
+  | 'openRenameDataRoomDialog'
+  | 'openDeleteDataRoomDialog'
+  | 'closeCreateDataRoomDialog'
+  | 'closeRenameDataRoomDialog'
+  | 'closeDeleteDataRoomDialog'
+  | 'handleDataRoomNameDraftChange'
+  | 'handleCreateDataRoom'
+  | 'handleRenameDataRoom'
+  | 'handleDeleteDataRoom'
+>
+
+export type HomeFolderHandlers = Pick<
+  HomePageHandlers,
+  | 'handleFolderNameDraftChange'
+  | 'openCreateFolderDialog'
+  | 'closeCreateFolderDialog'
+  | 'openRenameFolderDialog'
+  | 'closeRenameFolderDialog'
+  | 'openDeleteFolderDialog'
+  | 'closeDeleteFolderDialog'
+  | 'handleCreateFolder'
+  | 'handleRenameFolder'
+  | 'handleDeleteFolder'
+>
+
+export type HomeFileHandlers = Pick<
+  HomePageHandlers,
+  | 'handleFileNameDraftChange'
+  | 'openRenameFileDialog'
+  | 'closeRenameFileDialog'
+  | 'openDeleteFileDialog'
+  | 'closeDeleteFileDialog'
+  | 'openViewFileDialog'
+  | 'closeViewFileDialog'
+  | 'handleUploadInputChange'
+  | 'handleRenameFile'
+  | 'handleDeleteFile'
+>
+
+export type HomeSelectionHandlers = Pick<
+  HomePageHandlers,
+  | 'toggleContentItemSelection'
+  | 'toggleAllContentItemSelection'
+  | 'clearContentItemSelection'
+  | 'openDeleteSelectedContentDialog'
+  | 'closeDeleteSelectedContentDialog'
+  | 'handleDeleteSelectedContent'
+>
+
+export type HomeMoveHandlers = Pick<
+  HomePageHandlers,
+  | 'openMoveSelectedContentDialog'
+  | 'openMoveFolderDialog'
+  | 'openMoveFileDialog'
+  | 'closeMoveContentDialog'
+  | 'handleMoveDestinationFolderChange'
+  | 'handleMoveSelectedContent'
+  | 'startDragMove'
+  | 'endDragMove'
+  | 'setDragMoveTargetFolder'
+  | 'canDropOnFolder'
+  | 'dropOnFolder'
+>
+
+export type HomeListHandlers = Pick<
+  HomePageHandlers,
+  'handleListViewPageChange' | 'handleListViewItemsPerPageChange' | 'toggleSort'
+>
+
+export type HomeNavigationHandlers = Pick<HomePageHandlers, 'selectDataRoom' | 'selectFolder'>
+export type HomeFeedbackHandlers = Pick<HomePageHandlers, 'dismissFeedback'>
+
+export interface HomePageHandlerGroups {
+  dataRoom: HomeDataRoomHandlers
+  folder: HomeFolderHandlers
+  file: HomeFileHandlers
+  selection: HomeSelectionHandlers
+  move: HomeMoveHandlers
+  list: HomeListHandlers
+  navigation: HomeNavigationHandlers
+  feedback: HomeFeedbackHandlers
+}
+
 export interface HomePageViewModel {
   t: TFunction<'common'>
   selection: HomePageSelectionState
@@ -139,4 +225,5 @@ export interface HomePageViewModel {
   }
   uiState: HomePageUiState
   handlers: HomePageHandlers
+  handlerGroups: HomePageHandlerGroups
 }

@@ -3,6 +3,7 @@ import {
   getFileNameValidationError,
   getPdfUploadValidationError,
   hasDuplicateFileName,
+  normalizeNodeName,
   preparePdfUpload,
   type DataRoomState,
   type FileNode,
@@ -125,51 +126,143 @@ export function useFileActions({
       return
     }
 
-    const selectedFile = event.target.files?.[0]
-
-    if (!selectedFile) {
+    const selectedFiles = Array.from(event.target.files ?? [])
+    if (selectedFiles.length === 0) {
       return
     }
 
-    const uploadError = getPdfUploadValidationError(selectedFile)
+    if (selectedFiles.length === 1) {
+      const [selectedFile] = selectedFiles
+      const uploadError = getPdfUploadValidationError(selectedFile)
 
-    if (uploadError) {
+      if (uploadError) {
+        enqueueFeedback(t('dataroomErrorPdfOnly'), 'error')
+        clearUploadInput(event)
+        return
+      }
+
+      const preparedUpload = preparePdfUpload(selectedFile)
+      const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: activeFolder.id })
+      if (!uploadNameValidation.ok) {
+        enqueueFeedback(uploadNameValidation.message, 'error')
+        clearUploadInput(event)
+        return
+      }
+
+      const fileId = generateNodeId('file')
+
+      try {
+        await fileBlobStorage.putBlob(fileId, selectedFile)
+      } catch {
+        enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
+        clearUploadInput(event)
+        return
+      }
+
+      dispatch({
+        type: 'dataroom/uploadFile',
+        payload: {
+          parentFolderId: activeFolder.id,
+          fileId,
+          fileName: preparedUpload.fileName,
+          size: preparedUpload.size,
+          mimeType: preparedUpload.mimeType,
+        },
+      })
+      setHighlightedContentItemId(fileId)
+
+      enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
+      clearUploadInput(event)
+      return
+    }
+
+    const existingFileNames = new Set(
+      activeFolder.fileIds
+        .map((fileId) => entities.filesById[fileId])
+        .filter((file): file is NonNullable<typeof file> => Boolean(file))
+        .map((file) => normalizeNodeName(file.name)),
+    )
+
+    let uploadedCount = 0
+    let invalidPdfCount = 0
+    let invalidNameCount = 0
+    let duplicateNameCount = 0
+    let storageFailedCount = 0
+    let lastUploadedFileId: NodeId | null = null
+
+    for (const selectedFile of selectedFiles) {
+      const uploadError = getPdfUploadValidationError(selectedFile)
+      if (uploadError) {
+        invalidPdfCount += 1
+        continue
+      }
+
+      const preparedUpload = preparePdfUpload(selectedFile)
+      const nameValidationError = getFileNameValidationError(preparedUpload.fileName)
+      if (nameValidationError) {
+        invalidNameCount += 1
+        continue
+      }
+
+      const normalizedFileName = normalizeNodeName(preparedUpload.fileName)
+      if (existingFileNames.has(normalizedFileName)) {
+        duplicateNameCount += 1
+        continue
+      }
+
+      const fileId = generateNodeId('file')
+      try {
+        await fileBlobStorage.putBlob(fileId, selectedFile)
+      } catch {
+        storageFailedCount += 1
+        continue
+      }
+
+      dispatch({
+        type: 'dataroom/uploadFile',
+        payload: {
+          parentFolderId: activeFolder.id,
+          fileId,
+          fileName: preparedUpload.fileName,
+          size: preparedUpload.size,
+          mimeType: preparedUpload.mimeType,
+        },
+      })
+      existingFileNames.add(normalizedFileName)
+      uploadedCount += 1
+      lastUploadedFileId = fileId
+    }
+
+    if (lastUploadedFileId) {
+      setHighlightedContentItemId(lastUploadedFileId)
+    }
+
+    if (uploadedCount > 0) {
+      enqueueFeedback(t('dataroomFeedbackFilesUploaded', { count: uploadedCount }), 'success')
+    }
+    if (invalidPdfCount > 0) {
+      enqueueFeedback(t('dataroomErrorPdfOnlyBatch', { count: invalidPdfCount }), 'error')
+    }
+    if (invalidNameCount > 0) {
+      enqueueFeedback(t('dataroomErrorFileNameInvalidBatch', { count: invalidNameCount }), 'error')
+    }
+    if (duplicateNameCount > 0) {
+      enqueueFeedback(t('dataroomErrorFileNameDuplicateBatch', { count: duplicateNameCount }), 'error')
+    }
+    if (storageFailedCount > 0) {
+      enqueueFeedback(t('dataroomErrorFileStorageFailedBatch', { count: storageFailedCount }), 'error')
+    }
+
+    if (
+      uploadedCount === 0 &&
+      invalidPdfCount === 0 &&
+      invalidNameCount === 0 &&
+      duplicateNameCount === 0 &&
+      storageFailedCount === 0
+    ) {
       enqueueFeedback(t('dataroomErrorPdfOnly'), 'error')
-      clearUploadInput(event)
-      return
     }
 
-    const preparedUpload = preparePdfUpload(selectedFile)
-    const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: activeFolder.id })
-    if (!uploadNameValidation.ok) {
-      enqueueFeedback(uploadNameValidation.message, 'error')
-      clearUploadInput(event)
-      return
-    }
-
-    const fileId = generateNodeId('file')
-
-    try {
-      await fileBlobStorage.putBlob(fileId, selectedFile)
-    } catch {
-      enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
-      clearUploadInput(event)
-      return
-    }
-
-    dispatch({
-      type: 'dataroom/uploadFile',
-      payload: {
-        parentFolderId: activeFolder.id,
-        fileId,
-        fileName: preparedUpload.fileName,
-        size: preparedUpload.size,
-        mimeType: preparedUpload.mimeType,
-      },
-    })
-    setHighlightedContentItemId(fileId)
-
-    enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
     clearUploadInput(event)
   }
 

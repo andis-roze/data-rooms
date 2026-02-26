@@ -115,6 +115,17 @@ async function uploadNonPdf(user: ReturnType<typeof userEvent.setup>, name: stri
   await user.upload(uploadInput, file)
 }
 
+async function uploadFiles(
+  user: ReturnType<typeof userEvent.setup>,
+  files: Array<{ name: string; mimeType: string; contents?: string }>,
+): Promise<void> {
+  const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+  await user.upload(
+    uploadInput,
+    files.map(({ name, mimeType, contents }) => new File([contents ?? 'test file'], name, { type: mimeType })),
+  )
+}
+
 async function goToBreadcrumb(user: ReturnType<typeof userEvent.setup>, name: string) {
   const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
   await user.click(within(breadcrumbs).getByRole('button', { name }))
@@ -170,6 +181,8 @@ describe('App routing and localization', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upload one or more PDF files' })).toBeInTheDocument()
+    expect(screen.getByText('Upload PDFs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Data Rooms' })).toBeInTheDocument()
     expect(screen.queryByRole('list', { name: 'Folder tree' })).not.toBeInTheDocument()
@@ -463,6 +476,37 @@ describe('App routing and localization', () => {
 
     expect(screen.getByText('Only PDF files are allowed.')).toBeInTheDocument()
     expect(screen.queryByText('notes.txt')).not.toBeInTheDocument()
+  })
+
+  it('uploads multiple PDFs selected in one action', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await uploadFiles(user, [
+      { name: 'alpha.pdf', mimeType: 'application/pdf', contents: '%PDF-1.4 alpha' },
+      { name: 'beta.pdf', mimeType: 'application/pdf', contents: '%PDF-1.4 beta' },
+    ])
+
+    expect(screen.getByRole('button', { name: 'View file alpha.pdf' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View file beta.pdf' })).toBeInTheDocument()
+    expect(screen.getByText('Uploaded 2 PDF file(s).')).toBeInTheDocument()
+  })
+
+  it('handles mixed multi-file upload outcomes independently', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    renderRoute('/')
+
+    await uploadFiles(user, [
+      { name: 'contract.pdf', mimeType: 'application/pdf', contents: '%PDF-1.4 contract 1' },
+      { name: 'contract.pdf', mimeType: 'application/pdf', contents: '%PDF-1.4 contract 2' },
+      { name: 'notes.txt', mimeType: 'text/plain', contents: 'plain text' },
+    ])
+
+    expect(screen.getByRole('button', { name: 'View file contract.pdf' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'View file notes.txt' })).not.toBeInTheDocument()
+    expect(screen.getByText('Uploaded 1 PDF file(s).')).toBeInTheDocument()
+    expect(screen.getByText('1 file(s) skipped because a file with the same name already exists.')).toBeInTheDocument()
+    expect(screen.getByText('1 file(s) skipped because only PDF files are allowed.')).toBeInTheDocument()
   })
 
   it('moves selected folders and files to another folder', async () => {

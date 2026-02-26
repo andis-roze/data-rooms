@@ -2,13 +2,20 @@ import type { NodeId } from '../dataroom/model'
 import type {
   HomeDeleteSummary,
   HomeDialogState,
+  HomeDataRoomHandlers,
+  HomeFileHandlers,
+  HomeFolderHandlers,
   HomeFormState,
-  HomePageHandlers,
 } from './model/homePageViewModel'
 import { DataRoomDialogs } from './dialogs/DataRoomDialogs'
 import { FileDialogs } from './dialogs/FileDialogs'
 import { FilePreviewDialog } from './dialogs/FilePreviewDialog'
 import { FolderDialogs } from './dialogs/FolderDialogs'
+
+type DataRoomDialogHandlers = HomeDataRoomHandlers
+type FolderDialogHandlers = HomeFolderHandlers
+type FileDialogHandlers = HomeFileHandlers
+type PreviewDialogHandlers = Pick<HomeFileHandlers, 'closeViewFileDialog'>
 
 // Composes all home-page dialogs behind a single prop surface for container usage.
 interface HomeDialogsProps {
@@ -21,29 +28,10 @@ interface HomeDialogsProps {
   activeFileName: string | null
   dataRoomDeleteSummary: HomeDeleteSummary
   folderDeleteSummary: HomeDeleteSummary
-  handlers: Pick<
-    HomePageHandlers,
-    | 'closeCreateDataRoomDialog'
-    | 'handleDataRoomNameDraftChange'
-    | 'handleCreateDataRoom'
-    | 'closeRenameDataRoomDialog'
-    | 'handleRenameDataRoom'
-    | 'closeDeleteDataRoomDialog'
-    | 'handleDeleteDataRoom'
-    | 'closeCreateFolderDialog'
-    | 'handleFolderNameDraftChange'
-    | 'handleCreateFolder'
-    | 'closeRenameFolderDialog'
-    | 'handleRenameFolder'
-    | 'closeDeleteFolderDialog'
-    | 'handleDeleteFolder'
-    | 'closeRenameFileDialog'
-    | 'handleFileNameDraftChange'
-    | 'handleRenameFile'
-    | 'closeDeleteFileDialog'
-    | 'handleDeleteFile'
-    | 'closeViewFileDialog'
-  >
+  dataRoomHandlers: DataRoomDialogHandlers
+  folderHandlers: FolderDialogHandlers
+  fileHandlers: FileDialogHandlers
+  previewHandlers: PreviewDialogHandlers
 }
 
 export function HomeDialogs({
@@ -56,7 +44,10 @@ export function HomeDialogs({
   activeFileName,
   dataRoomDeleteSummary,
   folderDeleteSummary,
-  handlers,
+  dataRoomHandlers,
+  folderHandlers,
+  fileHandlers,
+  previewHandlers,
 }: HomeDialogsProps) {
   return (
     <>
@@ -68,13 +59,13 @@ export function HomeDialogs({
         dataRoomNameError={forms.dataRoomNameError}
         activeDataRoomName={activeDataRoomName}
         dataRoomDeleteSummary={dataRoomDeleteSummary}
-        onCloseCreateDataRoomDialog={handlers.closeCreateDataRoomDialog}
-        onDataRoomNameChange={handlers.handleDataRoomNameDraftChange}
-        onCreateDataRoom={handlers.handleCreateDataRoom}
-        onCloseRenameDataRoomDialog={handlers.closeRenameDataRoomDialog}
-        onRenameDataRoom={handlers.handleRenameDataRoom}
-        onCloseDeleteDataRoomDialog={handlers.closeDeleteDataRoomDialog}
-        onDeleteDataRoom={handlers.handleDeleteDataRoom}
+        onCloseCreateDataRoomDialog={dataRoomHandlers.closeCreateDataRoomDialog}
+        onDataRoomNameChange={dataRoomHandlers.handleDataRoomNameDraftChange}
+        onCreateDataRoom={dataRoomHandlers.handleCreateDataRoom}
+        onCloseRenameDataRoomDialog={dataRoomHandlers.closeRenameDataRoomDialog}
+        onRenameDataRoom={dataRoomHandlers.handleRenameDataRoom}
+        onCloseDeleteDataRoomDialog={dataRoomHandlers.closeDeleteDataRoomDialog}
+        onDeleteDataRoom={dataRoomHandlers.handleDeleteDataRoom}
       />
 
       <FolderDialogs
@@ -86,13 +77,13 @@ export function HomeDialogs({
         activeFolderName={activeFolderName}
         targetFolderName={targetFolderName}
         folderDeleteSummary={folderDeleteSummary}
-        onCloseCreateFolderDialog={handlers.closeCreateFolderDialog}
-        onFolderNameChange={handlers.handleFolderNameDraftChange}
-        onCreateFolder={handlers.handleCreateFolder}
-        onCloseRenameFolderDialog={handlers.closeRenameFolderDialog}
-        onRenameFolder={handlers.handleRenameFolder}
-        onCloseDeleteFolderDialog={handlers.closeDeleteFolderDialog}
-        onDeleteFolder={handlers.handleDeleteFolder}
+        onCloseCreateFolderDialog={folderHandlers.closeCreateFolderDialog}
+        onFolderNameChange={folderHandlers.handleFolderNameDraftChange}
+        onCreateFolder={folderHandlers.handleCreateFolder}
+        onCloseRenameFolderDialog={folderHandlers.closeRenameFolderDialog}
+        onRenameFolder={folderHandlers.handleRenameFolder}
+        onCloseDeleteFolderDialog={folderHandlers.closeDeleteFolderDialog}
+        onDeleteFolder={folderHandlers.handleDeleteFolder}
       />
 
       <FileDialogs
@@ -101,18 +92,18 @@ export function HomeDialogs({
         fileNameDraft={forms.fileNameDraft}
         fileNameError={forms.fileNameError}
         activeFileName={activeFileName}
-        onCloseRenameFileDialog={handlers.closeRenameFileDialog}
-        onFileNameChange={handlers.handleFileNameDraftChange}
-        onRenameFile={handlers.handleRenameFile}
-        onCloseDeleteFileDialog={handlers.closeDeleteFileDialog}
-        onDeleteFile={handlers.handleDeleteFile}
+        onCloseRenameFileDialog={fileHandlers.closeRenameFileDialog}
+        onFileNameChange={fileHandlers.handleFileNameDraftChange}
+        onRenameFile={fileHandlers.handleRenameFile}
+        onCloseDeleteFileDialog={fileHandlers.closeDeleteFileDialog}
+        onDeleteFile={fileHandlers.handleDeleteFile}
       />
 
       <FilePreviewDialog
         viewFileDialogOpen={dialogs.isViewFileDialogOpen}
         activeFileId={activeFileId}
         activeFileName={activeFileName}
-        onCloseViewFileDialog={handlers.closeViewFileDialog}
+        onCloseViewFileDialog={previewHandlers.closeViewFileDialog}
       />
     </>
   )

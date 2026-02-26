@@ -67,8 +67,15 @@ Use breadcrumbs above the table to jump back to parent folders quickly.
 
 ## File Upload and Preview
 
-- Use `Upload PDF` to add files to the current folder
+- Use `Upload PDFs` to add files to the current folder
+- You can select one file or multiple files in a single picker action
+- In the file picker:
+  - `Ctrl` (Windows/Linux) or `Cmd` (macOS) + click to select individual files
+  - `Shift` + click to select a range of files
 - Only PDF files are accepted
+- When uploading multiple files, each file is processed independently:
+  - Valid PDFs are uploaded
+  - Invalid or duplicate files are skipped with feedback
 - Open a file with `View` to preview
 
 ## Name Validation Rules

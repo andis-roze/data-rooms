@@ -6,6 +6,7 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 
 - User documentation: [User Guide](docs/USER_GUIDE.md)
 - Technical/developer documentation: [Technical Guide](docs/TECHNICAL_GUIDE.md)
+- Refactor implementation roadmap: [Refactor Roadmap](docs/refactor/IMPLEMENTATION_ROADMAP.md)
 
 ## Demo
 

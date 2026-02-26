@@ -2,18 +2,14 @@ import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import type { ChangeEvent, RefObject } from 'react'
 import type { Folder, NodeId } from '../../dataroom/model'
-import { FolderContentTable } from '../FolderContentTable'
 import type { FileItem, FolderContentItem, SortState } from '../types'
-import { ContentActionBar } from './content/ContentActionBar'
-import { ContentBreadcrumbBar } from './content/ContentBreadcrumbBar'
-import { ContentSelectionBanner } from './content/ContentSelectionBanner'
-import { DeleteSelectedContentDialog } from './content/DeleteSelectedContentDialog'
 import {
-  ListPaginationControls,
   type ListPaginationHandlers,
   type ListPaginationState,
 } from './content/ListPaginationControls'
-import { MoveContentDialog } from './content/MoveContentDialog'
+import { ContentSectionHeader } from './content/ContentSectionHeader'
+import { ContentSectionOverlays } from './content/ContentSectionOverlays'
+import { ContentSectionTableArea } from './content/ContentSectionTableArea'
 
 export interface HomeContentSectionState {
   activeDataRoomName: string
@@ -147,89 +143,70 @@ export function HomeContentSection({
   return (
     <Box component="section" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
       <Stack spacing={2.5}>
-        <ContentBreadcrumbBar
+        <ContentSectionHeader
           activeDataRoomName={activeDataRoomName}
           activeFolderId={activeFolderId}
           breadcrumbs={breadcrumbs}
           resolveDisplayName={resolveDisplayName}
-          onSelectFolder={onSelectFolder}
-        />
-
-        <ContentActionBar onCreateFolder={onCreateFolder} onUploadPdf={onUploadPdf} />
-
-        <input
-          ref={uploadInputRef}
-          type="file"
-          accept="application/pdf,.pdf"
-          onChange={onUploadInputChange}
-          data-testid="upload-pdf-input"
-          style={{ display: 'none' }}
-        />
-
-        <ContentSelectionBanner
           selectedContentItemCount={selectedContentItemCount}
+          uploadInputRef={uploadInputRef}
+          onSelectFolder={onSelectFolder}
+          onCreateFolder={onCreateFolder}
+          onUploadPdf={onUploadPdf}
+          onUploadInputChange={onUploadInputChange}
           onOpenMoveSelectedContentDialog={onOpenMoveSelectedContentDialog}
           onOpenDeleteSelectedContentDialog={onOpenDeleteSelectedContentDialog}
           onClearContentItemSelection={onClearContentItemSelection}
         />
 
-        <ListPaginationControls state={pagination} handlers={paginationHandlers} />
-
-        <FolderContentTable
-          state={{
-            items: visibleContentItems,
-            sortState,
-            locale,
-            resolveDisplayName,
-            selectedItemIds: checkedContentItemIds,
-            highlightedItemId: highlightedContentItemId,
-            indeterminateFolderIds,
-            dragMoveActive,
-            dragMoveTargetFolderId,
-          }}
-          handlers={{
-            onToggleSort,
-            onStartDragMove,
-            onEndDragMove,
-            onSetDragMoveTargetFolder,
-            onCanDropOnFolder,
-            onDropOnFolder,
-            onToggleItemSelection: onToggleContentItemSelection,
-            onToggleAllItemSelection: onToggleAllContentItemSelection,
-            onSelectFolder,
-            onOpenRenameFolder,
-            onOpenDeleteFolder,
-            onOpenMoveFolder,
-            onOpenViewFile,
-            onOpenRenameFile,
-            onOpenDeleteFile,
-            onOpenMoveFile,
-          }}
+        <ContentSectionTableArea
+          visibleContentItems={visibleContentItems}
+          sortState={sortState}
+          locale={locale}
+          resolveDisplayName={resolveDisplayName}
+          checkedContentItemIds={checkedContentItemIds}
+          highlightedContentItemId={highlightedContentItemId}
+          indeterminateFolderIds={indeterminateFolderIds}
+          dragMoveActive={dragMoveActive}
+          dragMoveTargetFolderId={dragMoveTargetFolderId}
+          pagination={pagination}
+          paginationHandlers={paginationHandlers}
+          onToggleSort={onToggleSort}
+          onStartDragMove={onStartDragMove}
+          onEndDragMove={onEndDragMove}
+          onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
+          onCanDropOnFolder={onCanDropOnFolder}
+          onDropOnFolder={onDropOnFolder}
+          onToggleContentItemSelection={onToggleContentItemSelection}
+          onToggleAllContentItemSelection={onToggleAllContentItemSelection}
+          onSelectFolder={onSelectFolder}
+          onOpenRenameFolder={onOpenRenameFolder}
+          onOpenDeleteFolder={onOpenDeleteFolder}
+          onOpenMoveFolder={onOpenMoveFolder}
+          onOpenViewFile={onOpenViewFile}
+          onOpenRenameFile={onOpenRenameFile}
+          onOpenDeleteFile={onOpenDeleteFile}
+          onOpenMoveFile={onOpenMoveFile}
         />
-
-        <ListPaginationControls state={pagination} handlers={paginationHandlers} />
       </Stack>
 
-      <MoveContentDialog
-        open={moveContentDialogOpen}
+      <ContentSectionOverlays
+        moveContentDialogOpen={moveContentDialogOpen}
         moveItemCount={moveItemCount}
         moveItemNames={moveItemNames}
         moveDestinationFolderId={moveDestinationFolderId}
         moveDestinationFolderOptions={moveDestinationFolderOptions}
         moveValidationError={moveValidationError}
-        onClose={onCloseMoveContentDialog}
-        onMoveDestinationFolderChange={onMoveDestinationFolderChange}
-        onConfirmMove={onMoveSelectedContent}
-      />
-
-      <DeleteSelectedContentDialog
-        open={deleteSelectedContentDialogOpen}
+        deleteSelectedContentDialogOpen={deleteSelectedContentDialogOpen}
         deleteSelectedContentItemCount={deleteSelectedContentItemCount}
         deleteSelectedFileCount={deleteSelectedFileCount}
         deleteSelectedFolderCount={deleteSelectedFolderCount}
         selectedContentItemNames={selectedContentItemNames}
-        onClose={onCloseDeleteSelectedContentDialog}
-        onConfirmDelete={onDeleteSelectedContent}
+        onCloseMoveContentDialog={onCloseMoveContentDialog}
+        onMoveDestinationFolderChange={onMoveDestinationFolderChange}
+        onMoveSelectedContent={onMoveSelectedContent}
+        onCloseDeleteSelectedContentDialog={onCloseDeleteSelectedContentDialog}
+        onDeleteSelectedContent={onDeleteSelectedContent}
       />
     </Box>
   )

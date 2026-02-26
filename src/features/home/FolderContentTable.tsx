@@ -1,10 +1,11 @@
-import type { DragEvent } from 'react'
 import Box from '@mui/material/Box'
 import List from '@mui/material/List'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { FileNode, Folder, NodeId } from '../dataroom/model'
+import { useFolderTableDragDrop } from './hooks/useFolderTableDragDrop'
+import { useFolderTableSelection } from './hooks/useFolderTableSelection'
 import { FolderContentTableHeader } from './components/content/FolderContentTableHeader'
 import { FileRow } from './components/FileRow'
 import { FolderRow } from './components/FolderRow'
@@ -88,17 +89,14 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
     onOpenDeleteFile,
     onOpenMoveFile,
   } = handlers
-  const selectableItemIds = items.map((item) => item.id)
-  const selectedItemIdSet = new Set(selectedItemIds)
-  const selectedSelectableCount = selectableItemIds.filter((itemId) => selectedItemIdSet.has(itemId)).length
-  const areAllSelectableItemsSelected = selectableItemIds.length > 0 && selectedSelectableCount === selectableItemIds.length
-  const isSelectAllIndeterminate = selectedSelectableCount > 0 && !areAllSelectableItemsSelected
-  const handleFolderDragOver = (event: DragEvent<HTMLLIElement>, folderId: NodeId) => {
-    if (onCanDropOnFolder(folderId)) {
-      event.preventDefault()
-      event.dataTransfer.dropEffect = 'move'
-    }
-  }
+  const { selectableItemIds, selectedItemIdSet, areAllSelectableItemsSelected, isSelectAllIndeterminate } =
+    useFolderTableSelection({
+      items,
+      selectedItemIds,
+    })
+  const { handleFolderDragOver } = useFolderTableDragDrop({
+    onCanDropOnFolder,
+  })
   return (
     <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
       <FolderContentTableHeader

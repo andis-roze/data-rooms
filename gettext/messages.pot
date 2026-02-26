@@ -84,6 +84,9 @@ msgstr ""
 msgid "dataroomAriaRenameFolder"
 msgstr ""
 
+msgid "dataroomAriaUploadPdfs"
+msgstr ""
+
 msgid "dataroomAriaViewFile"
 msgstr ""
 
@@ -177,13 +180,22 @@ msgstr ""
 msgid "dataroomErrorFileNameDuplicate"
 msgstr ""
 
+msgid "dataroomErrorFileNameDuplicateBatch"
+msgstr ""
+
 msgid "dataroomErrorFileNameEmpty"
+msgstr ""
+
+msgid "dataroomErrorFileNameInvalidBatch"
 msgstr ""
 
 msgid "dataroomErrorFileNameReserved"
 msgstr ""
 
 msgid "dataroomErrorFileStorageFailed"
+msgstr ""
+
+msgid "dataroomErrorFileStorageFailedBatch"
 msgstr ""
 
 msgid "dataroomErrorFolderNameDuplicate"
@@ -196,6 +208,9 @@ msgid "dataroomErrorFolderNameReserved"
 msgstr ""
 
 msgid "dataroomErrorPdfOnly"
+msgstr ""
+
+msgid "dataroomErrorPdfOnlyBatch"
 msgstr ""
 
 msgid "dataroomFeedbackDataRoomCreated"
@@ -211,6 +226,9 @@ msgid "dataroomFeedbackFileDeleted"
 msgstr ""
 
 msgid "dataroomFeedbackFileRenamed"
+msgstr ""
+
+msgid "dataroomFeedbackFilesUploaded"
 msgstr ""
 
 msgid "dataroomFeedbackFileUploaded"

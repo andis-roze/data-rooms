@@ -86,6 +86,9 @@ msgstr "Datei {name} umbenennen"
 msgid "dataroomAriaRenameFolder"
 msgstr "Ordner {name} umbenennen"
 
+msgid "dataroomAriaUploadPdfs"
+msgstr "Eine oder mehrere PDF-Dateien hochladen"
+
 msgid "dataroomAriaViewFile"
 msgstr "Datei {name} ansehen"
 
@@ -191,14 +194,25 @@ msgstr "Datenraumname ist nicht erlaubt."
 msgid "dataroomErrorFileNameDuplicate"
 msgstr "Eine Datei mit diesem Namen existiert hier bereits."
 
+msgid "dataroomErrorFileNameDuplicateBatch"
+msgstr ""
+"{count} Datei(en) wurden ubersprungen, weil derselbe Name bereits vorhanden "
+"ist."
+
 msgid "dataroomErrorFileNameEmpty"
 msgstr "Dateiname darf nicht leer sein."
+
+msgid "dataroomErrorFileNameInvalidBatch"
+msgstr "{count} Datei(en) wurden ubersprungen, weil der Dateiname ungueltig ist."
 
 msgid "dataroomErrorFileNameReserved"
 msgstr "Dateiname ist nicht erlaubt."
 
 msgid "dataroomErrorFileStorageFailed"
 msgstr "Datei konnte nicht im Browser-Speicher abgelegt werden."
+
+msgid "dataroomErrorFileStorageFailedBatch"
+msgstr "{count} Datei(en) konnten nicht im Browser-Speicher abgelegt werden."
 
 msgid "dataroomErrorFolderNameDuplicate"
 msgstr "Ein Ordner mit diesem Namen existiert hier bereits."
@@ -211,6 +225,9 @@ msgstr "Ordnername ist nicht erlaubt."
 
 msgid "dataroomErrorPdfOnly"
 msgstr "Nur PDF-Dateien sind erlaubt."
+
+msgid "dataroomErrorPdfOnlyBatch"
+msgstr "{count} Datei(en) wurden ubersprungen, weil nur PDFs erlaubt sind."
 
 msgid "dataroomFeedbackDataRoomCreated"
 msgstr "Datenraum erstellt."
@@ -226,6 +243,9 @@ msgstr "Datei geloscht."
 
 msgid "dataroomFeedbackFileRenamed"
 msgstr "Datei umbenannt."
+
+msgid "dataroomFeedbackFilesUploaded"
+msgstr "{count} PDF-Datei(en) hochgeladen."
 
 msgid "dataroomFeedbackFileUploaded"
 msgstr "PDF hochgeladen."

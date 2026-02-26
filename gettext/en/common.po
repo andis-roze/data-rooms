@@ -63,7 +63,7 @@ msgid "dataroomActionRenameFile"
 msgstr "Rename"
 
 msgid "dataroomActionUploadPdf"
-msgstr "Upload PDF"
+msgstr "Upload PDFs"
 
 msgid "dataroomAriaDeleteFile"
 msgstr "Delete file {name}"
@@ -85,6 +85,9 @@ msgstr "Rename file {name}"
 
 msgid "dataroomAriaRenameFolder"
 msgstr "Rename folder {name}"
+
+msgid "dataroomAriaUploadPdfs"
+msgstr "Upload one or more PDF files"
 
 msgid "dataroomAriaViewFile"
 msgstr "View file {name}"
@@ -187,14 +190,23 @@ msgstr "Data Room name is not allowed."
 msgid "dataroomErrorFileNameDuplicate"
 msgstr "File with this name already exists in this location."
 
+msgid "dataroomErrorFileNameDuplicateBatch"
+msgstr "{count} file(s) skipped because a file with the same name already exists."
+
 msgid "dataroomErrorFileNameEmpty"
 msgstr "File name cannot be empty."
+
+msgid "dataroomErrorFileNameInvalidBatch"
+msgstr "{count} file(s) skipped because the file name is invalid."
 
 msgid "dataroomErrorFileNameReserved"
 msgstr "File name is not allowed."
 
 msgid "dataroomErrorFileStorageFailed"
 msgstr "Unable to store file in browser storage."
+
+msgid "dataroomErrorFileStorageFailedBatch"
+msgstr "{count} file(s) could not be stored in browser storage."
 
 msgid "dataroomErrorFolderNameDuplicate"
 msgstr "Folder with this name already exists in this location."
@@ -207,6 +219,9 @@ msgstr "Folder name is not allowed."
 
 msgid "dataroomErrorPdfOnly"
 msgstr "Only PDF files are allowed."
+
+msgid "dataroomErrorPdfOnlyBatch"
+msgstr "{count} file(s) skipped because only PDF files are allowed."
 
 msgid "dataroomFeedbackDataRoomCreated"
 msgstr "Data Room created."
@@ -222,6 +237,9 @@ msgstr "File deleted."
 
 msgid "dataroomFeedbackFileRenamed"
 msgstr "File renamed."
+
+msgid "dataroomFeedbackFilesUploaded"
+msgstr "Uploaded {count} PDF file(s)."
 
 msgid "dataroomFeedbackFileUploaded"
 msgstr "PDF uploaded."

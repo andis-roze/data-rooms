@@ -7,7 +7,7 @@ import { HomePageDialogsContainer } from './HomePageDialogsContainer'
 
 export function HomePageContainer() {
   const controller = useHomePageController()
-  const { t, selection, viewHelpers, uiState, handlers } = controller
+  const { t, selection, viewHelpers, uiState, handlerGroups } = controller
 
   const {
     selectedDataRoomId,
@@ -54,10 +54,10 @@ export function HomePageContainer() {
         isCreateDialogOpen={dialogs.isCreateDataRoomDialogOpen}
         dataRoomNameDraft={forms.dataRoomNameDraft}
         dataRoomNameError={forms.dataRoomNameError}
-        onOpenCreateDialog={handlers.openCreateDataRoomDialog}
-        onCloseCreateDialog={handlers.closeCreateDataRoomDialog}
-        onDataRoomNameDraftChange={handlers.handleDataRoomNameDraftChange}
-        onCreateDataRoom={handlers.handleCreateDataRoom}
+        onOpenCreateDialog={handlerGroups.dataRoom.openCreateDataRoomDialog}
+        onCloseCreateDialog={handlerGroups.dataRoom.closeCreateDataRoomDialog}
+        onDataRoomNameDraftChange={handlerGroups.dataRoom.handleDataRoomNameDraftChange}
+        onCreateDataRoom={handlerGroups.dataRoom.handleCreateDataRoom}
       />
     )
   }
@@ -78,10 +78,10 @@ export function HomePageContainer() {
         resolveDisplayName,
       }}
       sidebarHandlers={{
-        onCreateDataRoom: handlers.openCreateDataRoomDialog,
-        onRenameDataRoom: handlers.openRenameDataRoomDialog,
-        onDeleteDataRoom: handlers.openDeleteDataRoomDialog,
-        onSelectDataRoom: handlers.selectDataRoom,
+        onCreateDataRoom: handlerGroups.dataRoom.openCreateDataRoomDialog,
+        onRenameDataRoom: handlerGroups.dataRoom.openRenameDataRoomDialog,
+        onDeleteDataRoom: handlerGroups.dataRoom.openDeleteDataRoomDialog,
+        onSelectDataRoom: handlerGroups.navigation.selectDataRoom,
       }}
       contentState={{
         activeDataRoomName,
@@ -117,37 +117,37 @@ export function HomePageContainer() {
         uploadInputRef,
       }}
       contentHandlers={{
-        onCreateFolder: handlers.openCreateFolderDialog,
+        onCreateFolder: handlerGroups.folder.openCreateFolderDialog,
         onUploadPdf: () => uploadInputRef.current?.click(),
-        onUploadInputChange: handlers.handleUploadInputChange,
-        onToggleSort: handlers.toggleSort,
-        onToggleContentItemSelection: handlers.toggleContentItemSelection,
-        onToggleAllContentItemSelection: handlers.toggleAllContentItemSelection,
-        onClearContentItemSelection: handlers.clearContentItemSelection,
-        onOpenDeleteSelectedContentDialog: handlers.openDeleteSelectedContentDialog,
-        onCloseDeleteSelectedContentDialog: handlers.closeDeleteSelectedContentDialog,
-        onDeleteSelectedContent: handlers.handleDeleteSelectedContent,
-        onOpenMoveSelectedContentDialog: handlers.openMoveSelectedContentDialog,
-        onCloseMoveContentDialog: handlers.closeMoveContentDialog,
-        onMoveDestinationFolderChange: handlers.handleMoveDestinationFolderChange,
-        onMoveSelectedContent: handlers.handleMoveSelectedContent,
-        onStartDragMove: handlers.startDragMove,
-        onEndDragMove: handlers.endDragMove,
-        onSetDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
-        onCanDropOnFolder: handlers.canDropOnFolder,
-        onDropOnFolder: handlers.dropOnFolder,
+        onUploadInputChange: handlerGroups.file.handleUploadInputChange,
+        onToggleSort: handlerGroups.list.toggleSort,
+        onToggleContentItemSelection: handlerGroups.selection.toggleContentItemSelection,
+        onToggleAllContentItemSelection: handlerGroups.selection.toggleAllContentItemSelection,
+        onClearContentItemSelection: handlerGroups.selection.clearContentItemSelection,
+        onOpenDeleteSelectedContentDialog: handlerGroups.selection.openDeleteSelectedContentDialog,
+        onCloseDeleteSelectedContentDialog: handlerGroups.selection.closeDeleteSelectedContentDialog,
+        onDeleteSelectedContent: handlerGroups.selection.handleDeleteSelectedContent,
+        onOpenMoveSelectedContentDialog: handlerGroups.move.openMoveSelectedContentDialog,
+        onCloseMoveContentDialog: handlerGroups.move.closeMoveContentDialog,
+        onMoveDestinationFolderChange: handlerGroups.move.handleMoveDestinationFolderChange,
+        onMoveSelectedContent: handlerGroups.move.handleMoveSelectedContent,
+        onStartDragMove: handlerGroups.move.startDragMove,
+        onEndDragMove: handlerGroups.move.endDragMove,
+        onSetDragMoveTargetFolder: handlerGroups.move.setDragMoveTargetFolder,
+        onCanDropOnFolder: handlerGroups.move.canDropOnFolder,
+        onDropOnFolder: handlerGroups.move.dropOnFolder,
         pagination: {
-          onPageChange: handlers.handleListViewPageChange,
-          onItemsPerPageChange: handlers.handleListViewItemsPerPageChange,
+          onPageChange: handlerGroups.list.handleListViewPageChange,
+          onItemsPerPageChange: handlerGroups.list.handleListViewItemsPerPageChange,
         },
-        onSelectFolder: handlers.selectFolder,
-        onOpenRenameFolder: handlers.openRenameFolderDialog,
-        onOpenDeleteFolder: handlers.openDeleteFolderDialog,
-        onOpenMoveFolder: handlers.openMoveFolderDialog,
-        onOpenViewFile: handlers.openViewFileDialog,
-        onOpenRenameFile: handlers.openRenameFileDialog,
-        onOpenDeleteFile: handlers.openDeleteFileDialog,
-        onOpenMoveFile: handlers.openMoveFileDialog,
+        onSelectFolder: handlerGroups.navigation.selectFolder,
+        onOpenRenameFolder: handlerGroups.folder.openRenameFolderDialog,
+        onOpenDeleteFolder: handlerGroups.folder.openDeleteFolderDialog,
+        onOpenMoveFolder: handlerGroups.move.openMoveFolderDialog,
+        onOpenViewFile: handlerGroups.file.openViewFileDialog,
+        onOpenRenameFile: handlerGroups.file.openRenameFileDialog,
+        onOpenDeleteFile: handlerGroups.file.openDeleteFileDialog,
+        onOpenMoveFile: handlerGroups.move.openMoveFileDialog,
       }}
     >
       <HomePageDialogsContainer
@@ -160,13 +160,13 @@ export function HomePageContainer() {
         dataRoomDeleteSummary={dataRoomDeleteSummary}
         folderDeleteSummary={folderDeleteSummary}
         resolveDisplayName={resolveDisplayName}
-        handlers={handlers}
+        handlers={handlerGroups}
       />
 
       <FeedbackStack
         feedbackQueue={feedbackQueue}
         timeoutMs={feedbackTimeoutMs}
-        onDismissFeedback={handlers.dismissFeedback}
+        onDismissFeedback={handlerGroups.feedback.dismissFeedback}
       />
     </HomePageWorkspace>
   )

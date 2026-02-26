@@ -18,7 +18,7 @@ export function ContentActionBar({
       <Button variant="contained" onClick={onCreateFolder}>
         {t('dataroomActionCreateFolder')}
       </Button>
-      <Button variant="text" onClick={onUploadPdf}>
+      <Button variant="text" onClick={onUploadPdf} aria-label={t('dataroomAriaUploadPdfs')}>
         {t('dataroomActionUploadPdf')}
       </Button>
     </Stack>

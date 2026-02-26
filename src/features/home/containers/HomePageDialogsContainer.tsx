@@ -2,12 +2,12 @@ import type {
   HomeDeleteSummary,
   HomeDialogState,
   HomeFormState,
-  HomePageHandlers,
+  HomePageHandlerGroups,
   HomePageSelectionState,
 } from '../model/homePageViewModel'
 import { HomeDialogs } from '../HomeDialogs'
 
-// Maps controller state/handlers into the flattened HomeDialogs props.
+// Maps controller state/handlers into grouped HomeDialogs handler props.
 interface HomePageDialogsContainerProps {
   dialogs: HomeDialogState
   forms: HomeFormState
@@ -18,29 +18,7 @@ interface HomePageDialogsContainerProps {
   dataRoomDeleteSummary: HomeDeleteSummary
   folderDeleteSummary: HomeDeleteSummary
   resolveDisplayName: (value: string) => string
-  handlers: Pick<
-    HomePageHandlers,
-    | 'closeCreateDataRoomDialog'
-    | 'handleDataRoomNameDraftChange'
-    | 'handleCreateDataRoom'
-    | 'closeRenameDataRoomDialog'
-    | 'handleRenameDataRoom'
-    | 'closeDeleteDataRoomDialog'
-    | 'handleDeleteDataRoom'
-    | 'closeCreateFolderDialog'
-    | 'handleFolderNameDraftChange'
-    | 'handleCreateFolder'
-    | 'closeRenameFolderDialog'
-    | 'handleRenameFolder'
-    | 'closeDeleteFolderDialog'
-    | 'handleDeleteFolder'
-    | 'closeRenameFileDialog'
-    | 'handleFileNameDraftChange'
-    | 'handleRenameFile'
-    | 'closeDeleteFileDialog'
-    | 'handleDeleteFile'
-    | 'closeViewFileDialog'
-  >
+  handlers: Pick<HomePageHandlerGroups, 'dataRoom' | 'folder' | 'file'>
 }
 
 export function HomePageDialogsContainer({
@@ -66,7 +44,10 @@ export function HomePageDialogsContainer({
       activeFileId={activeFile?.id ?? null}
       dataRoomDeleteSummary={dataRoomDeleteSummary}
       folderDeleteSummary={folderDeleteSummary}
-      handlers={handlers}
+      dataRoomHandlers={handlers.dataRoom}
+      folderHandlers={handlers.folder}
+      fileHandlers={handlers.file}
+      previewHandlers={handlers.file}
     />
   )
 }
