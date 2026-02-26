@@ -23,6 +23,7 @@ interface FolderRowProps {
   locale: string
   resolveDisplayName: (value: string) => string
   selected: boolean
+  isHighlighted: boolean
   indeterminate: boolean
   dragMoveActive: boolean
   dragMoveTargeted: boolean
@@ -56,6 +57,7 @@ export function FolderRow({
   locale,
   resolveDisplayName,
   selected,
+  isHighlighted,
   indeterminate,
   dragMoveActive,
   dragMoveTargeted,
@@ -108,14 +110,18 @@ export function FolderRow({
       sx={{
         px: 2,
         py: 1,
+        bgcolor: isHighlighted ? 'action.hover' : undefined,
         userSelect: 'none',
         cursor: isDraggable ? activeCursor : undefined,
         '&:hover': isDraggable ? { cursor: activeCursor } : undefined,
         '&:active': isDraggable ? { cursor: 'grabbing' } : undefined,
         outline: dragMoveActive && dragMoveTargeted ? '1px dashed' : 'none',
         outlineColor: canDrop ? 'success.main' : 'error.main',
-        bgcolor: dragMoveActive && dragMoveTargeted ? (canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover') : undefined,
+        ...(dragMoveActive && dragMoveTargeted
+          ? { bgcolor: canDrop ? 'rgba(46,125,50,0.12)' : 'action.hover' }
+          : {}),
       }}
+      data-row-highlighted={isHighlighted ? 'true' : 'false'}
     >
       <Box
         sx={{

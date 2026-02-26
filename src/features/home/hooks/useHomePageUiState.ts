@@ -67,6 +67,7 @@ export function useHomePageTransientState() {
   const uploadInputRef = useRef<HTMLInputElement | null>(null)
   const [targetFolderId, setTargetFolderId] = useState<NodeId | null>(null)
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
+  const [highlightedContentItemId, setHighlightedContentItemId] = useState<NodeId | null>(null)
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
 
   return {
@@ -75,6 +76,8 @@ export function useHomePageTransientState() {
     setTargetFolderId,
     activeFileId,
     setActiveFileId,
+    highlightedContentItemId,
+    setHighlightedContentItemId,
     sortState,
     setSortState,
   }

@@ -201,6 +201,35 @@ describe('App routing and localization', () => {
     expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
   }, 15000)
 
+  it('selects newly created folder and uploaded file without navigating into them', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    expect(screen.getByRole('checkbox', { name: 'Select item Finance' })).not.toBeChecked()
+    const financeRow = screen.getByRole('button', { name: 'Open folder Finance' }).closest('li')
+    expect(financeRow).not.toBeNull()
+    expect(financeRow).toHaveAttribute('data-row-highlighted', 'true')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await goToBreadcrumb(user, 'Data Room')
+    const financeRowAfterOpen = screen.getByRole('button', { name: 'Open folder Finance' }).closest('li')
+    expect(financeRowAfterOpen).not.toBeNull()
+    expect(financeRowAfterOpen).toHaveAttribute('data-row-highlighted', 'false')
+
+    await uploadPdf(user, 'contract.pdf')
+    expect(screen.getByRole('checkbox', { name: 'Select item contract.pdf' })).not.toBeChecked()
+    const contractRow = screen.getByRole('button', { name: 'View file contract.pdf' }).closest('li')
+    expect(contractRow).not.toBeNull()
+    expect(contractRow).toHaveAttribute('data-row-highlighted', 'true')
+    await user.click(screen.getByRole('button', { name: 'View file contract.pdf' }))
+    const previewDialog = screen.getByRole('dialog', { name: 'contract.pdf' })
+    await user.click(within(previewDialog).getByRole('button', { name: 'Close' }))
+    await waitForElementToBeRemoved(previewDialog)
+    const contractRowAfterOpen = screen.getByRole('button', { name: 'View file contract.pdf' }).closest('li')
+    expect(contractRowAfterOpen).not.toBeNull()
+    expect(contractRowAfterOpen).toHaveAttribute('data-row-highlighted', 'false')
+  }, 15000)
+
   it('creates, renames, and deletes a data room from sidebar controls', async () => {
     const user = userEvent.setup()
     renderRoute('/')

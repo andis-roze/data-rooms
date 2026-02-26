@@ -45,6 +45,8 @@ export function useHomePageController(): HomePageViewModel {
     setTargetFolderId,
     activeFileId,
     setActiveFileId,
+    highlightedContentItemId,
+    setHighlightedContentItemId,
     sortState,
     setSortState,
   } = transientState
@@ -183,6 +185,7 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectDataRoom = (dataRoomId: NodeId) => {
+    setHighlightedContentItemId(null)
     clearContentItemSelection()
     closeMoveContentDialog()
     endDragMove()
@@ -190,6 +193,7 @@ export function useHomePageController(): HomePageViewModel {
   }
 
   const selectFolder = (folderId: NodeId) => {
+    setHighlightedContentItemId(null)
     selectNode('folder', folderId)
   }
 
@@ -236,6 +240,7 @@ export function useHomePageController(): HomePageViewModel {
       folderNameDraft,
       resolveDisplayName,
       enqueueFeedback,
+      setHighlightedContentItemId,
       fileBlobStorage: defaultFileBlobStorageService,
       setFolderNameDraft,
       setFolderNameError,
@@ -252,6 +257,7 @@ export function useHomePageController(): HomePageViewModel {
       activeFile,
       fileNameDraft,
       enqueueFeedback,
+      setHighlightedContentItemId,
       fileBlobStorage: defaultFileBlobStorageService,
       setActiveFileId,
       setFileNameDraft,
@@ -302,6 +308,7 @@ export function useHomePageController(): HomePageViewModel {
       dragMoveActive: isDragMoveActive,
       dragMoveItemIds,
       dragMoveTargetFolderId,
+      highlightedContentItemId,
     },
     viewHelpers: {
       resolveDisplayName,

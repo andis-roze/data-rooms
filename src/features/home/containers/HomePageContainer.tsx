@@ -40,6 +40,7 @@ export function HomePageContainer() {
     dragMoveActive,
     dragMoveItemIds,
     dragMoveTargetFolderId,
+    highlightedContentItemId,
   } = selection
 
   const { resolveDisplayName } = viewHelpers
@@ -122,6 +123,7 @@ export function HomePageContainer() {
         moveValidationError,
         dragMoveActive,
         dragMoveTargetFolderId,
+        highlightedContentItemId,
         deleteSelectedContentDialogOpen: dialogs.isDeleteSelectedContentDialogOpen,
         uploadInputRef,
       }}

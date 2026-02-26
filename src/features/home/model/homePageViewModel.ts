@@ -64,6 +64,7 @@ export interface HomePageSelectionState {
   dragMoveActive: boolean
   dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
+  highlightedContentItemId: NodeId | null
 }
 
 export interface HomePageUiState {

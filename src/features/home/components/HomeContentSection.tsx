@@ -33,6 +33,7 @@ interface HomeContentSectionStateProps {
   moveValidationError: string | null
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
+  highlightedContentItemId: NodeId | null
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
 }
@@ -99,6 +100,7 @@ export function HomeContentSection({
     moveValidationError,
     dragMoveActive,
     dragMoveTargetFolderId,
+    highlightedContentItemId,
     deleteSelectedContentDialogOpen,
     uploadInputRef,
   } = state
@@ -169,6 +171,7 @@ export function HomeContentSection({
           locale={locale}
           resolveDisplayName={resolveDisplayName}
           selectedItemIds={checkedContentItemIds}
+          highlightedItemId={highlightedContentItemId}
           indeterminateFolderIds={indeterminateFolderIds}
           dragMoveActive={dragMoveActive}
           dragMoveTargetFolderId={dragMoveTargetFolderId}

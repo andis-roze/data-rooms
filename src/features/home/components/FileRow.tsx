@@ -20,6 +20,7 @@ interface FileRowProps {
   rowGridTemplate: string
   locale: string
   selected: boolean
+  isHighlighted: boolean
   dragMoveActive: boolean
   onDragMoveStart: (itemId: NodeId) => void
   onDragMoveEnd: () => void
@@ -87,6 +88,7 @@ export function FileRow({
   rowGridTemplate,
   locale,
   selected,
+  isHighlighted,
   dragMoveActive,
   onDragMoveStart,
   onDragMoveEnd,
@@ -126,11 +128,13 @@ export function FileRow({
       sx={{
         px: 2,
         py: 1,
+        bgcolor: isHighlighted ? 'action.hover' : undefined,
         userSelect: 'none',
         cursor: activeCursor,
         '&:hover': { cursor: activeCursor },
         '&:active': { cursor: 'grabbing' },
       }}
+      data-row-highlighted={isHighlighted ? 'true' : 'false'}
     >
       <Box
         sx={{

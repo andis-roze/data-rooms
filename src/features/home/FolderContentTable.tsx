@@ -18,6 +18,7 @@ interface FolderContentTableProps {
   locale: string
   resolveDisplayName: (value: string) => string
   selectedItemIds: NodeId[]
+  highlightedItemId: NodeId | null
   indeterminateFolderIds: NodeId[]
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
@@ -56,6 +57,7 @@ export function FolderContentTable({
   locale,
   resolveDisplayName,
   selectedItemIds,
+  highlightedItemId,
   indeterminateFolderIds,
   dragMoveActive,
   dragMoveTargetFolderId,
@@ -221,6 +223,7 @@ export function FolderContentTable({
                 locale={locale}
                 resolveDisplayName={resolveDisplayName}
                 selected={selectedItemIdSet.has(item.id)}
+                isHighlighted={highlightedItemId === item.id}
                 indeterminate={indeterminateFolderIds.includes(item.id)}
                 dragMoveActive={dragMoveActive}
                 dragMoveTargeted={dragMoveTargetFolderId === item.id}
@@ -252,6 +255,7 @@ export function FolderContentTable({
               rowGridTemplate={desktopGridTemplate}
               locale={locale}
               selected={selectedItemIdSet.has(item.id)}
+              isHighlighted={highlightedItemId === item.id}
               dragMoveActive={dragMoveActive}
               onDragMoveStart={onStartDragMove}
               onDragMoveEnd={onEndDragMove}

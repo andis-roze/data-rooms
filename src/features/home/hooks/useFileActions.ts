@@ -22,6 +22,7 @@ interface UseFileActionsParams {
   activeFile: FileNode | null
   fileNameDraft: string
   enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  setHighlightedContentItemId: Dispatch<SetStateAction<NodeId | null>>
   fileBlobStorage: FileBlobStorageService
   setActiveFileId: Dispatch<SetStateAction<NodeId | null>>
   setFileNameDraft: Dispatch<SetStateAction<string>>
@@ -41,6 +42,7 @@ export function useFileActions({
   activeFile,
   fileNameDraft,
   enqueueFeedback,
+  setHighlightedContentItemId,
   fileBlobStorage,
   setActiveFileId,
   setFileNameDraft,
@@ -109,6 +111,7 @@ export function useFileActions({
   }
 
   const openViewFileDialog = (file: FileNode) => {
+    setHighlightedContentItemId(null)
     selectActiveFile(file)
     setIsViewFileDialogOpen(true)
   }
@@ -164,6 +167,7 @@ export function useFileActions({
         mimeType: preparedUpload.mimeType,
       },
     })
+    setHighlightedContentItemId(fileId)
 
     enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
     clearUploadInput(event)

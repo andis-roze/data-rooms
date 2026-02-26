@@ -23,6 +23,7 @@ interface UseFolderActionsParams {
   folderNameDraft: string
   resolveDisplayName: (value: string) => string
   enqueueFeedback: (message: string, severity: 'success' | 'error') => void
+  setHighlightedContentItemId: Dispatch<SetStateAction<NodeId | null>>
   fileBlobStorage: FileBlobStorageService
   setFolderNameDraft: Dispatch<SetStateAction<string>>
   setFolderNameError: Dispatch<SetStateAction<string | null>>
@@ -42,6 +43,7 @@ export function useFolderActions({
   folderNameDraft,
   resolveDisplayName,
   enqueueFeedback,
+  setHighlightedContentItemId,
   fileBlobStorage,
   setFolderNameDraft,
   setFolderNameError,
@@ -128,15 +130,18 @@ export function useFolderActions({
       return
     }
 
+    const folderId = generateNodeId('folder')
+
     dispatch({
       type: 'dataroom/createFolder',
       payload: {
         dataRoomId: activeDataRoom.id,
         parentFolderId: activeFolder.id,
-        folderId: generateNodeId('folder'),
+        folderId,
         folderName: folderNameDraft,
       },
     })
+    setHighlightedContentItemId(folderId)
 
     // Keep list/tree focus on the current folder after creating a child folder.
     // Dispatch once immediately and once deferred to guard against dialog click-through
