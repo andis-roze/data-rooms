@@ -146,7 +146,7 @@ RECORDINGS_DIR=artifacts/demo-video node scripts/record-ux-walkthrough.mjs --ste
 
 Current provided demo recording:
 
-- `artifacts/demo-video/demo-full-ux-ultra-slow.webm`
+- `artifacts/demo-video/demo-full-ux-ultra-slow.av1.mkv`
 
 Speed is configurable via CLI or env:
 
