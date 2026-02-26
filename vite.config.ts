@@ -56,9 +56,9 @@ export default defineConfig(({ mode }) => {
         provider: 'v8',
         reporter: ['text', 'html'],
         thresholds: {
-          statements: 60,
-          lines: 60,
-          functions: 60,
+          statements: 62,
+          lines: 62,
+          functions: 62,
         },
       },
     },

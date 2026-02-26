@@ -4,7 +4,7 @@ import path from 'node:path'
 
 const rootDir = process.cwd()
 const coverageSummaryPath = path.join(rootDir, 'coverage', 'coverage-summary.json')
-const minimumCoveragePercent = 60
+const minimumCoveragePercent = 62
 
 const runOrExit = (command, args, blockedMessage) => {
   const run = spawnSync(command, args, { stdio: 'inherit' })
