@@ -110,9 +110,9 @@ export function useHomePageController(): HomePageViewModel {
   const rootFolder = selectRootFolder(entities, activeDataRoom)
   const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
   const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
-  const visibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
-  const parentNavigationItem = visibleContentItems.find((item) => item.kind === 'folder' && item.isParentNavigation)
-  const pageableContentItems = visibleContentItems.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
+  const allVisibleContentItems = selectVisibleContentItems(entities, activeFolder, resolveDisplayName, sortState)
+  const parentNavigationItem = allVisibleContentItems.find((item) => item.kind === 'folder' && item.isParentNavigation)
+  const pageableContentItems = allVisibleContentItems.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
   const listViewPageCount = Math.max(1, Math.ceil(pageableContentItems.length / listViewItemsPerPage))
   const resolvedListViewPage = Math.min(listViewPage, listViewPageCount - 1)
   const pageStart = resolvedListViewPage * listViewItemsPerPage
@@ -160,7 +160,7 @@ export function useHomePageController(): HomePageViewModel {
   } = useContentSelection({
     entities,
     activeDataRoomId,
-    visibleContentItems,
+    visibleContentItems: pagedContentItems,
     resolveDisplayName,
   })
 
@@ -172,7 +172,6 @@ export function useHomePageController(): HomePageViewModel {
     moveDestinationFolderOptions,
     moveValidationError,
     dragMoveActive: isDragMoveActive,
-    dragMoveItemIds,
     dragMoveTargetFolderId,
     openMoveSelectedContentDialog,
     openMoveFolderDialog,
@@ -304,10 +303,8 @@ export function useHomePageController(): HomePageViewModel {
 
   return {
     t,
-    entities,
     selection: {
       selectedDataRoomId,
-      selectedFolderId,
       dataRooms,
       activeDataRoom,
       rootFolder,
@@ -320,7 +317,6 @@ export function useHomePageController(): HomePageViewModel {
       canDeleteActiveDataRoom,
       dataRoomDeleteSummary,
       folderDeleteSummary,
-      selectedContentItemIds,
       checkedContentItemIds,
       selectedContentItemCount,
       deleteSelectedContentItemCount: deleteSelectionItemIds.length,
@@ -334,7 +330,6 @@ export function useHomePageController(): HomePageViewModel {
       moveDestinationFolderOptions,
       moveValidationError,
       dragMoveActive: isDragMoveActive,
-      dragMoveItemIds,
       dragMoveTargetFolderId,
       highlightedContentItemId,
       listViewPage: resolvedListViewPage,

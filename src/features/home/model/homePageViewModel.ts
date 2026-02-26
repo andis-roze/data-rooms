@@ -1,6 +1,6 @@
 import type { ChangeEvent, RefObject } from 'react'
 import type { TFunction } from 'i18next'
-import type { DataRoom, DataRoomState, FileNode, Folder, NodeId } from '../../dataroom/model'
+import type { DataRoom, FileNode, Folder, NodeId } from '../../dataroom/model'
 import type { FeedbackState, FolderContentItem, SortState } from './homeViewTypes'
 
 export interface HomeDeleteSummary {
@@ -33,7 +33,6 @@ export interface HomeFormState {
 
 export interface HomePageSelectionState {
   selectedDataRoomId: NodeId | null
-  selectedFolderId: NodeId | null
   dataRooms: DataRoom[]
   activeDataRoom: DataRoom | undefined
   rootFolder: Folder | null
@@ -46,7 +45,6 @@ export interface HomePageSelectionState {
   canDeleteActiveDataRoom: boolean
   dataRoomDeleteSummary: HomeDeleteSummary
   folderDeleteSummary: HomeDeleteSummary
-  selectedContentItemIds: NodeId[]
   checkedContentItemIds: NodeId[]
   selectedContentItemCount: number
   deleteSelectedContentItemCount: number
@@ -60,7 +58,6 @@ export interface HomePageSelectionState {
   moveDestinationFolderOptions: Array<{ id: NodeId; name: string; depth: number; path: string; parentPath: string | null }>
   moveValidationError: string | null
   dragMoveActive: boolean
-  dragMoveItemIds: NodeId[]
   dragMoveTargetFolderId: NodeId | null
   highlightedContentItemId: NodeId | null
   listViewPage: number
@@ -136,7 +133,6 @@ export interface HomePageHandlers {
 
 export interface HomePageViewModel {
   t: TFunction<'common'>
-  entities: DataRoomState
   selection: HomePageSelectionState
   viewHelpers: {
     resolveDisplayName: (value: string) => string
