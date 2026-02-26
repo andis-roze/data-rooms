@@ -1,39 +1,38 @@
 import { describe, expect, it } from 'vitest'
-import { createDataRoom, createFolder, createSeedDataRoomState } from '../../features/dataroom/model'
 import { createInitialDataRoomStoreState, dataRoomReducer } from '../../features/dataroom/state/reducer'
 import type { DataRoomAction, DataRoomStoreState } from '../../features/dataroom/state/types'
-
-const NOW = 1_700_000_000_000
+import { createDataRoomFixtureBuilder, FIXTURE_NOW } from '../utils/dataRoomFixtures'
 
 function createReducerFixture() {
-  let entities = createSeedDataRoomState(NOW)
+  const builder = createDataRoomFixtureBuilder()
+  const room1Id = builder.seedDataRoomId
+  const room1RootId = builder.seedRootFolderId
 
-  const room1Id = entities.dataRoomOrder[0]
-  const room1RootId = entities.dataRoomsById[room1Id].rootFolderId
-
-  entities = createFolder(entities, {
+  builder.addFolder({
     dataRoomId: room1Id,
     parentFolderId: room1RootId,
     folderId: 'folder-room1-a',
     folderName: 'Finance',
-    now: NOW + 1,
+    now: FIXTURE_NOW + 1,
   })
 
-  entities = createDataRoom(entities, {
+  builder.addDataRoom({
     dataRoomId: 'dataroom-2',
     rootFolderId: 'folder-root-2',
     dataRoomName: 'Room 2',
     rootFolderName: 'Root 2',
-    now: NOW + 2,
+    now: FIXTURE_NOW + 2,
   })
 
-  entities = createFolder(entities, {
+  builder.addFolder({
     dataRoomId: 'dataroom-2',
     parentFolderId: 'folder-root-2',
     folderId: 'folder-room2-a',
     folderName: 'Legal',
-    now: NOW + 3,
+    now: FIXTURE_NOW + 3,
   })
+
+  const entities = builder.build()
 
   return {
     entities,

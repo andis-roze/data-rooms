@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { createDataRoom, createFile, createFolder, createSeedDataRoomState } from '../../features/dataroom/model'
 import type { SortState } from '../../features/home/model/homeViewTypes'
 import {
   selectActiveDataRoom,
@@ -9,61 +8,52 @@ import {
   selectRootFolder,
   selectVisibleContentItems,
 } from '../../features/home/selectors/homeSelectors'
-
-const NOW = 1_700_000_000_000
+import { createDataRoomFixtureBuilder } from '../utils/dataRoomFixtures'
 
 function createStateWithChildren() {
-  const seed = createSeedDataRoomState(NOW)
-  const dataRoomId = seed.dataRoomOrder[0]
-  const rootFolderId = seed.dataRoomsById[dataRoomId].rootFolderId
+  const builder = createDataRoomFixtureBuilder()
 
-  const withFolders = createFolder(
-    createFolder(seed, {
-      dataRoomId,
-      parentFolderId: rootFolderId,
+  builder
+    .addFolder({
+      dataRoomId: builder.seedDataRoomId,
+      parentFolderId: builder.seedRootFolderId,
       folderId: 'folder-b',
       folderName: 'Bravo',
-      now: NOW + 1,
-    }),
-    {
-      dataRoomId,
-      parentFolderId: rootFolderId,
+    })
+    .addFolder({
+      dataRoomId: builder.seedDataRoomId,
+      parentFolderId: builder.seedRootFolderId,
       folderId: 'folder-a',
       folderName: 'Alpha',
-      now: NOW + 2,
-    },
-  )
-
-  return createFile(
-    createFile(withFolders, {
-      parentFolderId: rootFolderId,
+    })
+    .addFile({
+      parentFolderId: builder.seedRootFolderId,
       fileId: 'file-z',
       fileName: 'Zulu.pdf',
       size: 100,
       mimeType: 'application/pdf',
-      now: NOW + 3,
-    }),
-    {
-      parentFolderId: rootFolderId,
+    })
+    .addFile({
+      parentFolderId: builder.seedRootFolderId,
       fileId: 'file-e',
       fileName: 'Echo.pdf',
       size: 200,
       mimeType: 'application/pdf',
-      now: NOW + 4,
-    },
-  )
+    })
+
+  return builder.build()
 }
 
 describe('homeSelectors', () => {
   it('selectDataRooms filters out missing ids from dataRoomOrder', () => {
-    const seed = createSeedDataRoomState(NOW)
-    const withSecondRoom = createDataRoom(seed, {
+    const builder = createDataRoomFixtureBuilder()
+    builder.addDataRoom({
       dataRoomId: 'room-2',
       rootFolderId: 'room-2-root',
       dataRoomName: 'Room 2',
       rootFolderName: 'Root',
-      now: NOW + 1,
     })
+    const withSecondRoom = builder.build()
 
     const state = {
       ...withSecondRoom,
@@ -74,14 +64,14 @@ describe('homeSelectors', () => {
   })
 
   it('selectActiveDataRoom falls back to the first available room', () => {
-    const seed = createSeedDataRoomState(NOW)
-    const withSecondRoom = createDataRoom(seed, {
+    const builder = createDataRoomFixtureBuilder()
+    builder.addDataRoom({
       dataRoomId: 'room-2',
       rootFolderId: 'room-2-root',
       dataRoomName: 'Room 2',
       rootFolderName: 'Root',
-      now: NOW + 1,
     })
+    const withSecondRoom = builder.build()
     const dataRooms = selectDataRooms(withSecondRoom)
 
     expect(selectActiveDataRoom(withSecondRoom, null, dataRooms)?.id).toBe(dataRooms[0].id)
@@ -90,13 +80,13 @@ describe('homeSelectors', () => {
   })
 
   it('selectRootFolder returns null when no active data room is available', () => {
-    const state = createSeedDataRoomState(NOW)
+    const state = createDataRoomFixtureBuilder().build()
 
     expect(selectRootFolder(state, undefined)).toBeNull()
   })
 
   it('selectActiveFolder falls back to root and handles missing root', () => {
-    const state = createSeedDataRoomState(NOW)
+    const state = createDataRoomFixtureBuilder().build()
     const rootFolder = state.foldersById[state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId]
 
     expect(selectActiveFolder(state, rootFolder, null)?.id).toBe(rootFolder.id)
@@ -105,28 +95,28 @@ describe('homeSelectors', () => {
   })
 
   it('selectBreadcrumbs derives path from root to active folder', () => {
-    const seed = createSeedDataRoomState(NOW)
-    const dataRoomId = seed.dataRoomOrder[0]
-    const rootFolderId = seed.dataRoomsById[dataRoomId].rootFolderId
-
-    const withFinance = createFolder(seed, {
-      dataRoomId,
-      parentFolderId: rootFolderId,
+    const builder = createDataRoomFixtureBuilder()
+    builder.addFolder({
+      dataRoomId: builder.seedDataRoomId,
+      parentFolderId: builder.seedRootFolderId,
       folderId: 'folder-finance',
       folderName: 'Finance',
-      now: NOW + 1,
     })
-    const withInvoices = createFolder(withFinance, {
-      dataRoomId,
+    builder.addFolder({
+      dataRoomId: builder.seedDataRoomId,
       parentFolderId: 'folder-finance',
       folderId: 'folder-invoices',
       folderName: 'Invoices',
-      now: NOW + 2,
     })
+    const withInvoices = builder.build()
 
     const breadcrumbs = selectBreadcrumbs(withInvoices, withInvoices.foldersById['folder-invoices'])
 
-    expect(breadcrumbs.map((folder) => folder.id)).toEqual([rootFolderId, 'folder-finance', 'folder-invoices'])
+    expect(breadcrumbs.map((folder) => folder.id)).toEqual([
+      builder.seedRootFolderId,
+      'folder-finance',
+      'folder-invoices',
+    ])
   })
 
   it('selectVisibleContentItems sorts mixed child content by requested sort state', () => {
@@ -143,7 +133,7 @@ describe('homeSelectors', () => {
   })
 
   it('selectVisibleContentItems returns empty for null active folder and empty folders', () => {
-    const state = createSeedDataRoomState(NOW)
+    const state = createDataRoomFixtureBuilder().build()
     const rootFolder = state.foldersById[state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId]
     const sortState: SortState = { field: 'name', direction: 'asc' }
 
