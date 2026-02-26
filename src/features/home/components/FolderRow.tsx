@@ -32,6 +32,7 @@ interface FolderRowProps {
   onDragMoveLeaveFolder: () => void
   onDragMoveOver: (event: DragEvent<HTMLLIElement>) => void
   onDropOnFolder: (folderId: NodeId) => void
+  onDropExternalFiles: (folderId: NodeId, files: File[]) => void
   onToggleSelect: (itemId: NodeId) => void
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
@@ -64,6 +65,7 @@ export function FolderRow({
   onDragMoveLeaveFolder,
   onDragMoveOver,
   onDropOnFolder,
+  onDropExternalFiles,
   onToggleSelect,
   onSelectFolder,
   onOpenRenameFolder,
@@ -95,9 +97,20 @@ export function FolderRow({
         }
       }}
       onDragLeave={onDragMoveLeaveFolder}
-      onDragOver={onDragMoveOver}
+      onDragOver={(event) => {
+        if (event.dataTransfer.types.includes('Files')) {
+          event.preventDefault()
+          event.dataTransfer.dropEffect = 'copy'
+          return
+        }
+        onDragMoveOver(event)
+      }}
       onDrop={(event) => {
         event.preventDefault()
+        if (event.dataTransfer.types.includes('Files')) {
+          onDropExternalFiles(folder.id, Array.from(event.dataTransfer.files))
+          return
+        }
         onDropOnFolder(folder.id)
       }}
       sx={{

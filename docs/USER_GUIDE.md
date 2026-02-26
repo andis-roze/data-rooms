@@ -76,6 +76,9 @@ Use breadcrumbs above the table to jump back to parent folders quickly.
 - When uploading multiple files, each file is processed independently:
   - Valid PDFs are uploaded
   - Invalid or duplicate files are skipped with feedback
+- You can also drag files from your computer into the content list:
+  - Drop on the list background to upload into the current folder
+  - Drop on a folder row to upload directly into that folder
 - Open a file with `View` to preview
 
 ## Name Validation Rules

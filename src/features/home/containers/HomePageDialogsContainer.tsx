@@ -33,15 +33,19 @@ export function HomePageDialogsContainer({
   resolveDisplayName,
   handlers,
 }: HomePageDialogsContainerProps) {
+  const targetFolderName = targetFolder ? resolveDisplayName(targetFolder.name) : null
+  const activeFileName = activeFile?.name ?? null
+  const activeFileId = activeFile?.id ?? null
+
   return (
     <HomeDialogs
       dialogs={dialogs}
       forms={forms}
       activeDataRoomName={activeDataRoomName}
       activeFolderName={activeFolderName}
-      targetFolderName={targetFolder ? resolveDisplayName(targetFolder.name) : null}
-      activeFileName={activeFile?.name ?? null}
-      activeFileId={activeFile?.id ?? null}
+      targetFolderName={targetFolderName}
+      activeFileName={activeFileName}
+      activeFileId={activeFileId}
       dataRoomDeleteSummary={dataRoomDeleteSummary}
       folderDeleteSummary={folderDeleteSummary}
       dataRoomHandlers={handlers.dataRoom}

@@ -44,6 +44,8 @@ export interface HomeContentSectionHandlers {
   onCreateFolder: () => void
   onUploadPdf: () => void
   onUploadInputChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onUploadDroppedFiles: (files: File[]) => Promise<void>
+  onUploadDroppedFilesToFolder: (folderId: NodeId, files: File[]) => Promise<void>
   onToggleSort: (field: 'name' | 'type' | 'updated') => void
   onToggleContentItemSelection: (itemId: NodeId) => void
   onToggleAllContentItemSelection: () => void
@@ -113,6 +115,8 @@ export function HomeContentSection({
     onCreateFolder,
     onUploadPdf,
     onUploadInputChange,
+    onUploadDroppedFiles,
+    onUploadDroppedFilesToFolder,
     onToggleSort,
     onToggleContentItemSelection,
     onToggleAllContentItemSelection,
@@ -172,6 +176,8 @@ export function HomeContentSection({
           pagination={pagination}
           paginationHandlers={paginationHandlers}
           onToggleSort={onToggleSort}
+          onUploadDroppedFiles={onUploadDroppedFiles}
+          onUploadDroppedFilesToFolder={onUploadDroppedFilesToFolder}
           onStartDragMove={onStartDragMove}
           onEndDragMove={onEndDragMove}
           onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}

@@ -68,87 +68,93 @@ export function HomePageContainer() {
 
   const activeDataRoomName = resolveDisplayName(activeDataRoom.name)
   const activeFolderName = resolveDisplayName(activeFolder.name)
+  const sidebarState = {
+    dataRooms,
+    selectedDataRoomId,
+    canDeleteActiveDataRoom,
+    resolveDisplayName,
+  }
+  const sidebarHandlers = {
+    onCreateDataRoom: handlerGroups.dataRoom.openCreateDataRoomDialog,
+    onRenameDataRoom: handlerGroups.dataRoom.openRenameDataRoomDialog,
+    onDeleteDataRoom: handlerGroups.dataRoom.openDeleteDataRoomDialog,
+    onSelectDataRoom: handlerGroups.navigation.selectDataRoom,
+  }
+  const contentState = {
+    activeDataRoomName,
+    activeFolderId: activeFolder.id,
+    breadcrumbs,
+    visibleContentItems,
+    sortState,
+    locale,
+    resolveDisplayName,
+    checkedContentItemIds,
+    selectedContentItemCount,
+    deleteSelectedContentItemCount,
+    deleteSelectedFileCount,
+    deleteSelectedFolderCount,
+    selectedContentItemNames,
+    indeterminateFolderIds,
+    moveContentDialogOpen: dialogs.isMoveContentDialogOpen,
+    moveItemCount,
+    moveItemNames,
+    moveDestinationFolderId,
+    moveDestinationFolderOptions,
+    moveValidationError,
+    dragMoveActive,
+    dragMoveTargetFolderId,
+    highlightedContentItemId,
+    pagination: {
+      page: listViewPage,
+      pageCount: listViewPageCount,
+      itemsPerPage: listViewItemsPerPage,
+      itemsPerPageOptions: listViewItemsPerPageOptions,
+    },
+    deleteSelectedContentDialogOpen: dialogs.isDeleteSelectedContentDialogOpen,
+    uploadInputRef,
+  }
+  const contentHandlers = {
+    onCreateFolder: handlerGroups.folder.openCreateFolderDialog,
+    onUploadPdf: () => uploadInputRef.current?.click(),
+    onUploadInputChange: handlerGroups.file.handleUploadInputChange,
+    onUploadDroppedFiles: handlerGroups.file.handleUploadDroppedFiles,
+    onUploadDroppedFilesToFolder: handlerGroups.file.handleUploadDroppedFilesToFolder,
+    onToggleSort: handlerGroups.list.toggleSort,
+    onToggleContentItemSelection: handlerGroups.selection.toggleContentItemSelection,
+    onToggleAllContentItemSelection: handlerGroups.selection.toggleAllContentItemSelection,
+    onClearContentItemSelection: handlerGroups.selection.clearContentItemSelection,
+    onOpenDeleteSelectedContentDialog: handlerGroups.selection.openDeleteSelectedContentDialog,
+    onCloseDeleteSelectedContentDialog: handlerGroups.selection.closeDeleteSelectedContentDialog,
+    onDeleteSelectedContent: handlerGroups.selection.handleDeleteSelectedContent,
+    onOpenMoveSelectedContentDialog: handlerGroups.move.openMoveSelectedContentDialog,
+    onCloseMoveContentDialog: handlerGroups.move.closeMoveContentDialog,
+    onMoveDestinationFolderChange: handlerGroups.move.handleMoveDestinationFolderChange,
+    onMoveSelectedContent: handlerGroups.move.handleMoveSelectedContent,
+    onStartDragMove: handlerGroups.move.startDragMove,
+    onEndDragMove: handlerGroups.move.endDragMove,
+    onSetDragMoveTargetFolder: handlerGroups.move.setDragMoveTargetFolder,
+    onCanDropOnFolder: handlerGroups.move.canDropOnFolder,
+    onDropOnFolder: handlerGroups.move.dropOnFolder,
+    pagination: {
+      onPageChange: handlerGroups.list.handleListViewPageChange,
+      onItemsPerPageChange: handlerGroups.list.handleListViewItemsPerPageChange,
+    },
+    onSelectFolder: handlerGroups.navigation.selectFolder,
+    onOpenRenameFolder: handlerGroups.folder.openRenameFolderDialog,
+    onOpenDeleteFolder: handlerGroups.folder.openDeleteFolderDialog,
+    onOpenMoveFolder: handlerGroups.move.openMoveFolderDialog,
+    onOpenViewFile: handlerGroups.file.openViewFileDialog,
+    onOpenRenameFile: handlerGroups.file.openRenameFileDialog,
+    onOpenDeleteFile: handlerGroups.file.openDeleteFileDialog,
+    onOpenMoveFile: handlerGroups.move.openMoveFileDialog,
+  }
 
   return (
     <HomePageWorkspace
-      sidebarState={{
-        dataRooms,
-        selectedDataRoomId,
-        canDeleteActiveDataRoom,
-        resolveDisplayName,
-      }}
-      sidebarHandlers={{
-        onCreateDataRoom: handlerGroups.dataRoom.openCreateDataRoomDialog,
-        onRenameDataRoom: handlerGroups.dataRoom.openRenameDataRoomDialog,
-        onDeleteDataRoom: handlerGroups.dataRoom.openDeleteDataRoomDialog,
-        onSelectDataRoom: handlerGroups.navigation.selectDataRoom,
-      }}
-      contentState={{
-        activeDataRoomName,
-        activeFolderId: activeFolder.id,
-        breadcrumbs,
-        visibleContentItems,
-        sortState,
-        locale,
-        resolveDisplayName,
-        checkedContentItemIds,
-        selectedContentItemCount,
-        deleteSelectedContentItemCount,
-        deleteSelectedFileCount,
-        deleteSelectedFolderCount,
-        selectedContentItemNames,
-        indeterminateFolderIds,
-        moveContentDialogOpen: dialogs.isMoveContentDialogOpen,
-        moveItemCount,
-        moveItemNames,
-        moveDestinationFolderId,
-        moveDestinationFolderOptions,
-        moveValidationError,
-        dragMoveActive,
-        dragMoveTargetFolderId,
-        highlightedContentItemId,
-        pagination: {
-          page: listViewPage,
-          pageCount: listViewPageCount,
-          itemsPerPage: listViewItemsPerPage,
-          itemsPerPageOptions: listViewItemsPerPageOptions,
-        },
-        deleteSelectedContentDialogOpen: dialogs.isDeleteSelectedContentDialogOpen,
-        uploadInputRef,
-      }}
-      contentHandlers={{
-        onCreateFolder: handlerGroups.folder.openCreateFolderDialog,
-        onUploadPdf: () => uploadInputRef.current?.click(),
-        onUploadInputChange: handlerGroups.file.handleUploadInputChange,
-        onToggleSort: handlerGroups.list.toggleSort,
-        onToggleContentItemSelection: handlerGroups.selection.toggleContentItemSelection,
-        onToggleAllContentItemSelection: handlerGroups.selection.toggleAllContentItemSelection,
-        onClearContentItemSelection: handlerGroups.selection.clearContentItemSelection,
-        onOpenDeleteSelectedContentDialog: handlerGroups.selection.openDeleteSelectedContentDialog,
-        onCloseDeleteSelectedContentDialog: handlerGroups.selection.closeDeleteSelectedContentDialog,
-        onDeleteSelectedContent: handlerGroups.selection.handleDeleteSelectedContent,
-        onOpenMoveSelectedContentDialog: handlerGroups.move.openMoveSelectedContentDialog,
-        onCloseMoveContentDialog: handlerGroups.move.closeMoveContentDialog,
-        onMoveDestinationFolderChange: handlerGroups.move.handleMoveDestinationFolderChange,
-        onMoveSelectedContent: handlerGroups.move.handleMoveSelectedContent,
-        onStartDragMove: handlerGroups.move.startDragMove,
-        onEndDragMove: handlerGroups.move.endDragMove,
-        onSetDragMoveTargetFolder: handlerGroups.move.setDragMoveTargetFolder,
-        onCanDropOnFolder: handlerGroups.move.canDropOnFolder,
-        onDropOnFolder: handlerGroups.move.dropOnFolder,
-        pagination: {
-          onPageChange: handlerGroups.list.handleListViewPageChange,
-          onItemsPerPageChange: handlerGroups.list.handleListViewItemsPerPageChange,
-        },
-        onSelectFolder: handlerGroups.navigation.selectFolder,
-        onOpenRenameFolder: handlerGroups.folder.openRenameFolderDialog,
-        onOpenDeleteFolder: handlerGroups.folder.openDeleteFolderDialog,
-        onOpenMoveFolder: handlerGroups.move.openMoveFolderDialog,
-        onOpenViewFile: handlerGroups.file.openViewFileDialog,
-        onOpenRenameFile: handlerGroups.file.openRenameFileDialog,
-        onOpenDeleteFile: handlerGroups.file.openDeleteFileDialog,
-        onOpenMoveFile: handlerGroups.move.openMoveFileDialog,
-      }}
+      sidebarState={sidebarState}
+      sidebarHandlers={sidebarHandlers}
+      contentState={contentState}
+      contentHandlers={contentHandlers}
     >
       <HomePageDialogsContainer
         dialogs={dialogs}

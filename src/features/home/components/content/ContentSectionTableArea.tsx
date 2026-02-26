@@ -21,6 +21,8 @@ interface ContentSectionTableAreaProps {
   pagination: ListPaginationState
   paginationHandlers: ListPaginationHandlers
   onToggleSort: (field: 'name' | 'type' | 'updated') => void
+  onUploadDroppedFiles: (files: File[]) => Promise<void>
+  onUploadDroppedFilesToFolder: (folderId: NodeId, files: File[]) => Promise<void>
   onStartDragMove: (itemId: NodeId) => void
   onEndDragMove: () => void
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
@@ -51,6 +53,8 @@ export function ContentSectionTableArea({
   pagination,
   paginationHandlers,
   onToggleSort,
+  onUploadDroppedFiles,
+  onUploadDroppedFilesToFolder,
   onStartDragMove,
   onEndDragMove,
   onSetDragMoveTargetFolder,
@@ -85,6 +89,8 @@ export function ContentSectionTableArea({
         }}
         handlers={{
           onToggleSort,
+          onUploadDroppedFiles,
+          onUploadDroppedFilesToFolder,
           onStartDragMove,
           onEndDragMove,
           onSetDragMoveTargetFolder,

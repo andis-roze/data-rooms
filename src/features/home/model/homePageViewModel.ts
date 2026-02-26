@@ -104,6 +104,8 @@ export interface HomePageHandlers {
   openViewFileDialog: (file: FileNode) => void
   closeViewFileDialog: () => void
   handleUploadInputChange: (event: ChangeEvent<HTMLInputElement>) => Promise<void>
+  handleUploadDroppedFiles: (files: File[]) => Promise<void>
+  handleUploadDroppedFilesToFolder: (folderId: NodeId, files: File[]) => Promise<void>
   handleRenameFile: () => void
   handleDeleteFile: () => Promise<void>
   toggleContentItemSelection: (itemId: NodeId) => void
@@ -169,6 +171,8 @@ export type HomeFileHandlers = Pick<
   | 'openViewFileDialog'
   | 'closeViewFileDialog'
   | 'handleUploadInputChange'
+  | 'handleUploadDroppedFiles'
+  | 'handleUploadDroppedFilesToFolder'
   | 'handleRenameFile'
   | 'handleDeleteFile'
 >

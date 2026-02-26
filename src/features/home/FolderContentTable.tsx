@@ -25,6 +25,8 @@ interface FolderContentTableStateProps {
 
 interface FolderContentTableHandlerProps {
   onToggleSort: (field: SortField) => void
+  onUploadDroppedFiles: (files: File[]) => Promise<void>
+  onUploadDroppedFilesToFolder: (folderId: NodeId, files: File[]) => Promise<void>
   onStartDragMove: (itemId: NodeId) => void
   onEndDragMove: () => void
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
@@ -73,6 +75,8 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
   } = state
   const {
     onToggleSort,
+    onUploadDroppedFiles,
+    onUploadDroppedFilesToFolder,
     onStartDragMove,
     onEndDragMove,
     onSetDragMoveTargetFolder,
@@ -109,7 +113,25 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
         hasSelectableItems={selectableItemIds.length > 0}
         onToggleAllItemSelection={onToggleAllItemSelection}
       />
-      <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
+      <List
+        aria-label={t('dataroomCurrentFolderContentsLabel')}
+        onDragOver={(event) => {
+          if (!event.dataTransfer.types.includes('Files')) {
+            return
+          }
+
+          event.preventDefault()
+          event.dataTransfer.dropEffect = 'copy'
+        }}
+        onDrop={(event) => {
+          if (!event.dataTransfer.types.includes('Files')) {
+            return
+          }
+
+          event.preventDefault()
+          void onUploadDroppedFiles(Array.from(event.dataTransfer.files))
+        }}
+      >
         {items.map((item) => {
           if (item.kind === 'folder') {
             return (
@@ -136,6 +158,9 @@ export function FolderContentTable({ state, handlers }: FolderContentTableProps)
                 }}
                 onDragMoveOver={(event) => handleFolderDragOver(event, item.id)}
                 onDropOnFolder={(folderId) => onDropOnFolder(folderId)}
+                onDropExternalFiles={(folderId, files) => {
+                  void onUploadDroppedFilesToFolder(folderId, files)
+                }}
                 onToggleSelect={onToggleItemSelection}
                 onSelectFolder={onSelectFolder}
                 onOpenRenameFolder={onOpenRenameFolder}

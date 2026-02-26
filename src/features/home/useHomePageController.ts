@@ -1,23 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
-import {
-  getDataRoomDeleteSummary,
-  getFolderDeleteSummary,
-  type NodeId,
-} from '../dataroom/model'
+import { type NodeId } from '../dataroom/model'
 import { useDataRoomDispatch, useDataRoomState } from '../dataroom/state'
-import {
-  selectActiveDataRoom,
-  selectActiveFolder,
-  selectBreadcrumbs,
-  selectDataRooms,
-  selectRootFolder,
-  selectVisibleContentItems,
-} from './selectors/homeSelectors'
-import type { HomePageHandlerGroups, HomePageHandlers, HomePageViewModel } from './model/homePageViewModel'
+import type { HomePageHandlers, HomePageViewModel } from './model/homePageViewModel'
 import { useMoveContentWorkflow } from './hooks/useMoveContentWorkflow'
 import { useContentSelection } from './hooks/useContentSelection'
 import { useHomePageActions } from './hooks/useHomePageActions'
+import { useHomePageActionGroups } from './hooks/useHomePageActionGroups'
 import { useFeedbackQueue } from './hooks/useFeedbackQueue'
 import {
   useHomePageDialogState,
@@ -28,8 +16,8 @@ import { useHomePageViewHelpers } from './hooks/useHomePageViewHelpers'
 import { defaultFileBlobStorageService } from './services/fileBlobStorage'
 import { useDeleteSelectedContent } from './hooks/useDeleteSelectedContent'
 import { LIST_VIEW_ITEMS_PER_PAGE_OPTIONS } from './config/pagination'
-
-const EMPTY_DELETE_SUMMARY = { folderCount: 0, fileCount: 0 }
+import { useHomePageSelectionState } from './hooks/useHomePageSelectionState'
+import { useHomePagePaginationState } from './hooks/useHomePagePaginationState'
 
 // Main coordinator for home page state, derived view data, and user interaction handlers.
 export function useHomePageController(): HomePageViewModel {
@@ -105,43 +93,38 @@ export function useHomePageController(): HomePageViewModel {
     translate,
   })
 
-  const dataRooms = selectDataRooms(entities)
-  const activeDataRoom = selectActiveDataRoom(entities, selectedDataRoomId, dataRooms)
-  const rootFolder = selectRootFolder(entities, activeDataRoom)
-  const activeFolder = selectActiveFolder(entities, rootFolder, selectedFolderId)
-  const breadcrumbs = selectBreadcrumbs(entities, activeFolder)
-  const visibleContentItems = selectVisibleContentItems(entities, activeFolder, sortState)
-  const listViewPageCount = Math.max(1, Math.ceil(visibleContentItems.length / listViewItemsPerPage))
-  const resolvedListViewPage = Math.min(listViewPage, listViewPageCount - 1)
-  const pageStart = resolvedListViewPage * listViewItemsPerPage
-  const pageEnd = pageStart + listViewItemsPerPage
-  const pagedContentItems = visibleContentItems.slice(pageStart, pageEnd)
-  const activeDataRoomId = activeDataRoom?.id ?? null
-  const locale = i18n.resolvedLanguage ?? i18n.language
+  const {
+    dataRooms,
+    activeDataRoom,
+    rootFolder,
+    activeFolder,
+    breadcrumbs,
+    visibleContentItems,
+    activeDataRoomId,
+    locale,
+    targetFolder,
+    activeFile,
+    canDeleteActiveDataRoom,
+    dataRoomDeleteSummary,
+    folderDeleteSummary,
+  } = useHomePageSelectionState({
+    entities,
+    selectedDataRoomId,
+    selectedFolderId,
+    sortState,
+    targetFolderId,
+    activeFileId,
+    resolvedLanguage: i18n.resolvedLanguage,
+    language: i18n.language,
+  })
 
-  useEffect(() => {
-    if (listViewPage !== resolvedListViewPage) {
-      setListViewPage(resolvedListViewPage)
-    }
-  }, [listViewPage, resolvedListViewPage, setListViewPage])
-
-  useEffect(() => {
-    setListViewPage(0)
-  }, [activeFolder?.id, listViewItemsPerPage, setListViewPage])
-
-  const canDeleteActiveDataRoom = Boolean(activeDataRoom)
-  const dataRoomDeleteSummary = activeDataRoom
-    ? getDataRoomDeleteSummary(entities, activeDataRoom.id)
-    : EMPTY_DELETE_SUMMARY
-
-  const getFolderById = (folderId: NodeId | null) => (folderId ? entities.foldersById[folderId] ?? null : null)
-  const getFileById = (fileId: NodeId | null) => (fileId ? entities.filesById[fileId] ?? null : null)
-
-  const targetFolder = getFolderById(targetFolderId)
-  const folderDeleteSummary = activeFolder
-    ? getFolderDeleteSummary(entities, targetFolder?.id ?? activeFolder.id)
-    : EMPTY_DELETE_SUMMARY
-  const activeFile = getFileById(activeFileId)
+  const { listViewPageCount, resolvedListViewPage, pagedContentItems } = useHomePagePaginationState({
+    visibleContentItems,
+    listViewPage,
+    listViewItemsPerPage,
+    activeFolderId: activeFolder?.id ?? null,
+    setListViewPage,
+  })
   const {
     selectedContentItemIds,
     checkedContentItemIds,
@@ -298,8 +281,18 @@ export function useHomePageController(): HomePageViewModel {
     },
   })
 
+  const handleUploadDroppedFiles = async (files: File[]) => {
+    await actions.handleUploadFiles(files)
+  }
+
+  const handleUploadDroppedFilesToFolder = async (folderId: NodeId, files: File[]) => {
+    await actions.handleUploadFiles(files, { parentFolderId: folderId })
+  }
+
   const handlers: HomePageHandlers = {
     ...actions,
+    handleUploadDroppedFiles,
+    handleUploadDroppedFilesToFolder,
     dismissFeedback,
     selectDataRoom,
     selectFolder,
@@ -324,77 +317,7 @@ export function useHomePageController(): HomePageViewModel {
     handleListViewItemsPerPageChange,
   }
 
-  const handlerGroups: HomePageHandlerGroups = {
-    dataRoom: {
-      openCreateDataRoomDialog: handlers.openCreateDataRoomDialog,
-      openRenameDataRoomDialog: handlers.openRenameDataRoomDialog,
-      openDeleteDataRoomDialog: handlers.openDeleteDataRoomDialog,
-      closeCreateDataRoomDialog: handlers.closeCreateDataRoomDialog,
-      closeRenameDataRoomDialog: handlers.closeRenameDataRoomDialog,
-      closeDeleteDataRoomDialog: handlers.closeDeleteDataRoomDialog,
-      handleDataRoomNameDraftChange: handlers.handleDataRoomNameDraftChange,
-      handleCreateDataRoom: handlers.handleCreateDataRoom,
-      handleRenameDataRoom: handlers.handleRenameDataRoom,
-      handleDeleteDataRoom: handlers.handleDeleteDataRoom,
-    },
-    folder: {
-      handleFolderNameDraftChange: handlers.handleFolderNameDraftChange,
-      openCreateFolderDialog: handlers.openCreateFolderDialog,
-      closeCreateFolderDialog: handlers.closeCreateFolderDialog,
-      openRenameFolderDialog: handlers.openRenameFolderDialog,
-      closeRenameFolderDialog: handlers.closeRenameFolderDialog,
-      openDeleteFolderDialog: handlers.openDeleteFolderDialog,
-      closeDeleteFolderDialog: handlers.closeDeleteFolderDialog,
-      handleCreateFolder: handlers.handleCreateFolder,
-      handleRenameFolder: handlers.handleRenameFolder,
-      handleDeleteFolder: handlers.handleDeleteFolder,
-    },
-    file: {
-      handleFileNameDraftChange: handlers.handleFileNameDraftChange,
-      openRenameFileDialog: handlers.openRenameFileDialog,
-      closeRenameFileDialog: handlers.closeRenameFileDialog,
-      openDeleteFileDialog: handlers.openDeleteFileDialog,
-      closeDeleteFileDialog: handlers.closeDeleteFileDialog,
-      openViewFileDialog: handlers.openViewFileDialog,
-      closeViewFileDialog: handlers.closeViewFileDialog,
-      handleUploadInputChange: handlers.handleUploadInputChange,
-      handleRenameFile: handlers.handleRenameFile,
-      handleDeleteFile: handlers.handleDeleteFile,
-    },
-    selection: {
-      toggleContentItemSelection: handlers.toggleContentItemSelection,
-      toggleAllContentItemSelection: handlers.toggleAllContentItemSelection,
-      clearContentItemSelection: handlers.clearContentItemSelection,
-      openDeleteSelectedContentDialog: handlers.openDeleteSelectedContentDialog,
-      closeDeleteSelectedContentDialog: handlers.closeDeleteSelectedContentDialog,
-      handleDeleteSelectedContent: handlers.handleDeleteSelectedContent,
-    },
-    move: {
-      openMoveSelectedContentDialog: handlers.openMoveSelectedContentDialog,
-      openMoveFolderDialog: handlers.openMoveFolderDialog,
-      openMoveFileDialog: handlers.openMoveFileDialog,
-      closeMoveContentDialog: handlers.closeMoveContentDialog,
-      handleMoveDestinationFolderChange: handlers.handleMoveDestinationFolderChange,
-      handleMoveSelectedContent: handlers.handleMoveSelectedContent,
-      startDragMove: handlers.startDragMove,
-      endDragMove: handlers.endDragMove,
-      setDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
-      canDropOnFolder: handlers.canDropOnFolder,
-      dropOnFolder: handlers.dropOnFolder,
-    },
-    list: {
-      handleListViewPageChange,
-      handleListViewItemsPerPageChange,
-      toggleSort: handlers.toggleSort,
-    },
-    navigation: {
-      selectDataRoom: handlers.selectDataRoom,
-      selectFolder: handlers.selectFolder,
-    },
-    feedback: {
-      dismissFeedback: handlers.dismissFeedback,
-    },
-  }
+  const handlerGroups = useHomePageActionGroups(handlers)
 
   return {
     t,

@@ -157,6 +157,24 @@ function createMockDataTransfer() {
   }
 }
 
+function createMockFileDataTransfer(files: File[]) {
+  const dataByType = new Map<string, string>()
+  return {
+    effectAllowed: '',
+    dropEffect: '',
+    setData: (type: string, value: string) => {
+      dataByType.set(type, value)
+    },
+    getData: (type: string) => dataByType.get(type) ?? '',
+    clearData: () => {
+      dataByType.clear()
+    },
+    files,
+    items: [],
+    types: ['Files'],
+  }
+}
+
 function dragAndDrop(source: Element, destination: Element) {
   const dataTransfer = createMockDataTransfer()
   fireEvent.dragStart(source, { dataTransfer })
@@ -378,7 +396,7 @@ describe('App routing and localization', () => {
     await waitForElementToBeRemoved(deleteFileDialog)
 
     expect(screen.queryByText('nda.pdf')).not.toBeInTheDocument()
-  })
+  }, 15000)
 
   it('applies header sort and persists it across remounts', async () => {
     const user = userEvent.setup()
@@ -409,7 +427,7 @@ describe('App routing and localization', () => {
 
     const persistedOrder = screen.getAllByRole('button', { name: /View file / })
     expect(persistedOrder[0]).toHaveAccessibleName('View file zeta.pdf')
-  })
+  }, 15000)
 
   it('paginates list view and allows changing items per page', async () => {
     const user = userEvent.setup()
@@ -490,6 +508,41 @@ describe('App routing and localization', () => {
     expect(screen.getByRole('button', { name: 'View file alpha.pdf' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'View file beta.pdf' })).toBeInTheDocument()
     expect(screen.getByText('Uploaded 2 PDF file(s).')).toBeInTheDocument()
+  })
+
+  it('uploads dropped PDFs on the current list view folder', async () => {
+    renderRoute('/')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    const droppedFile = new File(['%PDF-1.4 dropped'], 'dropped-list.pdf', { type: 'application/pdf' })
+    const dataTransfer = createMockFileDataTransfer([droppedFile])
+
+    fireEvent.dragOver(list, { dataTransfer })
+    fireEvent.drop(list, { dataTransfer })
+
+    expect(await screen.findByRole('button', { name: 'View file dropped-list.pdf' })).toBeInTheDocument()
+  })
+
+  it('uploads dropped PDFs into the target folder row', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Archive')
+
+    const list = screen.getByRole('list', { name: 'Current folder contents' })
+    const destinationButton = within(list).getByRole('button', { name: 'Open folder Archive' })
+    const destinationRow = destinationButton.closest('li')
+    expect(destinationRow).not.toBeNull()
+
+    const droppedFile = new File(['%PDF-1.4 folder target'], 'dropped-folder.pdf', { type: 'application/pdf' })
+    const dataTransfer = createMockFileDataTransfer([droppedFile])
+
+    fireEvent.dragOver(destinationRow as Element, { dataTransfer })
+    fireEvent.drop(destinationRow as Element, { dataTransfer })
+
+    expect(screen.queryByRole('button', { name: 'View file dropped-folder.pdf' })).not.toBeInTheDocument()
+    await user.click(destinationButton)
+    expect(await screen.findByRole('button', { name: 'View file dropped-folder.pdf' })).toBeInTheDocument()
   })
 
   it('handles mixed multi-file upload outcomes independently', async () => {

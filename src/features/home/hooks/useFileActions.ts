@@ -34,6 +34,9 @@ interface UseFileActionsParams {
 }
 
 type FileNameValidationResult = { ok: true } | { ok: false; message: string }
+interface UploadFilesOptions {
+  parentFolderId?: NodeId
+}
 
 export function useFileActions({
   t,
@@ -122,11 +125,22 @@ export function useFileActions({
   }
 
   const handleUploadInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!activeFolder) {
+    const selectedFiles = Array.from(event.target.files ?? [])
+    await handleUploadFiles(selectedFiles)
+    clearUploadInput(event)
+  }
+
+  const handleUploadFiles = async (selectedFiles: File[], options?: UploadFilesOptions) => {
+    const uploadFolderId = options?.parentFolderId ?? activeFolder?.id ?? null
+    if (!uploadFolderId) {
       return
     }
 
-    const selectedFiles = Array.from(event.target.files ?? [])
+    const uploadFolder = entities.foldersById[uploadFolderId]
+    if (!uploadFolder) {
+      return
+    }
+
     if (selectedFiles.length === 0) {
       return
     }
@@ -137,15 +151,13 @@ export function useFileActions({
 
       if (uploadError) {
         enqueueFeedback(t('dataroomErrorPdfOnly'), 'error')
-        clearUploadInput(event)
         return
       }
 
       const preparedUpload = preparePdfUpload(selectedFile)
-      const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: activeFolder.id })
+      const uploadNameValidation = validateFileName(preparedUpload.fileName, { parentFolderId: uploadFolder.id })
       if (!uploadNameValidation.ok) {
         enqueueFeedback(uploadNameValidation.message, 'error')
-        clearUploadInput(event)
         return
       }
 
@@ -155,14 +167,13 @@ export function useFileActions({
         await fileBlobStorage.putBlob(fileId, selectedFile)
       } catch {
         enqueueFeedback(t('dataroomErrorFileStorageFailed'), 'error')
-        clearUploadInput(event)
         return
       }
 
       dispatch({
         type: 'dataroom/uploadFile',
         payload: {
-          parentFolderId: activeFolder.id,
+          parentFolderId: uploadFolder.id,
           fileId,
           fileName: preparedUpload.fileName,
           size: preparedUpload.size,
@@ -172,12 +183,11 @@ export function useFileActions({
       setHighlightedContentItemId(fileId)
 
       enqueueFeedback(t('dataroomFeedbackFileUploaded'), 'success')
-      clearUploadInput(event)
       return
     }
 
     const existingFileNames = new Set(
-      activeFolder.fileIds
+      uploadFolder.fileIds
         .map((fileId) => entities.filesById[fileId])
         .filter((file): file is NonNullable<typeof file> => Boolean(file))
         .map((file) => normalizeNodeName(file.name)),
@@ -221,7 +231,7 @@ export function useFileActions({
       dispatch({
         type: 'dataroom/uploadFile',
         payload: {
-          parentFolderId: activeFolder.id,
+          parentFolderId: uploadFolder.id,
           fileId,
           fileName: preparedUpload.fileName,
           size: preparedUpload.size,
@@ -262,8 +272,6 @@ export function useFileActions({
     ) {
       enqueueFeedback(t('dataroomErrorPdfOnly'), 'error')
     }
-
-    clearUploadInput(event)
   }
 
   const handleRenameFile = () => {
@@ -325,6 +333,7 @@ export function useFileActions({
     openViewFileDialog,
     closeViewFileDialog,
     handleUploadInputChange,
+    handleUploadFiles,
     handleRenameFile,
     handleDeleteFile,
   }
