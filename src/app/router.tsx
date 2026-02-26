@@ -1,7 +1,7 @@
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 import { AppLayout } from './layout/AppLayout'
 import { AboutPage } from '../features/about/AboutPage'
-import { HomePage } from '../features/home/HomePage'
+import { HomePage } from '../features/home'
 
 export const appRoutes: RouteObject[] = [
   {
