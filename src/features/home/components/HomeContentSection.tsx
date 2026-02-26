@@ -256,31 +256,35 @@ export function HomeContentSection({
         />
 
         <FolderContentTable
-          items={visibleContentItems}
-          sortState={sortState}
-          onToggleSort={onToggleSort}
-          locale={locale}
-          resolveDisplayName={resolveDisplayName}
-          selectedItemIds={checkedContentItemIds}
-          highlightedItemId={highlightedContentItemId}
-          indeterminateFolderIds={indeterminateFolderIds}
-          dragMoveActive={dragMoveActive}
-          dragMoveTargetFolderId={dragMoveTargetFolderId}
-          onStartDragMove={onStartDragMove}
-          onEndDragMove={onEndDragMove}
-          onSetDragMoveTargetFolder={onSetDragMoveTargetFolder}
-          onCanDropOnFolder={onCanDropOnFolder}
-          onDropOnFolder={onDropOnFolder}
-          onToggleItemSelection={onToggleContentItemSelection}
-          onToggleAllItemSelection={onToggleAllContentItemSelection}
-          onSelectFolder={onSelectFolder}
-          onOpenRenameFolder={onOpenRenameFolder}
-          onOpenDeleteFolder={onOpenDeleteFolder}
-          onOpenMoveFolder={onOpenMoveFolder}
-          onOpenViewFile={onOpenViewFile}
-          onOpenRenameFile={onOpenRenameFile}
-          onOpenDeleteFile={onOpenDeleteFile}
-          onOpenMoveFile={onOpenMoveFile}
+          state={{
+            items: visibleContentItems,
+            sortState,
+            locale,
+            resolveDisplayName,
+            selectedItemIds: checkedContentItemIds,
+            highlightedItemId: highlightedContentItemId,
+            indeterminateFolderIds,
+            dragMoveActive,
+            dragMoveTargetFolderId,
+          }}
+          handlers={{
+            onToggleSort,
+            onStartDragMove,
+            onEndDragMove,
+            onSetDragMoveTargetFolder,
+            onCanDropOnFolder,
+            onDropOnFolder,
+            onToggleItemSelection: onToggleContentItemSelection,
+            onToggleAllItemSelection: onToggleAllContentItemSelection,
+            onSelectFolder,
+            onOpenRenameFolder,
+            onOpenDeleteFolder,
+            onOpenMoveFolder,
+            onOpenViewFile,
+            onOpenRenameFile,
+            onOpenDeleteFile,
+            onOpenMoveFile,
+          }}
         />
 
         <ListPaginationControls

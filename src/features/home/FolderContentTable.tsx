@@ -10,10 +10,9 @@ import { FileRow } from './components/FileRow'
 import { FolderRow } from './components/FolderRow'
 import type { FolderContentItem, SortField, SortState } from './types'
 
-interface FolderContentTableProps {
+interface FolderContentTableStateProps {
   items: FolderContentItem[]
   sortState: SortState
-  onToggleSort: (field: SortField) => void
   locale: string
   resolveDisplayName: (value: string) => string
   selectedItemIds: NodeId[]
@@ -21,6 +20,10 @@ interface FolderContentTableProps {
   indeterminateFolderIds: NodeId[]
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
+}
+
+interface FolderContentTableHandlerProps {
+  onToggleSort: (field: SortField) => void
   onStartDragMove: (itemId: NodeId) => void
   onEndDragMove: () => void
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
@@ -38,6 +41,11 @@ interface FolderContentTableProps {
   onOpenMoveFile: (file: FileNode) => void
 }
 
+interface FolderContentTableProps {
+  state: FolderContentTableStateProps
+  handlers: FolderContentTableHandlerProps
+}
+
 const rowGridTemplate = {
   xs: '36px minmax(0,1fr) auto',
   md: '40px 120px 1fr 130px 104px',
@@ -49,34 +57,37 @@ const ACTIONS_COLUMN_WIDTH = 128
 
 const desktopGridTemplate = `40px ${TYPE_COLUMN_WIDTH}px minmax(180px, 1fr) ${UPDATED_COLUMN_WIDTH}px ${ACTIONS_COLUMN_WIDTH}px`
 
-export function FolderContentTable({
-  items,
-  sortState,
-  onToggleSort,
-  locale,
-  resolveDisplayName,
-  selectedItemIds,
-  highlightedItemId,
-  indeterminateFolderIds,
-  dragMoveActive,
-  dragMoveTargetFolderId,
-  onStartDragMove,
-  onEndDragMove,
-  onSetDragMoveTargetFolder,
-  onCanDropOnFolder,
-  onDropOnFolder,
-  onToggleItemSelection,
-  onToggleAllItemSelection,
-  onSelectFolder,
-  onOpenRenameFolder,
-  onOpenDeleteFolder,
-  onOpenMoveFolder,
-  onOpenViewFile,
-  onOpenRenameFile,
-  onOpenDeleteFile,
-  onOpenMoveFile,
-}: FolderContentTableProps) {
+export function FolderContentTable({ state, handlers }: FolderContentTableProps) {
   const { t } = useTranslation()
+  const {
+    items,
+    sortState,
+    locale,
+    resolveDisplayName,
+    selectedItemIds,
+    highlightedItemId,
+    indeterminateFolderIds,
+    dragMoveActive,
+    dragMoveTargetFolderId,
+  } = state
+  const {
+    onToggleSort,
+    onStartDragMove,
+    onEndDragMove,
+    onSetDragMoveTargetFolder,
+    onCanDropOnFolder,
+    onDropOnFolder,
+    onToggleItemSelection,
+    onToggleAllItemSelection,
+    onSelectFolder,
+    onOpenRenameFolder,
+    onOpenDeleteFolder,
+    onOpenMoveFolder,
+    onOpenViewFile,
+    onOpenRenameFile,
+    onOpenDeleteFile,
+    onOpenMoveFile,
+  } = handlers
   const selectableItems = items.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
   const selectableItemIds = selectableItems.map((item) => item.id)
   const selectedItemIdSet = new Set(selectedItemIds)
