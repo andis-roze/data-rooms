@@ -1,12 +1,11 @@
 import type { DragEvent } from 'react'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Checkbox from '@mui/material/Checkbox'
 import List from '@mui/material/List'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import type { FileNode, Folder, NodeId } from '../dataroom/model'
+import { FolderContentTableHeader } from './components/content/FolderContentTableHeader'
 import { FileRow } from './components/FileRow'
 import { FolderRow } from './components/FolderRow'
 import type { FolderContentItem, SortField, SortState } from './types'
@@ -84,19 +83,6 @@ export function FolderContentTable({
   const selectedSelectableCount = selectableItemIds.filter((itemId) => selectedItemIdSet.has(itemId)).length
   const areAllSelectableItemsSelected = selectableItemIds.length > 0 && selectedSelectableCount === selectableItemIds.length
   const isSelectAllIndeterminate = selectedSelectableCount > 0 && !areAllSelectableItemsSelected
-  const sortIndicator = (field: SortField) =>
-    sortState.field === field ? (sortState.direction === 'asc' ? '↑' : '↓') : '↕'
-  const headerSeparatorSx = {
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: 2,
-      right: 0,
-      bottom: 2,
-      width: '1px',
-      backgroundColor: 'divider',
-    },
-  }
   const handleFolderDragOver = (event: DragEvent<HTMLLIElement>, folderId: NodeId) => {
     if (onCanDropOnFolder(folderId)) {
       event.preventDefault()
@@ -105,109 +91,16 @@ export function FolderContentTable({
   }
   return (
     <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, p: 1 }}>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: rowGridTemplate.xs, md: desktopGridTemplate },
-          gap: 1,
-          alignItems: 'center',
-          px: 2,
-          py: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', minWidth: 0 }}>
-          <Checkbox
-            size="small"
-            checked={areAllSelectableItemsSelected}
-            indeterminate={isSelectAllIndeterminate}
-            disabled={selectableItemIds.length === 0}
-            inputProps={{ 'aria-label': t('dataroomSelectionSelectAllAria') }}
-            onChange={() => onToggleAllItemSelection()}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-            display: { xs: 'none', md: 'block' },
-            minWidth: 0,
-            pr: 1,
-            ...headerSeparatorSx,
-          }}
-        >
-          <Button
-            size="small"
-            color="inherit"
-            sx={{
-              display: { xs: 'none', md: 'inline-flex' },
-              justifyContent: 'flex-start',
-              px: 0.5,
-              minWidth: 0,
-              whiteSpace: 'nowrap',
-            }}
-            onClick={() => onToggleSort('type')}
-            aria-label={t('dataroomSortByTypeAria')}
-            aria-pressed={sortState.field === 'type'}
-          >
-            {t('dataroomColumnType')} {sortIndicator('type')}
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-            minWidth: 0,
-            pr: { xs: 0, md: 1 },
-            ...headerSeparatorSx,
-            '&::after': {
-              ...headerSeparatorSx['&::after'],
-              display: { xs: 'none', md: 'block' },
-            },
-          }}
-        >
-          <Button
-            size="small"
-            color="inherit"
-            sx={{ justifyContent: 'flex-start', px: 0.5, minWidth: 0, whiteSpace: 'nowrap' }}
-            onClick={() => onToggleSort('name')}
-            aria-label={t('dataroomSortByNameAria')}
-            aria-pressed={sortState.field === 'name'}
-          >
-            {t('dataroomColumnName')} {sortIndicator('name')}
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-            display: { xs: 'none', md: 'block' },
-            minWidth: 0,
-            pr: 1,
-            ...headerSeparatorSx,
-          }}
-        >
-          <Button
-            size="small"
-            color="inherit"
-            sx={{
-              display: { xs: 'none', md: 'inline-flex' },
-              justifyContent: 'flex-start',
-              px: 0.5,
-              minWidth: 0,
-              whiteSpace: 'nowrap',
-            }}
-            onClick={() => onToggleSort('updated')}
-            aria-label={t('dataroomSortByUpdatedAria')}
-            aria-pressed={sortState.field === 'updated'}
-          >
-            {t('dataroomColumnUpdated')} {sortIndicator('updated')}
-          </Button>
-        </Box>
-        <Box sx={{ position: 'relative', minWidth: 0, pl: { xs: 0, md: 0.5 } }}>
-          <Typography variant="caption" color="text.secondary" sx={{ justifySelf: 'end' }}>
-            {t('dataroomColumnActions')}
-          </Typography>
-        </Box>
-      </Box>
+      <FolderContentTableHeader
+        sortState={sortState}
+        onToggleSort={onToggleSort}
+        rowGridTemplateXs={rowGridTemplate.xs}
+        rowGridTemplateDesktop={desktopGridTemplate}
+        areAllSelectableItemsSelected={areAllSelectableItemsSelected}
+        isSelectAllIndeterminate={isSelectAllIndeterminate}
+        hasSelectableItems={selectableItemIds.length > 0}
+        onToggleAllItemSelection={onToggleAllItemSelection}
+      />
       <List aria-label={t('dataroomCurrentFolderContentsLabel')}>
         {items.map((item) => {
           if (item.kind === 'folder') {
