@@ -6,7 +6,9 @@ import {
   createSeedDataRoomState,
   deleteFolderCascade,
   getDataRoomNameValidationError,
+  getFileIdsForFolderCascadeDelete,
   getFileNameValidationError,
+  getFolderDeleteSummary,
   getFolderNameValidationError,
   hasDuplicateDataRoomName,
   hasDuplicateFileName,
@@ -185,6 +187,22 @@ describe('tree mutations', () => {
     expect(result.nextState.filesById['file-b']).toBeUndefined()
   })
 
+  it('returns no-op delete result when trying to delete root folder', () => {
+    const state = createStateWithNestedTree()
+    const rootFolderId = state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId
+
+    const result = deleteFolderCascade(state, {
+      folderId: rootFolderId,
+      now: NOW + 31,
+    })
+
+    expect(result.deleted).toBe(false)
+    expect(result.deletedFolderCount).toBe(0)
+    expect(result.deletedFileCount).toBe(0)
+    expect(result.fallbackFolderId).toBeNull()
+    expect(result.nextState).toBe(state)
+  })
+
   it('moves folders across parents and blocks invalid descendant moves', () => {
     const state = createStateWithNestedTree()
 
@@ -205,6 +223,28 @@ describe('tree mutations', () => {
     })
 
     expect(blocked).toBe(state)
+  })
+
+  it('blocks moving folder when destination has a normalized duplicate sibling name', () => {
+    const state = createStateWithNestedTree()
+    const withDestinationConflict = createFolder(state, {
+      dataRoomId: state.dataRoomOrder[0],
+      parentFolderId: 'folder-b',
+      folderId: 'folder-b-finance',
+      folderName: ' FINANCE ',
+      now: NOW + 41,
+    })
+
+    const blocked = moveFolder(withDestinationConflict, {
+      folderId: 'folder-a',
+      destinationFolderId: 'folder-b',
+      now: NOW + 42,
+    })
+
+    expect(blocked).toBe(withDestinationConflict)
+    expect(blocked.foldersById['folder-a'].parentFolderId).toBe(
+      state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId,
+    )
   })
 
   it('treats moving folder to current parent as no-op', () => {
@@ -314,6 +354,19 @@ describe('tree mutations', () => {
   })
 })
 
+describe('delete analysis', () => {
+  it('returns no-op summary for root and full descendant analysis for nested folder', () => {
+    const state = createStateWithNestedTree()
+    const rootFolderId = state.dataRoomsById[state.dataRoomOrder[0]].rootFolderId
+
+    expect(getFolderDeleteSummary(state, rootFolderId)).toEqual({ folderCount: 0, fileCount: 0 })
+    expect(getFileIdsForFolderCascadeDelete(state, rootFolderId)).toEqual([])
+
+    expect(getFolderDeleteSummary(state, 'folder-a')).toEqual({ folderCount: 2, fileCount: 2 })
+    expect(getFileIdsForFolderCascadeDelete(state, 'folder-a').sort()).toEqual(['file-a', 'file-b'])
+  })
+})
+
 describe('sorting', () => {
   const items: FolderContentItem[] = [
     {
@@ -377,6 +430,16 @@ describe('sorting', () => {
 
     const sorted = sortContentItems(tieItems, { field: 'updated', direction: 'asc' })
     expect(sorted.map((item) => item.name)).toEqual(['a.pdf', 'b.pdf'])
+  })
+
+  it('uses reverse name tie-breaker for updated desc when timestamps are equal', () => {
+    const tieItems: FolderContentItem[] = [
+      { ...items[0], updatedAt: 10, name: 'b.pdf' },
+      { ...items[2], updatedAt: 10, name: 'a.pdf' },
+    ]
+
+    const sorted = sortContentItems(tieItems, { field: 'updated', direction: 'desc' })
+    expect(sorted.map((item) => item.name)).toEqual(['b.pdf', 'a.pdf'])
   })
 
   it('toggles sort direction when selecting the same field and resets on new field', () => {
