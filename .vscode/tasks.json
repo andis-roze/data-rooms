@@ -30,6 +30,17 @@
     },
     {
       "type": "npm",
+      "script": "build:gh-pages",
+      "group": "build",
+      "label": "npm: build:gh-pages"
+    },
+    {
+      "type": "npm",
+      "script": "deploy:gh-pages",
+      "label": "npm: deploy:gh-pages"
+    },
+    {
+      "type": "npm",
       "script": "lint",
       "group": "test",
       "label": "npm: lint"
@@ -39,6 +50,12 @@
       "script": "test:run",
       "group": "test",
       "label": "npm: test:run"
+    },
+    {
+      "type": "npm",
+      "script": "test:smoke:home",
+      "group": "test",
+      "label": "npm: test:smoke:home"
     },
     {
       "type": "npm",
@@ -87,6 +104,30 @@
       "type": "npm",
       "script": "hooks:pre-push",
       "label": "npm: hooks:pre-push"
+    },
+    {
+      "type": "npm",
+      "script": "audit:unused:types",
+      "group": "test",
+      "label": "npm: audit:unused:types"
+    },
+    {
+      "type": "npm",
+      "script": "audit:unused:exports",
+      "group": "test",
+      "label": "npm: audit:unused:exports"
+    },
+    {
+      "type": "npm",
+      "script": "audit:unused:deps",
+      "group": "test",
+      "label": "npm: audit:unused:deps"
+    },
+    {
+      "type": "npm",
+      "script": "audit:unused",
+      "group": "test",
+      "label": "npm: audit:unused"
     },
     {
       "type": "npm",
