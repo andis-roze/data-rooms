@@ -15,7 +15,7 @@ Pre-recorded UX walkthroughs are available in:
 - Create, rename, and delete Data Rooms
 - Create, rename, move, and delete nested folders
 - Upload, preview, rename, move, and delete PDF files
-- Select multiple items in tree and table views
+- Select multiple items in the content list
 - Move selected items with dialog flow or drag and drop
 - Delete selected items with impact summary before confirmation
 - Sort content by `name`, `type`, or `updated`
@@ -23,7 +23,7 @@ Pre-recorded UX walkthroughs are available in:
 
 ## Main Layout
 
-- Sidebar (left): active Data Room selector + folder tree
+- Sidebar (left): Data Room list + actions menu
 - Content area (right): breadcrumbs, actions, table/list of current folder content
 - Dialogs: create/rename/delete/move confirmation and edit dialogs
 
@@ -31,33 +31,18 @@ Pre-recorded UX walkthroughs are available in:
 
 ### Data Room Selection
 
-Use the Data Room dropdown in the sidebar to switch active Data Room.
-
-### Folder Tree Navigation
-
-- Click a folder in the tree to open it.
-- Expanded/collapsed states are managed automatically and can be toggled manually.
+Use the Data Room list in the sidebar to switch active Data Room.
 
 ### Breadcrumb Navigation
 
 Use breadcrumbs above the table to jump back to parent folders quickly.
 
-### `..` Parent Navigation Entry
-
-In the content table, `..` means “go up one level.”
-
-- Appears only inside subfolders
-- Opens the parent folder
-- Hidden at root level
-- Not a real folder (cannot be renamed or deleted)
-
 ## Selection and Bulk Actions
 
 ### Item Selection
 
-- Select items from the tree or table
-- Parent folder checkboxes support indeterminate state when only part of a subtree is selected
-- Selection is synchronized between tree and table
+- Select items from the content list
+- Folder checkboxes support indeterminate state when only part of a subtree is selected
 
 ### Bulk Move
 
@@ -76,7 +61,7 @@ In the content table, `..` means “go up one level.”
 ## Drag and Drop Move
 
 - Start dragging a selected file/folder
-- Hover valid destination folders
+- Hover valid destination folders in the content list
 - Drop to move
 - Invalid drops are blocked by validation rules
 
