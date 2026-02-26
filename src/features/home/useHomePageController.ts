@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import {
   getDataRoomDeleteSummary,
   getFolderDeleteSummary,
@@ -115,12 +115,10 @@ export function useHomePageController(): HomePageViewModel {
   const pageableContentItems = visibleContentItems.filter((item) => !(item.kind === 'folder' && item.isParentNavigation))
   const listViewPageCount = Math.max(1, Math.ceil(pageableContentItems.length / listViewItemsPerPage))
   const resolvedListViewPage = Math.min(listViewPage, listViewPageCount - 1)
-  const pagedContentItems = useMemo(() => {
-    const pageStart = resolvedListViewPage * listViewItemsPerPage
-    const pageEnd = pageStart + listViewItemsPerPage
-    const pageItems = pageableContentItems.slice(pageStart, pageEnd)
-    return parentNavigationItem ? [parentNavigationItem, ...pageItems] : pageItems
-  }, [parentNavigationItem, pageableContentItems, resolvedListViewPage, listViewItemsPerPage])
+  const pageStart = resolvedListViewPage * listViewItemsPerPage
+  const pageEnd = pageStart + listViewItemsPerPage
+  const pageItems = pageableContentItems.slice(pageStart, pageEnd)
+  const pagedContentItems = parentNavigationItem ? [parentNavigationItem, ...pageItems] : pageItems
   const activeDataRoomId = activeDataRoom?.id ?? null
   const locale = i18n.resolvedLanguage ?? i18n.language
 

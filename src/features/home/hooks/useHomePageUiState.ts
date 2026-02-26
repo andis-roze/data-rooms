@@ -70,7 +70,7 @@ export function useHomePageTransientState() {
   const [activeFileId, setActiveFileId] = useState<NodeId | null>(null)
   const [highlightedContentItemId, setHighlightedContentItemId] = useState<NodeId | null>(null)
   const [listViewPage, setListViewPage] = useState(0)
-  const [listViewItemsPerPage, setListViewItemsPerPage] = useState(DEFAULT_LIST_VIEW_ITEMS_PER_PAGE)
+  const [listViewItemsPerPage, setListViewItemsPerPage] = useState<number>(DEFAULT_LIST_VIEW_ITEMS_PER_PAGE)
   const [sortState, setSortState] = useState<SortState>(() => loadSortModePreference())
 
   return {
