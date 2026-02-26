@@ -6,23 +6,25 @@ const rootDir = process.cwd()
 const coverageSummaryPath = path.join(rootDir, 'coverage', 'coverage-summary.json')
 const minimumCoveragePercent = 60
 
-const tsLintRun = spawnSync('npx', ['eslint', 'src/**/*.{ts,tsx}', '--max-warnings=0'], { stdio: 'inherit' })
-
-if (tsLintRun.status !== 0) {
-  console.error('[pre-push] Blocked: TypeScript lint check failed or reported warnings.')
-  process.exit(tsLintRun.status ?? 1)
+const runOrExit = (command, args, blockedMessage) => {
+  const run = spawnSync(command, args, { stdio: 'inherit' })
+  if (run.status !== 0) {
+    console.error(blockedMessage)
+    process.exit(run.status ?? 1)
+  }
 }
 
-const testRun = spawnSync(
+runOrExit('npx', ['eslint', 'src/**/*.{ts,tsx}', '--max-warnings=0'], '[pre-push] Blocked: TypeScript lint check failed or reported warnings.')
+
+runOrExit('npm', ['run', 'audit:unused'], '[pre-push] Blocked: unused-code audit failed.')
+
+runOrExit('npm', ['run', 'audit:unused:types'], '[pre-push] Blocked: TypeScript check failed.')
+
+runOrExit(
   'npm',
   ['run', 'test:coverage', '--', '--coverage.reporter=json-summary'],
-  { stdio: 'inherit' },
+  '[pre-push] Blocked: tests or coverage execution failed.',
 )
-
-if (testRun.status !== 0) {
-  console.error('[pre-push] Blocked: tests or coverage execution failed.')
-  process.exit(testRun.status ?? 1)
-}
 
 if (!existsSync(coverageSummaryPath)) {
   console.error('[pre-push] Blocked: coverage summary was not generated.')

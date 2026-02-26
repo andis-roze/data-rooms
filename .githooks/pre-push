@@ -6,5 +6,5 @@ if [[ "${SKIP_LOCAL_PRE_PUSH:-}" == "1" ]]; then
   exit 0
 fi
 
-echo "[pre-push] Running tests and coverage gate..."
+echo "[pre-push] Running lint, audit, TypeScript, and coverage gates..."
 npm run hooks:pre-push
