@@ -8,6 +8,7 @@ import {
   clearDataRoomState,
   createFolder as createFolderInState,
   createSeedDataRoomState,
+  dataRoomStorageKey,
   saveDataRoomState,
 } from '../../features/dataroom/model'
 import i18n from '../../i18n/config'
@@ -278,6 +279,34 @@ describe('App routing and localization', () => {
 
     await deleteCurrentDataRoom(user)
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+  }, 15000)
+
+  it('creates the first data room from an empty persisted state', async () => {
+    const user = userEvent.setup()
+
+    window.localStorage.setItem(
+      dataRoomStorageKey(),
+      JSON.stringify({
+        schemaVersion: 1,
+        dataRoomOrder: [],
+        dataRoomsById: {},
+        foldersById: {},
+        filesById: {},
+      }),
+    )
+
+    renderRoute('/')
+
+    expect(screen.getByRole('heading', { name: 'No Data Room available' })).toBeInTheDocument()
+    expect(screen.queryByRole('list', { name: 'Data Rooms' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Create data room' }))
+    await user.type(screen.getByRole('textbox', { name: 'Data Room name' }), 'Project Helios')
+    await user.click(screen.getByRole('button', { name: 'Create' }))
+
+    expect(await screen.findByRole('heading', { name: 'Project Helios' })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Data Rooms' })).toBeInTheDocument()
+    expect(screen.getByText('This folder is empty')).toBeInTheDocument()
   }, 15000)
 
   it('switches active data room from sidebar list and clears previous row highlight', async () => {
