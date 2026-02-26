@@ -10,6 +10,7 @@ Single-page Data Room MVP built with React + TypeScript + MUI.
 ## Demo
 
 - Public URL: [https://data-rooms-two.vercel.app/](https://data-rooms-two.vercel.app/)
+- GitHub Pages URL: [https://andis-roze.github.io/data-rooms/](https://andis-roze.github.io/data-rooms/)
 - Deployment: auto-deploy from `main` branch (Vercel Git integration)
 - Recorded walkthroughs:
   - `artifacts/demo-video/demo-full-ux-slow.webm`

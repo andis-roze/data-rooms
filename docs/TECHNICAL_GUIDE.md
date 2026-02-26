@@ -211,6 +211,10 @@ Verify in Vercel:
 
 ## Deployment Notes (GitHub Pages)
 
+Live URL:
+
+- https://andis-roze.github.io/data-rooms/
+
 Scripts:
 
 ```bash
