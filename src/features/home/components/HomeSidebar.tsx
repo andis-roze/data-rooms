@@ -10,7 +10,7 @@ import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/mod
 import { truncateMiddle } from '../services/formatters'
 import { HomeSidebarHeaderActions } from './sidebar/HomeSidebarHeaderActions'
 
-interface HomeSidebarStateProps {
+export interface HomeSidebarState {
   entities: DataRoomState
   dataRooms: DataRoom[]
   selectedDataRoomId: NodeId | null
@@ -25,7 +25,7 @@ interface HomeSidebarStateProps {
   resolveDisplayName: (value: string) => string
 }
 
-interface HomeSidebarHandlerProps {
+export interface HomeSidebarHandlers {
   onCreateDataRoom: () => void
   onRenameDataRoom: (dataRoom?: DataRoom) => void
   onDeleteDataRoom: (dataRoom?: DataRoom) => void
@@ -43,8 +43,8 @@ interface HomeSidebarHandlerProps {
 }
 
 interface HomeSidebarProps {
-  state: HomeSidebarStateProps
-  handlers: HomeSidebarHandlerProps
+  state: HomeSidebarState
+  handlers: HomeSidebarHandlers
 }
 
 export function HomeSidebar({

@@ -1,13 +1,8 @@
 import Container from '@mui/material/Container'
 import Paper from '@mui/material/Paper'
-import type { ComponentProps, ReactNode } from 'react'
-import { HomeContentSection } from '../HomeContentSection'
-import { HomeSidebar } from '../HomeSidebar'
-
-type HomeSidebarState = ComponentProps<typeof HomeSidebar>['state']
-type HomeSidebarHandlers = ComponentProps<typeof HomeSidebar>['handlers']
-type HomeContentSectionState = ComponentProps<typeof HomeContentSection>['state']
-type HomeContentSectionHandlers = ComponentProps<typeof HomeContentSection>['handlers']
+import type { ReactNode } from 'react'
+import { HomeContentSection, type HomeContentSectionHandlers, type HomeContentSectionState } from '../HomeContentSection'
+import { HomeSidebar, type HomeSidebarHandlers, type HomeSidebarState } from '../HomeSidebar'
 
 interface HomePageWorkspaceProps {
   sidebarState: HomeSidebarState

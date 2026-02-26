@@ -15,7 +15,7 @@ import {
 } from './content/ListPaginationControls'
 import { MoveContentDialog } from './content/MoveContentDialog'
 
-interface HomeContentSectionStateProps {
+export interface HomeContentSectionState {
   activeDataRoomName: string
   activeFolderId: NodeId
   breadcrumbs: Folder[]
@@ -44,7 +44,7 @@ interface HomeContentSectionStateProps {
   uploadInputRef: RefObject<HTMLInputElement | null>
 }
 
-interface HomeContentSectionHandlerProps {
+export interface HomeContentSectionHandlers {
   onCreateFolder: () => void
   onUploadPdf: () => void
   onUploadInputChange: (event: ChangeEvent<HTMLInputElement>) => void
@@ -76,8 +76,8 @@ interface HomeContentSectionHandlerProps {
 }
 
 interface HomeContentSectionProps {
-  state: HomeContentSectionStateProps
-  handlers: HomeContentSectionHandlerProps
+  state: HomeContentSectionState
+  handlers: HomeContentSectionHandlers
 }
 
 export function HomeContentSection({
