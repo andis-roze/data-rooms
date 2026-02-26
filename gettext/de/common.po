@@ -299,6 +299,27 @@ msgstr "Ein Datenraum wird hier angezeigt, sobald er erstellt wurde."
 msgid "dataroomNoDataRoomTitle"
 msgstr "Kein Datenraum verfugbar"
 
+msgid "dataroomPaginationItemsPerPage"
+msgstr "Elemente pro Seite"
+
+msgid "dataroomPaginationItemsPerPageAria"
+msgstr "Elemente pro Seite"
+
+msgid "dataroomPaginationNextButton"
+msgstr "Weiter"
+
+msgid "dataroomPaginationNextPageAria"
+msgstr "Naechste Seite"
+
+msgid "dataroomPaginationPageIndicator"
+msgstr "Seite {current} / {total}"
+
+msgid "dataroomPaginationPreviousButton"
+msgstr "Zurueck"
+
+msgid "dataroomPaginationPreviousPageAria"
+msgstr "Vorherige Seite"
+
 msgid "dataroomSeedDefaultDataRoomName"
 msgstr "Acme Due Diligence Raum"
 

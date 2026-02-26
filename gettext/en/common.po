@@ -295,6 +295,27 @@ msgstr "A Data Room will appear here once it is created."
 msgid "dataroomNoDataRoomTitle"
 msgstr "No Data Room available"
 
+msgid "dataroomPaginationItemsPerPage"
+msgstr "Items per page"
+
+msgid "dataroomPaginationItemsPerPageAria"
+msgstr "Items per page"
+
+msgid "dataroomPaginationNextButton"
+msgstr "Next"
+
+msgid "dataroomPaginationNextPageAria"
+msgstr "Next page"
+
+msgid "dataroomPaginationPageIndicator"
+msgstr "Page {current} / {total}"
+
+msgid "dataroomPaginationPreviousButton"
+msgstr "Prev"
+
+msgid "dataroomPaginationPreviousPageAria"
+msgstr "Previous page"
+
 msgid "dataroomSeedDefaultDataRoomName"
 msgstr "Acme Due Diligence Room"
 

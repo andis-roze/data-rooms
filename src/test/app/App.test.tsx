@@ -125,15 +125,6 @@ function dragAndDrop(source: Element, destination: Element) {
   fireEvent.dragEnd(source, { dataTransfer })
 }
 
-function dragAndDropWithEarlyDragEnd(source: Element, destination: Element) {
-  const dataTransfer = createMockDataTransfer()
-  fireEvent.dragStart(source, { dataTransfer })
-  fireEvent.dragEnter(destination, { dataTransfer })
-  fireEvent.dragOver(destination, { dataTransfer })
-  fireEvent.dragEnd(source, { dataTransfer })
-  fireEvent.drop(destination, { dataTransfer })
-}
-
 describe('App routing and localization', () => {
   beforeEach(async () => {
     clearDataRoomState()
@@ -185,6 +176,22 @@ describe('App routing and localization', () => {
     await user.click(screen.getByRole('button', { name: 'Data Room' }))
     await user.click(screen.getByRole('button', { name: 'Rename folder Finance' }))
     expect(screen.getByRole('textbox', { name: 'Folder name' })).toHaveFocus()
+  }, 15000)
+
+  it('auto-focuses data room name input in create and rename dialogs', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await openDataRoomActionsMenu(user)
+    await user.click(screen.getByRole('menuitem', { name: 'Create data room' }))
+    expect(screen.getByRole('textbox', { name: 'Data Room name' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create data room' }))
+
+    await createDataRoom(user, 'Project Zephyr')
+    await openDataRoomActionsMenu(user)
+    await user.click(screen.getByRole('menuitem', { name: 'Rename data room' }))
+    expect(screen.getByRole('textbox', { name: 'Data Room name' })).toHaveFocus()
   }, 15000)
 
   it('keeps current folder selected after creating a child folder', async () => {
@@ -242,6 +249,24 @@ describe('App routing and localization', () => {
 
     await deleteCurrentDataRoom(user)
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+  }, 15000)
+
+  it('switches active data room from sidebar list and clears previous row highlight', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    const financeRowBeforeSwitch = screen.getByRole('button', { name: 'Open folder Finance' }).closest('li')
+    expect(financeRowBeforeSwitch).not.toBeNull()
+    expect(financeRowBeforeSwitch).toHaveAttribute('data-row-highlighted', 'true')
+
+    await createDataRoom(user, 'Project Zephyr')
+    await user.click(screen.getByRole('button', { name: 'Acme Due Diligence Room' }))
+    expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
+
+    const financeRowAfterSwitch = screen.getByRole('button', { name: 'Open folder Finance' }).closest('li')
+    expect(financeRowAfterSwitch).not.toBeNull()
+    expect(financeRowAfterSwitch).toHaveAttribute('data-row-highlighted', 'false')
   }, 15000)
 
   it('blocks creating a data room with duplicate name', async () => {
@@ -332,12 +357,21 @@ describe('App routing and localization', () => {
     await user.click(screen.getAllByRole('button', { name: 'Next page' })[0])
     const listButtonsPageTwo = screen.getAllByRole('button', { name: /Open folder Folder / })
     expect(listButtonsPageTwo).toHaveLength(1)
+    expect(screen.getAllByText('Page 2 / 2')).toHaveLength(2)
 
     await user.click(screen.getAllByRole('combobox', { name: 'Items per page' })[0])
     await user.click(screen.getByRole('option', { name: '25' }))
 
     const listButtonsExpanded = screen.getAllByRole('button', { name: /Open folder Folder / })
     expect(listButtonsExpanded).toHaveLength(11)
+    expect(screen.getAllByText('Page 1 / 1')).toHaveLength(2)
+
+    await user.click(screen.getAllByRole('combobox', { name: 'Items per page' })[0])
+    await user.click(screen.getByRole('option', { name: '10' }))
+
+    await user.click(screen.getByRole('button', { name: 'Open folder Folder 01' }))
+    await goToBreadcrumb(user, 'Data Room')
+    expect(screen.getAllByText('Page 1 / 2')).toHaveLength(2)
   }, 60000)
 
   it('switches language to German from header controls', async () => {
@@ -378,73 +412,6 @@ describe('App routing and localization', () => {
     expect(screen.getByText('Only PDF files are allowed.')).toBeInTheDocument()
     expect(screen.queryByText('notes.txt')).not.toBeInTheDocument()
   })
-
-  it.skip('keeps tree and list checkbox selection in sync for the same folder', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-
-    const folderTree = screen.getByRole('list', { name: 'Folder tree' })
-    const contentList = screen.getByRole('list', { name: 'Current folder contents' })
-
-    const treeFinanceCheckbox = within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })
-    const listFinanceCheckbox = within(contentList).getByRole('checkbox', { name: 'Select item Finance' })
-
-    expect(treeFinanceCheckbox).not.toBeChecked()
-    expect(listFinanceCheckbox).not.toBeChecked()
-
-    await user.click(treeFinanceCheckbox)
-    expect(treeFinanceCheckbox).toBeChecked()
-    expect(listFinanceCheckbox).toBeChecked()
-
-    await user.click(listFinanceCheckbox)
-    expect(treeFinanceCheckbox).not.toBeChecked()
-    expect(listFinanceCheckbox).not.toBeChecked()
-  })
-
-  it.skip('supports recursive include with child exclusions even when sibling subfolders exist', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-
-    const folderTree = screen.getByRole('list', { name: 'Folder tree' })
-    await user.click(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' }))
-
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Finance')
-    await createFolder(user, 'Reports')
-    await goToBreadcrumb(user, 'Finance')
-
-    const financeList = screen.getByRole('list', { name: 'Current folder contents' })
-    const invoicesCheckbox = within(financeList).getByRole('checkbox', { name: 'Select item Invoices' })
-    const reportsCheckbox = within(financeList).getByRole('checkbox', { name: 'Select item Reports' })
-
-    expect(invoicesCheckbox).toBeChecked()
-    expect(reportsCheckbox).toBeChecked()
-
-    await user.click(invoicesCheckbox)
-    expect(invoicesCheckbox).not.toBeChecked()
-    expect(reportsCheckbox).toBeChecked()
-
-    await goToBreadcrumb(user, 'Data Room')
-    const financeTreeCheckbox = within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })
-    expect(financeTreeCheckbox).not.toBeChecked()
-    expect(financeTreeCheckbox).toHaveAttribute('data-indeterminate', 'true')
-
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    const reportsCheckboxInFinance = within(screen.getByRole('list', { name: 'Current folder contents' })).getByRole('checkbox', {
-      name: 'Select item Reports',
-    })
-    await user.click(reportsCheckboxInFinance)
-
-    await goToBreadcrumb(user, 'Data Room')
-    expect(within(folderTree).getByRole('checkbox', { name: 'Select item Finance' })).not.toBeChecked()
-  }, 30000)
 
   it('moves selected folders and files to another folder', async () => {
     const user = userEvent.setup()
@@ -492,29 +459,6 @@ describe('App routing and localization', () => {
     expect(within(moveDialog).getByRole('button', { name: 'Move' })).toBeDisabled()
   }, 30000)
 
-  it.skip('marks tree and list parent as indeterminate when only some descendants are selected', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await uploadPdf(user, 'leaf.pdf')
-    await uploadPdf(user, 'another.pdf')
-    await user.click(screen.getByRole('checkbox', { name: 'Select item leaf.pdf' }))
-    await goToBreadcrumb(user, 'Data Room')
-
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    const financeCheckbox = within(tree).getByRole('checkbox', { name: 'Select item Finance' })
-    expect(financeCheckbox).not.toBeChecked()
-    expect(financeCheckbox).toHaveAttribute('data-indeterminate', 'true')
-
-    const list = screen.getByRole('list', { name: 'Current folder contents' })
-    const financeListCheckbox = within(list).getByRole('checkbox', { name: 'Select item Finance' })
-    expect(financeListCheckbox).not.toBeChecked()
-    expect(financeListCheckbox).toHaveAttribute('data-indeterminate', 'true')
-  }, 30000)
-
   it('drags selected file to a visible destination folder row', async () => {
     const user = userEvent.setup()
     renderRoute('/')
@@ -541,62 +485,6 @@ describe('App routing and localization', () => {
     await user.click(destinationButton)
     expect(screen.getByText('dragged.pdf')).toBeInTheDocument()
   }, 15000)
-
-  it.skip('marks parent as fully selected when all descendants are selected', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Finance')
-    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
-    await uploadPdf(user, 'invoice.pdf')
-    await user.click(screen.getByRole('checkbox', { name: 'Select item invoice.pdf' }))
-    await goToBreadcrumb(user, 'Finance')
-    await uploadPdf(user, 'summary.pdf')
-    await user.click(screen.getByRole('checkbox', { name: 'Select item summary.pdf' }))
-    await goToBreadcrumb(user, 'Data Room')
-
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    const financeTreeCheckbox = within(tree).getByRole('checkbox', { name: 'Select item Finance' })
-    expect(financeTreeCheckbox).toBeChecked()
-    expect(financeTreeCheckbox).toHaveAttribute('data-indeterminate', 'false')
-
-    const list = screen.getByRole('list', { name: 'Current folder contents' })
-    const financeListCheckbox = within(list).getByRole('checkbox', { name: 'Select item Finance' })
-    expect(financeListCheckbox).toBeChecked()
-    expect(financeListCheckbox).toHaveAttribute('data-indeterminate', 'false')
-  }, 30000)
-
-  it.skip('shows delete impact counts based on fully checked hierarchy state', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Finance')
-    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
-    await uploadPdf(user, 'invoice.pdf')
-    await goToBreadcrumb(user, 'Finance')
-    await uploadPdf(user, 'summary.pdf')
-    await user.click(screen.getByRole('checkbox', { name: 'Select item summary.pdf' }))
-    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Select item invoice.pdf' }))
-    await goToBreadcrumb(user, 'Data Room')
-
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    expect(within(tree).getByRole('checkbox', { name: 'Select item Finance' })).toBeChecked()
-
-    await user.click(screen.getByRole('button', { name: 'Delete selected' }))
-    const deleteDialog = screen.getByRole('dialog', { name: 'Delete selected items?' })
-    expect(
-      within(deleteDialog).getByText('This will delete 2 file(s) and 2 folder(s). Folder contents will also be deleted.'),
-    ).toBeInTheDocument()
-  }, 40000)
 
   it('dragging an unselected file moves only that file even if another file is selected', async () => {
     const user = userEvent.setup()
@@ -627,99 +515,6 @@ describe('App routing and localization', () => {
     expect(screen.queryByText('selected.pdf')).not.toBeInTheDocument()
   }, 15000)
 
-  it.skip('supports dropping selected files onto a folder target in tree view', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Archive')
-    await goToBreadcrumb(user, 'Data Room')
-    await uploadPdf(user, 'tree-drop.pdf')
-    const list = screen.getByRole('list', { name: 'Current folder contents' })
-    await user.click(within(list).getByRole('checkbox', { name: 'Select item tree-drop.pdf' }))
-
-    const sourceButton = within(list).getByRole('button', { name: 'View file tree-drop.pdf' })
-    const sourceRow = sourceButton.closest('li')
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    const treeDestination = within(tree).getByRole('button', { name: 'Archive' })
-
-    expect(sourceRow).not.toBeNull()
-    dragAndDrop(sourceRow as Element, treeDestination)
-
-    const moveDialog = screen.getByRole('dialog', { name: 'Move items' })
-    const confirmMoveButton = within(moveDialog).getByRole('button', { name: 'Move' })
-    await user.click(confirmMoveButton)
-
-    await waitForElementToBeRemoved(moveDialog)
-    expect(screen.queryByText('tree-drop.pdf')).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Open folder Archive' }))
-    expect(screen.getByText('tree-drop.pdf')).toBeInTheDocument()
-  }, 15000)
-
-  it.skip('moves a dragged subfolder out of its source folder without leaving duplicates', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Archive')
-    await goToBreadcrumb(user, 'Data Room')
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-
-    const financeList = screen.getByRole('list', { name: 'Current folder contents' })
-    const invoicesButton = within(financeList).getByRole('button', { name: 'Open folder Invoices' })
-    const invoicesRow = invoicesButton.closest('li')
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    const archiveTreeTarget = within(tree).getByRole('button', { name: 'Archive' })
-
-    expect(invoicesRow).not.toBeNull()
-    dragAndDrop(invoicesRow as Element, archiveTreeTarget)
-
-    const moveDialog = screen.getByRole('dialog', { name: 'Move items' })
-    await user.click(within(moveDialog).getByRole('button', { name: 'Move' }))
-    await waitForElementToBeRemoved(moveDialog)
-
-    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
-
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Archive' }))
-    expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
-  }, 40000)
-
-  it.skip('keeps tree drop working even if dragend fires before drop', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Archive')
-    await goToBreadcrumb(user, 'Data Room')
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-
-    const financeList = screen.getByRole('list', { name: 'Current folder contents' })
-    const invoicesButton = within(financeList).getByRole('button', { name: 'Open folder Invoices' })
-    const invoicesRow = invoicesButton.closest('li')
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    const archiveTreeTarget = within(tree).getByRole('button', { name: 'Archive' })
-
-    expect(invoicesRow).not.toBeNull()
-    dragAndDropWithEarlyDragEnd(invoicesRow as Element, archiveTreeTarget)
-
-    const moveDialog = screen.getByRole('dialog', { name: 'Move items' })
-    await user.click(within(moveDialog).getByRole('button', { name: 'Move' }))
-    await waitForElementToBeRemoved(moveDialog)
-
-    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Archive' }))
-    expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
-  }, 40000)
-
   it('moves a folder to parent when dropped on the parent (..) row', async () => {
     const user = userEvent.setup()
     renderRoute('/')
@@ -748,27 +543,4 @@ describe('App routing and localization', () => {
     expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
   }, 40000)
 
-  it.skip('blocks dragging a folder into its descendant in tree view', async () => {
-    const user = userEvent.setup()
-    renderRoute('/')
-
-    await createFolder(user, 'Finance')
-    await goToBreadcrumb(user, 'Data Room')
-    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
-    await createFolder(user, 'Invoices')
-    await goToBreadcrumb(user, 'Data Room')
-
-    const list = screen.getByRole('list', { name: 'Current folder contents' })
-    const sourceButton = within(list).getByRole('button', { name: 'Open folder Finance' })
-    const sourceRow = sourceButton.closest('li')
-    const tree = screen.getByRole('list', { name: 'Folder tree' })
-    await user.click(within(tree).getByRole('button', { name: 'Expand folder Finance' }))
-    const descendantTarget = within(tree).getByRole('button', { name: 'Invoices' })
-
-    expect(sourceRow).not.toBeNull()
-    dragAndDrop(sourceRow as Element, descendantTarget)
-
-    expect(screen.getByRole('button', { name: 'Open folder Finance' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Open folder Invoices' })).not.toBeInTheDocument()
-  }, 30000)
 })

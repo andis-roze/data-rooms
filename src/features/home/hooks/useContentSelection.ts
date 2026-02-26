@@ -340,8 +340,6 @@ export function useContentSelection({
     selectedContentItemIds,
     checkedContentItemIds,
     selectedContentItemCount: selectedContentItemIds.length,
-    selectedFileCount: selectedFiles.length,
-    selectedFolderCount: selectedFolders.length,
     selectedContentItemNames,
     indeterminateFolderIds,
     deleteSelectionItemIds,

@@ -4,6 +4,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import type { SelectChangeEvent } from '@mui/material/Select'
 import Typography from '@mui/material/Typography'
+import { useTranslation } from 'react-i18next'
 
 export interface ListPaginationState {
   page: number
@@ -23,6 +24,7 @@ interface ListPaginationControlsProps {
 }
 
 export function ListPaginationControls({ state, handlers }: ListPaginationControlsProps) {
+  const { t } = useTranslation()
   const { page, pageCount, itemsPerPage, itemsPerPageOptions } = state
   const { onPageChange, onItemsPerPageChange } = handlers
 
@@ -34,13 +36,13 @@ export function ListPaginationControls({ state, handlers }: ListPaginationContro
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          Items per page
+          {t('dataroomPaginationItemsPerPage')}
         </Typography>
         <Select
           size="small"
           value={itemsPerPage}
           onChange={handleItemsPerPageChange}
-          inputProps={{ 'aria-label': 'Items per page' }}
+          inputProps={{ 'aria-label': t('dataroomPaginationItemsPerPageAria') }}
         >
           {itemsPerPageOptions.map((option) => (
             <MenuItem key={option} value={option}>
@@ -51,23 +53,23 @@ export function ListPaginationControls({ state, handlers }: ListPaginationContro
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          Page {page + 1} / {pageCount}
+          {t('dataroomPaginationPageIndicator', { current: page + 1, total: pageCount })}
         </Typography>
         <Button
           size="small"
           onClick={() => onPageChange(Math.max(0, page - 1))}
           disabled={page <= 0}
-          aria-label="Previous page"
+          aria-label={t('dataroomPaginationPreviousPageAria')}
         >
-          Prev
+          {t('dataroomPaginationPreviousButton')}
         </Button>
         <Button
           size="small"
           onClick={() => onPageChange(Math.min(pageCount - 1, page + 1))}
           disabled={page >= pageCount - 1}
-          aria-label="Next page"
+          aria-label={t('dataroomPaginationNextPageAria')}
         >
-          Next
+          {t('dataroomPaginationNextButton')}
         </Button>
       </Box>
     </Box>

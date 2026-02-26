@@ -9,8 +9,6 @@ import { DataRoomDialogs } from './dialogs/DataRoomDialogs'
 import { FileDialogs } from './dialogs/FileDialogs'
 import { FilePreviewDialog } from './dialogs/FilePreviewDialog'
 import { FolderDialogs } from './dialogs/FolderDialogs'
-export { CreateDataRoomDialog } from './dialogs/CreateDataRoomDialog'
-export { FeedbackStack } from './dialogs/FeedbackStack'
 
 // Composes all home-page dialogs behind a single prop surface for container usage.
 interface HomeDialogsProps {

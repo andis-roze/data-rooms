@@ -6,21 +6,13 @@ import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
 import { useTranslation } from 'react-i18next'
-import type { DataRoom, DataRoomState, Folder, NodeId } from '../../dataroom/model'
+import type { DataRoom, NodeId } from '../../dataroom/model'
 import { truncateMiddle } from '../services/formatters'
 import { HomeSidebarHeaderActions } from './sidebar/HomeSidebarHeaderActions'
 
 export interface HomeSidebarState {
-  entities: DataRoomState
   dataRooms: DataRoom[]
   selectedDataRoomId: NodeId | null
-  selectedFolderId: NodeId | null
-  selectedContentItemIds: NodeId[]
-  checkedContentItemIds: NodeId[]
-  indeterminateFolderIds: NodeId[]
-  dragMoveActive: boolean
-  dragMoveItemIds: NodeId[]
-  dragMoveTargetFolderId: NodeId | null
   canDeleteActiveDataRoom: boolean
   resolveDisplayName: (value: string) => string
 }
@@ -30,16 +22,6 @@ export interface HomeSidebarHandlers {
   onRenameDataRoom: (dataRoom?: DataRoom) => void
   onDeleteDataRoom: (dataRoom?: DataRoom) => void
   onSelectDataRoom: (dataRoomId: NodeId) => void
-  onSelectFolder: (folderId: NodeId) => void
-  onOpenMoveFolder: (folder: Folder) => void
-  onOpenRenameFolder: (folder: Folder) => void
-  onOpenDeleteFolder: (folder: Folder) => void
-  onToggleContentItemSelection: (itemId: NodeId) => void
-  onStartDragMove: (itemId: NodeId) => void
-  onEndDragMove: () => void
-  onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
-  onCanDropOnFolder: (folderId: NodeId) => boolean
-  onMoveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
 }
 
 interface HomeSidebarProps {

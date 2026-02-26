@@ -7,11 +7,10 @@ import { HomePageDialogsContainer } from './HomePageDialogsContainer'
 
 export function HomePageContainer() {
   const controller = useHomePageController()
-  const { t, entities, selection, viewHelpers, uiState, handlers } = controller
+  const { t, selection, viewHelpers, uiState, handlers } = controller
 
   const {
     selectedDataRoomId,
-    selectedFolderId,
     dataRooms,
     activeDataRoom,
     rootFolder,
@@ -24,7 +23,6 @@ export function HomePageContainer() {
     canDeleteActiveDataRoom,
     dataRoomDeleteSummary,
     folderDeleteSummary,
-    selectedContentItemIds,
     checkedContentItemIds,
     selectedContentItemCount,
     deleteSelectedContentItemCount,
@@ -38,7 +36,6 @@ export function HomePageContainer() {
     moveDestinationFolderOptions,
     moveValidationError,
     dragMoveActive,
-    dragMoveItemIds,
     dragMoveTargetFolderId,
     highlightedContentItemId,
     listViewPage,
@@ -75,16 +72,8 @@ export function HomePageContainer() {
   return (
     <HomePageWorkspace
       sidebarState={{
-        entities,
         dataRooms,
         selectedDataRoomId,
-        selectedFolderId,
-        selectedContentItemIds,
-        checkedContentItemIds,
-        indeterminateFolderIds,
-        dragMoveActive,
-        dragMoveItemIds,
-        dragMoveTargetFolderId,
         canDeleteActiveDataRoom,
         resolveDisplayName,
       }}
@@ -93,16 +82,6 @@ export function HomePageContainer() {
         onRenameDataRoom: handlers.openRenameDataRoomDialog,
         onDeleteDataRoom: handlers.openDeleteDataRoomDialog,
         onSelectDataRoom: handlers.selectDataRoom,
-        onSelectFolder: handlers.selectFolder,
-        onOpenMoveFolder: handlers.openMoveFolderDialog,
-        onOpenRenameFolder: handlers.openRenameFolderDialog,
-        onOpenDeleteFolder: handlers.openDeleteFolderDialog,
-        onToggleContentItemSelection: handlers.toggleContentItemSelection,
-        onStartDragMove: handlers.startDragMove,
-        onEndDragMove: handlers.endDragMove,
-        onSetDragMoveTargetFolder: handlers.setDragMoveTargetFolder,
-        onCanDropOnFolder: handlers.canDropOnFolder,
-        onMoveItemsToFolder: handlers.moveItemsToFolder,
       }}
       contentState={{
         activeDataRoomName,

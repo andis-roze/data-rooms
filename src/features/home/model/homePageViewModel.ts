@@ -49,8 +49,6 @@ export interface HomePageSelectionState {
   selectedContentItemIds: NodeId[]
   checkedContentItemIds: NodeId[]
   selectedContentItemCount: number
-  selectedFileCount: number
-  selectedFolderCount: number
   deleteSelectedContentItemCount: number
   deleteSelectedFileCount: number
   deleteSelectedFolderCount: number
@@ -128,7 +126,6 @@ export interface HomePageHandlers {
   setDragMoveTargetFolder: (folderId: NodeId | null) => void
   canDropOnFolder: (folderId: NodeId) => boolean
   dropOnFolder: (folderId: NodeId) => void
-  moveItemsToFolder: (itemIds: NodeId[], folderId: NodeId) => void
   handleListViewPageChange: (page: number) => void
   handleListViewItemsPerPageChange: (itemsPerPage: number) => void
   toggleSort: (field: 'name' | 'type' | 'updated') => void

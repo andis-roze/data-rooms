@@ -285,6 +285,27 @@ msgstr ""
 msgid "dataroomNoDataRoomTitle"
 msgstr ""
 
+msgid "dataroomPaginationItemsPerPage"
+msgstr ""
+
+msgid "dataroomPaginationItemsPerPageAria"
+msgstr ""
+
+msgid "dataroomPaginationNextButton"
+msgstr ""
+
+msgid "dataroomPaginationNextPageAria"
+msgstr ""
+
+msgid "dataroomPaginationPageIndicator"
+msgstr ""
+
+msgid "dataroomPaginationPreviousButton"
+msgstr ""
+
+msgid "dataroomPaginationPreviousPageAria"
+msgstr ""
+
 msgid "dataroomSeedDefaultDataRoomName"
 msgstr ""
 

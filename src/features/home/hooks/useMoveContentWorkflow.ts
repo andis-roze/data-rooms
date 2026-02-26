@@ -247,14 +247,6 @@ export function useMoveContentWorkflow({
     applyMove(currentDragItemIds, folderId)
     endDragMove()
   }
-  const moveItemsToFolder = (itemIds: NodeId[], folderId: NodeId) => {
-    if (itemIds.length === 0 || getMoveValidationError(itemIds, folderId) !== null) {
-      return
-    }
-    applyMove(itemIds, folderId)
-    endDragMove()
-  }
-
   return {
     isMoveContentDialogOpen,
     moveItemCount,
@@ -276,6 +268,5 @@ export function useMoveContentWorkflow({
     setDragMoveTargetFolder,
     canDropOnFolder,
     dropOnFolder,
-    moveItemsToFolder,
   }
 }
