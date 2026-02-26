@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:smoke:home": "vitest run src/test/app/App.test.tsx -t \"renders home route with data room shell and localized navigation|creates, renames, and deletes a folder from row actions|selects newly created folder and uploaded file without navigating into them|paginates list view and allows changing items per page|moves selected folders and files to another folder\"",
     "test:coverage": "vitest run --coverage --testTimeout=15000",
     "record:ux": "node scripts/record-ux-walkthrough.mjs",
     "record:ux:slow": "node scripts/record-ux-walkthrough.mjs --step-delay-ms=3000 --action-delay-ms=700",
