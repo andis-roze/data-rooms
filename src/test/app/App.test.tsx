@@ -171,6 +171,21 @@ describe('App routing and localization', () => {
     expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
   }, 15000)
 
+  it('auto-focuses folder name input in create and rename dialogs', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await user.click(screen.getByRole('button', { name: 'Create folder' }))
+    expect(screen.getByRole('textbox', { name: 'Folder name' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitForElementToBeRemoved(() => screen.queryByRole('dialog', { name: 'Create folder' }))
+
+    await createFolder(user, 'Finance')
+    await user.click(screen.getByRole('button', { name: 'Data Room' }))
+    await user.click(screen.getByRole('button', { name: 'Rename folder Finance' }))
+    expect(screen.getByRole('textbox', { name: 'Folder name' })).toHaveFocus()
+  }, 15000)
+
   it('keeps current folder selected after creating a child folder', async () => {
     const user = userEvent.setup()
     renderRoute('/')

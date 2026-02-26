@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -30,12 +31,36 @@ export function NamePromptDialog({
   onValueChange,
   onSubmit,
 }: NamePromptDialogProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const focusInput = () => {
+      inputRef.current?.focus()
+    }
+
+    // Focus once immediately and once on the next frame so this works
+    // reliably across dialog transitions and portal timing.
+    const timerId = window.setTimeout(() => {
+      focusInput()
+      window.requestAnimationFrame(focusInput)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
+  }, [open])
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
+          inputRef={inputRef}
           margin="dense"
           fullWidth
           label={label}
