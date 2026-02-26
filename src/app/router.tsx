@@ -1,7 +1,12 @@
+import { Suspense, lazy } from 'react'
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 import { AppLayout } from './layout/AppLayout'
-import { AboutPage } from '../features/about/AboutPage'
 import { HomePage } from '../features/home'
+
+const AboutPage = lazy(async () => {
+  const module = await import('../features/about/AboutPage')
+  return { default: module.AboutPage }
+})
 
 export const appRoutes: RouteObject[] = [
   {
@@ -14,7 +19,11 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: 'about',
-        element: <AboutPage />,
+        element: (
+          <Suspense fallback={null}>
+            <AboutPage />
+          </Suspense>
+        ),
       },
     ],
   },

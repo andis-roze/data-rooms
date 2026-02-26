@@ -22,6 +22,17 @@ export default defineConfig(({ mode }) => {
   return {
     base: env.VITE_BASE_PATH || '/',
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom', 'react-router-dom'],
+            mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+            i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-icu'],
+          },
+        },
+      },
+    },
     server: {
       host: env.VITE_DEV_HOST || '0.0.0.0',
       port: devPort,
