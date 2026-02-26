@@ -69,10 +69,12 @@ Use breadcrumbs above the table to jump back to parent folders quickly.
 
 - Use `Upload PDFs` to add files to the current folder
 - You can select one file or multiple files in a single picker action
+- Supported archive uploads: `.zip`, `.tar`, `.tar.gz`, `.tgz`
+- For archives, only PDF files inside the archive are imported
 - In the file picker:
   - `Ctrl` (Windows/Linux) or `Cmd` (macOS) + click to select individual files
   - `Shift` + click to select a range of files
-- Only PDF files are accepted
+- Only PDF files and supported archives are accepted
 - When uploading multiple files, each file is processed independently:
   - Valid PDFs are uploaded
   - Invalid or duplicate files are skipped with feedback

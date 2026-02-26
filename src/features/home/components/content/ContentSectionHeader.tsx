@@ -52,7 +52,7 @@ export function ContentSectionHeader({
         ref={uploadInputRef}
         type="file"
         multiple
-        accept="application/pdf,.pdf"
+        accept="application/pdf,.pdf,application/zip,.zip,application/x-tar,.tar,application/gzip,.tgz,.tar.gz"
         onChange={onUploadInputChange}
         data-testid="upload-pdf-input"
         style={{ display: 'none' }}

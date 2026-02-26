@@ -87,7 +87,7 @@ msgid "dataroomAriaRenameFolder"
 msgstr "Rename folder {name}"
 
 msgid "dataroomAriaUploadPdfs"
-msgstr "Upload one or more PDF files"
+msgstr "Upload one or more PDF files or supported archives"
 
 msgid "dataroomAriaViewFile"
 msgstr "View file {name}"
@@ -173,10 +173,28 @@ msgid "dataroomDialogRenameFolderTitle"
 msgstr "Rename folder"
 
 msgid "dataroomEmptyFolderBody"
-msgstr "Create a folder or upload a PDF to start organizing your Data Room."
+msgstr "Create a folder or upload a PDF/archive to start organizing your Data Room."
 
 msgid "dataroomEmptyFolderTitle"
 msgstr "This folder is empty"
+
+msgid "dataroomErrorArchiveNoPdf"
+msgstr "No PDF files were found in the archive."
+
+msgid "dataroomErrorArchiveNoPdfBatch"
+msgstr "{count} archive file(s) skipped because no PDFs were found inside."
+
+msgid "dataroomErrorArchiveReadFailed"
+msgstr "Unable to read archive file."
+
+msgid "dataroomErrorArchiveReadFailedBatch"
+msgstr "{count} archive file(s) could not be read."
+
+msgid "dataroomErrorArchiveUnsupported"
+msgstr "Archive format is not supported. Use ZIP, TAR, or TAR.GZ/TGZ."
+
+msgid "dataroomErrorArchiveUnsupportedBatch"
+msgstr "{count} archive file(s) skipped because the format is not supported."
 
 msgid "dataroomErrorDataRoomNameDuplicate"
 msgstr "A Data Room with this name already exists."
@@ -218,10 +236,12 @@ msgid "dataroomErrorFolderNameReserved"
 msgstr "Folder name is not allowed."
 
 msgid "dataroomErrorPdfOnly"
-msgstr "Only PDF files are allowed."
+msgstr "Only PDF files or supported archives are allowed."
 
 msgid "dataroomErrorPdfOnlyBatch"
-msgstr "{count} file(s) skipped because only PDF files are allowed."
+msgstr ""
+"{count} file(s) skipped because only PDF files or supported archives are "
+"allowed."
 
 msgid "dataroomFeedbackDataRoomCreated"
 msgstr "Data Room created."

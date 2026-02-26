@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitForElementToBeRemoved, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { gzipSync, strToU8, zipSync } from 'fflate'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AppProviders } from '../../app/providers/AppProviders'
@@ -126,6 +127,84 @@ async function uploadFiles(
   )
 }
 
+async function uploadArchive(
+  user: ReturnType<typeof userEvent.setup>,
+  archiveName: string,
+  archiveType: string,
+  bytes: Uint8Array,
+): Promise<void> {
+  const uploadInput = screen.getByTestId('upload-pdf-input') as HTMLInputElement
+  const normalizedBytes = new Uint8Array(bytes.length)
+  normalizedBytes.set(bytes)
+  const file = new File([normalizedBytes], archiveName, { type: archiveType })
+  await user.upload(uploadInput, file)
+}
+
+function writeTarText(target: Uint8Array, offset: number, length: number, value: string): void {
+  const bytes = strToU8(value)
+  target.set(bytes.subarray(0, length), offset)
+}
+
+function writeTarOctal(target: Uint8Array, offset: number, length: number, value: number): void {
+  const octal = value.toString(8).padStart(length - 1, '0')
+  writeTarText(target, offset, length - 1, octal)
+  target[offset + length - 1] = 0
+}
+
+function createTarEntryHeader(name: string, size: number): Uint8Array {
+  const header = new Uint8Array(512)
+  const normalizedName = name.replaceAll('\\', '/')
+
+  writeTarText(header, 0, 100, normalizedName)
+  writeTarOctal(header, 100, 8, 0o644)
+  writeTarOctal(header, 108, 8, 0)
+  writeTarOctal(header, 116, 8, 0)
+  writeTarOctal(header, 124, 12, size)
+  writeTarOctal(header, 136, 12, Math.floor(Date.now() / 1000))
+  writeTarText(header, 148, 8, '        ')
+  header[156] = '0'.charCodeAt(0)
+  writeTarText(header, 257, 6, 'ustar')
+  writeTarText(header, 263, 2, '00')
+
+  let checksum = 0
+  for (const byte of header) {
+    checksum += byte
+  }
+  const checksumValue = checksum.toString(8).padStart(6, '0')
+  writeTarText(header, 148, 6, checksumValue)
+  header[154] = 0
+  header[155] = 32
+
+  return header
+}
+
+function createTarArchive(entries: Array<{ name: string; contents: string }>): Uint8Array {
+  const parts: Uint8Array[] = []
+
+  for (const entry of entries) {
+    const content = strToU8(entry.contents)
+    const header = createTarEntryHeader(entry.name, content.length)
+    parts.push(header, content)
+
+    const paddingLength = (512 - (content.length % 512)) % 512
+    if (paddingLength > 0) {
+      parts.push(new Uint8Array(paddingLength))
+    }
+  }
+
+  parts.push(new Uint8Array(1024))
+
+  const totalSize = parts.reduce((sum, part) => sum + part.length, 0)
+  const tarBytes = new Uint8Array(totalSize)
+  let offset = 0
+  for (const part of parts) {
+    tarBytes.set(part, offset)
+    offset += part.length
+  }
+
+  return tarBytes
+}
+
 async function goToBreadcrumb(user: ReturnType<typeof userEvent.setup>, name: string) {
   const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
   await user.click(within(breadcrumbs).getByRole('button', { name }))
@@ -199,7 +278,7 @@ describe('App routing and localization', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Upload one or more PDF files' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upload one or more PDF files or supported archives' })).toBeInTheDocument()
     expect(screen.getByText('Upload PDFs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Acme Due Diligence Room' })).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Data Rooms' })).toBeInTheDocument()
@@ -492,7 +571,7 @@ describe('App routing and localization', () => {
 
     await uploadNonPdf(user, 'notes.txt')
 
-    expect(screen.getByText('Only PDF files are allowed.')).toBeInTheDocument()
+    expect(screen.getByText('Only PDF files or supported archives are allowed.')).toBeInTheDocument()
     expect(screen.queryByText('notes.txt')).not.toBeInTheDocument()
   })
 
@@ -508,6 +587,52 @@ describe('App routing and localization', () => {
     expect(screen.getByRole('button', { name: 'View file alpha.pdf' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'View file beta.pdf' })).toBeInTheDocument()
     expect(screen.getByText('Uploaded 2 PDF file(s).')).toBeInTheDocument()
+  })
+
+  it('imports PDFs from a zip archive upload', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    const zipBytes = zipSync({
+      'reports/zip-included.pdf': strToU8('%PDF-1.4 zip pdf'),
+      'reports/ignore.txt': strToU8('not a pdf'),
+    })
+
+    await uploadArchive(user, 'bundle.zip', 'application/zip', zipBytes)
+
+    expect(await screen.findByRole('button', { name: 'View file zip-included.pdf' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'View file ignore.txt' })).not.toBeInTheDocument()
+  })
+
+  it('imports PDFs from a tar archive upload', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    const tarBytes = await createTarArchive([
+      { name: 'docs/tar-included.pdf', contents: '%PDF-1.4 tar pdf' },
+      { name: 'docs/ignore.md', contents: 'not a pdf' },
+    ])
+
+    await uploadArchive(user, 'bundle.tar', 'application/x-tar', tarBytes)
+
+    expect(await screen.findByRole('button', { name: 'View file tar-included.pdf' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'View file ignore.md' })).not.toBeInTheDocument()
+  })
+
+  it('imports PDFs from a tar.gz archive upload', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    const tarBytes = await createTarArchive([
+      { name: 'docs/targz-included.pdf', contents: '%PDF-1.4 targz pdf' },
+      { name: 'docs/ignore.csv', contents: 'not a pdf' },
+    ])
+    const tgzBytes = gzipSync(tarBytes)
+
+    await uploadArchive(user, 'bundle.tar.gz', 'application/gzip', tgzBytes)
+
+    expect(await screen.findByRole('button', { name: 'View file targz-included.pdf' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'View file ignore.csv' })).not.toBeInTheDocument()
   })
 
   it('uploads dropped PDFs on the current list view folder', async () => {
@@ -559,7 +684,7 @@ describe('App routing and localization', () => {
     expect(screen.queryByRole('button', { name: 'View file notes.txt' })).not.toBeInTheDocument()
     expect(screen.getByText('Uploaded 1 PDF file(s).')).toBeInTheDocument()
     expect(screen.getByText('1 file(s) skipped because a file with the same name already exists.')).toBeInTheDocument()
-    expect(screen.getByText('1 file(s) skipped because only PDF files are allowed.')).toBeInTheDocument()
+    expect(screen.getByText('1 file(s) skipped because only PDF files or supported archives are allowed.')).toBeInTheDocument()
   })
 
   it('moves selected folders and files to another folder', async () => {

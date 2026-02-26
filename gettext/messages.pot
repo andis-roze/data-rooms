@@ -168,6 +168,24 @@ msgstr ""
 msgid "dataroomEmptyFolderTitle"
 msgstr ""
 
+msgid "dataroomErrorArchiveNoPdf"
+msgstr ""
+
+msgid "dataroomErrorArchiveNoPdfBatch"
+msgstr ""
+
+msgid "dataroomErrorArchiveReadFailed"
+msgstr ""
+
+msgid "dataroomErrorArchiveReadFailedBatch"
+msgstr ""
+
+msgid "dataroomErrorArchiveUnsupported"
+msgstr ""
+
+msgid "dataroomErrorArchiveUnsupportedBatch"
+msgstr ""
+
 msgid "dataroomErrorDataRoomNameDuplicate"
 msgstr ""
 

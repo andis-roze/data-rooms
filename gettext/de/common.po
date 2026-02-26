@@ -182,6 +182,28 @@ msgstr ""
 msgid "dataroomEmptyFolderTitle"
 msgstr "Dieser Ordner ist leer"
 
+msgid "dataroomErrorArchiveNoPdf"
+msgstr "Im Archiv wurden keine PDF-Dateien gefunden."
+
+msgid "dataroomErrorArchiveNoPdfBatch"
+msgstr ""
+"{count} Archivdatei(en) wurden ubersprungen, weil keine PDFs enthalten "
+"waren."
+
+msgid "dataroomErrorArchiveReadFailed"
+msgstr "Archivdatei konnte nicht gelesen werden."
+
+msgid "dataroomErrorArchiveReadFailedBatch"
+msgstr "{count} Archivdatei(en) konnten nicht gelesen werden."
+
+msgid "dataroomErrorArchiveUnsupported"
+msgstr "Archivformat wird nicht unterstutzt. Nutze ZIP, TAR oder TAR.GZ/TGZ."
+
+msgid "dataroomErrorArchiveUnsupportedBatch"
+msgstr ""
+"{count} Archivdatei(en) wurden ubersprungen, weil das Format nicht "
+"unterstutzt wird."
+
 msgid "dataroomErrorDataRoomNameDuplicate"
 msgstr "Ein Datenraum mit diesem Namen existiert bereits."
 

@@ -39,6 +39,7 @@
     "@fontsource/manrope": "^5.2.8",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
+    "fflate": "^0.8.2",
     "i18next": "^25.8.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-icu": "^2.4.3",
