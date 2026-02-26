@@ -171,6 +171,20 @@ describe('App routing and localization', () => {
     expect(screen.getAllByText('Data Room').length).toBeGreaterThan(0)
   }, 15000)
 
+  it('keeps current folder selected after creating a child folder', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+
+    await createFolder(user, 'Finance')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
+    await createFolder(user, 'Invoices')
+
+    const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
+    expect(within(breadcrumbs).getByRole('button', { name: 'Finance' })).toBeInTheDocument()
+    expect(within(breadcrumbs).queryByRole('button', { name: 'Invoices' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open folder Invoices' })).toBeInTheDocument()
+  }, 15000)
+
   it('creates, renames, and deletes a data room from sidebar controls', async () => {
     const user = userEvent.setup()
     renderRoute('/')
@@ -271,7 +285,9 @@ describe('App routing and localization', () => {
     renderRoute('/')
 
     await createFolder(user, 'Finance')
+    await user.click(screen.getByRole('button', { name: 'Open folder Finance' }))
     await createFolder(user, 'Invoices')
+    await user.click(screen.getByRole('button', { name: 'Open folder Invoices' }))
 
     const breadcrumbs = screen.getByLabelText('Folder breadcrumbs')
     expect(within(breadcrumbs).getByRole('button', { name: 'Finance' })).toBeInTheDocument()

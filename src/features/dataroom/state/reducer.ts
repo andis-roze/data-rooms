@@ -134,11 +134,17 @@ export function dataRoomReducer(state: DataRoomStoreState, action: DataRoomActio
         return state
       }
 
+      const selection = resolveSelection(
+        entities,
+        state.selectedDataRoomId,
+        state.selectedFolderId,
+      )
+
       return {
         ...state,
         entities,
-        selectedDataRoomId: action.payload.dataRoomId,
-        selectedFolderId: action.payload.folderId,
+        selectedDataRoomId: selection.selectedDataRoomId,
+        selectedFolderId: selection.selectedFolderId,
       }
     }
 

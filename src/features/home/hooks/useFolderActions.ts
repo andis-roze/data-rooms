@@ -138,6 +138,20 @@ export function useFolderActions({
       },
     })
 
+    // Keep list/tree focus on the current folder after creating a child folder.
+    // Dispatch once immediately and once deferred to guard against dialog click-through
+    // selecting the newly rendered row in manual mouse interactions.
+    dispatch({
+      type: 'dataroom/selectFolder',
+      payload: { folderId: activeFolder.id },
+    })
+    setTimeout(() => {
+      dispatch({
+        type: 'dataroom/selectFolder',
+        payload: { folderId: activeFolder.id },
+      })
+    }, 0)
+
     setIsCreateFolderDialogOpen(false)
     enqueueFeedback(t('dataroomFeedbackFolderCreated'), 'success')
   }
