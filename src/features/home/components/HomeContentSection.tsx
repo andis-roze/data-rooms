@@ -39,10 +39,12 @@ interface HomeContentSectionStateProps {
   dragMoveActive: boolean
   dragMoveTargetFolderId: NodeId | null
   highlightedContentItemId: NodeId | null
-  listViewPage: number
-  listViewPageCount: number
-  listViewItemsPerPage: number
-  listViewItemsPerPageOptions: number[]
+  pagination: {
+    page: number
+    pageCount: number
+    itemsPerPage: number
+    itemsPerPageOptions: number[]
+  }
   deleteSelectedContentDialogOpen: boolean
   uploadInputRef: RefObject<HTMLInputElement | null>
 }
@@ -67,8 +69,10 @@ interface HomeContentSectionHandlerProps {
   onSetDragMoveTargetFolder: (folderId: NodeId | null) => void
   onCanDropOnFolder: (folderId: NodeId) => boolean
   onDropOnFolder: (folderId: NodeId) => void
-  onListViewPageChange: (page: number) => void
-  onListViewItemsPerPageChange: (itemsPerPage: number) => void
+  pagination: {
+    onPageChange: (page: number) => void
+    onItemsPerPageChange: (itemsPerPage: number) => void
+  }
   onSelectFolder: (folderId: NodeId) => void
   onOpenRenameFolder: (folder: Folder) => void
   onOpenDeleteFolder: (folder: Folder) => void
@@ -85,24 +89,15 @@ interface HomeContentSectionProps {
 }
 
 interface ListPaginationControlsProps {
-  listViewPage: number
-  listViewPageCount: number
-  listViewItemsPerPage: number
-  listViewItemsPerPageOptions: number[]
-  onListViewPageChange: (page: number) => void
-  onListViewItemsPerPageChange: (itemsPerPage: number) => void
+  state: HomeContentSectionStateProps['pagination']
+  handlers: HomeContentSectionHandlerProps['pagination']
 }
 
-function ListPaginationControls({
-  listViewPage,
-  listViewPageCount,
-  listViewItemsPerPage,
-  listViewItemsPerPageOptions,
-  onListViewPageChange,
-  onListViewItemsPerPageChange,
-}: ListPaginationControlsProps) {
+function ListPaginationControls({ state, handlers }: ListPaginationControlsProps) {
+  const { page, pageCount, itemsPerPage, itemsPerPageOptions } = state
+  const { onPageChange, onItemsPerPageChange } = handlers
   const handleItemsPerPageChange = (event: SelectChangeEvent<number>) => {
-    onListViewItemsPerPageChange(Number(event.target.value))
+    onItemsPerPageChange(Number(event.target.value))
   }
 
   return (
@@ -113,11 +108,11 @@ function ListPaginationControls({
         </Typography>
         <Select
           size="small"
-          value={listViewItemsPerPage}
+          value={itemsPerPage}
           onChange={handleItemsPerPageChange}
           inputProps={{ 'aria-label': 'Items per page' }}
         >
-          {listViewItemsPerPageOptions.map((option) => (
+          {itemsPerPageOptions.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -126,20 +121,20 @@ function ListPaginationControls({
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          Page {listViewPage + 1} / {listViewPageCount}
+          Page {page + 1} / {pageCount}
         </Typography>
         <Button
           size="small"
-          onClick={() => onListViewPageChange(Math.max(0, listViewPage - 1))}
-          disabled={listViewPage <= 0}
+          onClick={() => onPageChange(Math.max(0, page - 1))}
+          disabled={page <= 0}
           aria-label="Previous page"
         >
           Prev
         </Button>
         <Button
           size="small"
-          onClick={() => onListViewPageChange(Math.min(listViewPageCount - 1, listViewPage + 1))}
-          disabled={listViewPage >= listViewPageCount - 1}
+          onClick={() => onPageChange(Math.min(pageCount - 1, page + 1))}
+          disabled={page >= pageCount - 1}
           aria-label="Next page"
         >
           Next
@@ -177,10 +172,7 @@ export function HomeContentSection({
     dragMoveActive,
     dragMoveTargetFolderId,
     highlightedContentItemId,
-    listViewPage,
-    listViewPageCount,
-    listViewItemsPerPage,
-    listViewItemsPerPageOptions,
+    pagination,
     deleteSelectedContentDialogOpen,
     uploadInputRef,
   } = state
@@ -205,8 +197,7 @@ export function HomeContentSection({
     onSetDragMoveTargetFolder,
     onCanDropOnFolder,
     onDropOnFolder,
-    onListViewPageChange,
-    onListViewItemsPerPageChange,
+    pagination: paginationHandlers,
     onSelectFolder,
     onOpenRenameFolder,
     onOpenDeleteFolder,
@@ -246,14 +237,7 @@ export function HomeContentSection({
           onClearContentItemSelection={onClearContentItemSelection}
         />
 
-        <ListPaginationControls
-          listViewPage={listViewPage}
-          listViewPageCount={listViewPageCount}
-          listViewItemsPerPage={listViewItemsPerPage}
-          listViewItemsPerPageOptions={listViewItemsPerPageOptions}
-          onListViewPageChange={onListViewPageChange}
-          onListViewItemsPerPageChange={onListViewItemsPerPageChange}
-        />
+        <ListPaginationControls state={pagination} handlers={paginationHandlers} />
 
         <FolderContentTable
           state={{
@@ -287,14 +271,7 @@ export function HomeContentSection({
           }}
         />
 
-        <ListPaginationControls
-          listViewPage={listViewPage}
-          listViewPageCount={listViewPageCount}
-          listViewItemsPerPage={listViewItemsPerPage}
-          listViewItemsPerPageOptions={listViewItemsPerPageOptions}
-          onListViewPageChange={onListViewPageChange}
-          onListViewItemsPerPageChange={onListViewItemsPerPageChange}
-        />
+        <ListPaginationControls state={pagination} handlers={paginationHandlers} />
       </Stack>
 
       <MoveContentDialog
