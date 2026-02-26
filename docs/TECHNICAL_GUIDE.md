@@ -130,13 +130,6 @@ One-command automated recording:
 npm run record:ux
 ```
 
-Slower presets:
-
-```bash
-npm run record:ux:slow
-npm run record:ux:slower
-```
-
 If Chromium is not installed for Playwright yet:
 
 ```bash
@@ -148,13 +141,11 @@ Output video files are written to `recordings/` by default.
 For shared/review artifacts in this repository, use:
 
 ```bash
-RECORDINGS_DIR=artifacts/demo-video npm run record:ux
+RECORDINGS_DIR=artifacts/demo-video node scripts/record-ux-walkthrough.mjs --step-delay-ms=6000 --action-delay-ms=1500
 ```
 
-Current provided demo recordings:
+Current provided demo recording:
 
-- `artifacts/demo-video/demo-full-ux-slow.webm`
-- `artifacts/demo-video/demo-full-ux-slowest.webm`
 - `artifacts/demo-video/demo-full-ux-ultra-slow.webm`
 
 Speed is configurable via CLI or env:

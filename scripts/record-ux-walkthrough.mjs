@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 import { mkdir } from 'node:fs/promises'
 import process from 'node:process'
+import { strToU8, zipSync } from 'fflate'
 import { chromium, firefox, webkit } from 'playwright'
 
 function readArg(name) {
@@ -150,6 +151,17 @@ async function runWalkthrough(page) {
     })
   }
 
+  const uploadFiles = async (files) => {
+    await page.getByTestId('upload-pdf-input').setInputFiles(files)
+  }
+
+  const createZipArchive = () =>
+    zipSync({
+      'zip-included.pdf': strToU8('%PDF-1.4 zip-included'),
+      'nested/ignored.txt': strToU8('not a pdf'),
+      'nested/also-included.pdf': strToU8('%PDF-1.4 also-included'),
+    })
+
   await step('Open app', 'Load the live demo and wait for the default data room.', async () => {
     await page.goto(APP_URL, { waitUntil: 'networkidle' })
     await installStepOverlay()
@@ -188,6 +200,48 @@ async function runWalkthrough(page) {
     await page.getByText('terms.pdf').waitFor()
   })
 
+  await step(
+    'Upload multiple files at once',
+    'Use one picker action to upload two PDFs and ignore a non-PDF in the same selection.',
+    async () => {
+      await uploadFiles([
+        {
+          name: 'bulk-1.pdf',
+          mimeType: 'application/pdf',
+          buffer: Buffer.from('%PDF-1.4 bulk-1'),
+        },
+        {
+          name: 'bulk-2.pdf',
+          mimeType: 'application/pdf',
+          buffer: Buffer.from('%PDF-1.4 bulk-2'),
+        },
+        {
+          name: 'ignore-me.txt',
+          mimeType: 'text/plain',
+          buffer: Buffer.from('ignore'),
+        },
+      ])
+      await page.getByText('bulk-1.pdf').waitFor()
+      await page.getByText('bulk-2.pdf').waitFor()
+    },
+  )
+
+  await step(
+    'Upload archive and extract PDFs',
+    'Upload a ZIP archive; only PDF entries from the archive are imported.',
+    async () => {
+      await uploadFiles([
+        {
+          name: 'bundle.zip',
+          mimeType: 'application/zip',
+          buffer: Buffer.from(createZipArchive()),
+        },
+      ])
+      await page.getByText('zip-included.pdf').waitFor()
+      await page.getByText('also-included.pdf').waitFor()
+    },
+  )
+
   await step('Bulk move selected folder + file', 'Select multiple items and move them to Archive.', async () => {
     const contentList = page.getByRole('list', { name: 'Current folder contents' })
     await contentList.getByRole('checkbox', { name: 'Select item Finance' }).click()
@@ -224,10 +278,23 @@ async function runWalkthrough(page) {
     const sourceRow = list.getByRole('button', { name: 'View file dragged.pdf' }).locator('xpath=ancestor::li')
     const destinationRow = list.getByRole('button', { name: 'Open folder Finance' }).locator('xpath=ancestor::li')
     await sourceRow.dragTo(destinationRow)
+    await page.waitForTimeout(ACTION_DELAY_MS)
 
+    let fileMoved = false
     await page.getByRole('button', { name: 'Open folder Finance' }).click()
-    await page.getByText('dragged.pdf').waitFor()
+    if (await page.getByText('dragged.pdf').count()) {
+      fileMoved = true
+    }
     await goToBreadcrumb('Archive')
+
+    if (!fileMoved) {
+      await list.getByRole('checkbox', { name: 'Select item dragged.pdf' }).click()
+      await sourceRow.dragTo(destinationRow)
+      await page.waitForTimeout(ACTION_DELAY_MS)
+      await page.getByRole('button', { name: 'Open folder Finance' }).click()
+      await page.getByText('dragged.pdf').waitFor()
+      await goToBreadcrumb('Archive')
+    }
   })
 
   await step('Validation message (duplicate folder name)', 'Trigger and display duplicate name validation in dialog.', async () => {
