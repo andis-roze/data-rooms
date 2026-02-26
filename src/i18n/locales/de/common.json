@@ -82,7 +82,6 @@
   "dataroomFilePreviewTitle": "Dateivorschau",
   "dataroomFilePreviewUnavailable": "Dateivorschau ist in dieser Umgebung nicht verfugbar.",
   "dataroomFolderItemType": "Ordner",
-  "dataroomFolderTreeTitle": "Ordnerbaum",
   "dataroomMoveInvalidDescendant": "{name} kann nicht in einen Unterordner von sich selbst verschoben werden.",
   "dataroomMoveInvalidFolder": "Ein oder mehrere Ordner konnen nicht verschoben werden.",
   "dataroomMoveInvalidNameConflict": "\"{name}\" existiert bereits im Zielordner.",

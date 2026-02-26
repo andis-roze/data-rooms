@@ -268,9 +268,6 @@ msgstr "File preview is unavailable in this environment."
 msgid "dataroomFolderItemType"
 msgstr "Folder"
 
-msgid "dataroomFolderTreeTitle"
-msgstr "Folder tree"
-
 msgid "dataroomMoveInvalidDescendant"
 msgstr "{name} cannot be moved into its own subfolder."
 

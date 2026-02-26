@@ -258,9 +258,6 @@ msgstr ""
 msgid "dataroomFolderItemType"
 msgstr ""
 
-msgid "dataroomFolderTreeTitle"
-msgstr ""
-
 msgid "dataroomMoveInvalidDescendant"
 msgstr ""
 

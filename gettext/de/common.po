@@ -272,9 +272,6 @@ msgstr "Dateivorschau ist in dieser Umgebung nicht verfugbar."
 msgid "dataroomFolderItemType"
 msgstr "Ordner"
 
-msgid "dataroomFolderTreeTitle"
-msgstr "Ordnerbaum"
-
 msgid "dataroomMoveInvalidDescendant"
 msgstr "{name} kann nicht in einen Unterordner von sich selbst verschoben werden."
 

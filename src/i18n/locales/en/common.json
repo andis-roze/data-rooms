@@ -82,7 +82,6 @@
   "dataroomFilePreviewTitle": "File preview",
   "dataroomFilePreviewUnavailable": "File preview is unavailable in this environment.",
   "dataroomFolderItemType": "Folder",
-  "dataroomFolderTreeTitle": "Folder tree",
   "dataroomMoveInvalidDescendant": "{name} cannot be moved into its own subfolder.",
   "dataroomMoveInvalidFolder": "One or more folders cannot be moved.",
   "dataroomMoveInvalidNameConflict": "\"{name}\" already exists in destination.",
